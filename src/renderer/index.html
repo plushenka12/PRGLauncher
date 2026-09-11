@@ -71,6 +71,7 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 
 /* YEAR TABS */
 .filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap}
+.library-search{min-width:190px;flex:1;max-width:300px;padding:8px 10px;border-radius:var(--rs);border:1px solid var(--border);background:var(--bg3);color:var(--text);font:12px var(--fb);outline:none}.library-search:focus{border-color:var(--accent)}
 .filter-select{font-family:var(--fb);font-size:13px;font-weight:500;padding:7px 32px 7px 12px;border-radius:20px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235a5a70'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;outline:none;transition:all .15s}
 .filter-select:hover{border-color:var(--accent);color:var(--text)}
 .filter-select.active{border-color:rgba(0,255,65,.4);background-color:rgba(0,255,65,.06);color:var(--green)}
@@ -480,6 +481,8 @@ body.guest-mode .actions-menu {
       <select class="filter-select" id="f-bar-platform">
         <option value="all">All platforms</option>
       </select>
+      <input class="library-search" id="library-search" placeholder="Пошук у бібліотеці…">
+      <select class="filter-select" id="library-sort" title="Сортування"><option value="recent">Остання сесія</option><option value="time">Найбільше часу</option><option value="title">Назва A–Я</option><option value="added">Нещодавно додані</option></select>
       <span id="filter-count" style="font-size:12px;color:var(--text3);font-family:var(--fm);margin-left:4px"></span>
     </div>
     <section class="backlog-hub" id="backlog-hub">
@@ -811,6 +814,8 @@ let filter = 'all';
 let yearFilter = 'all';
 let ratingFilter = 'all';
 let platformFilter = 'all';
+let libraryQuery = '';
+let librarySort = localStorage.getItem('gv-library-sort-v1') || 'recent';
 let editingId = null;
 let detailId = null;
 let timeEditId = null;
@@ -1196,11 +1201,16 @@ function fallbackEl(game){const d=document.createElement('div');d.className='cov
 
 function getFilteredGames(){
   let list = filter==='all'?[...games]:games.filter(g=>g.status===filter);
+  if(libraryQuery)list=list.filter(g=>g.title.toLocaleLowerCase().includes(libraryQuery));
   if(yearFilter!=='all') list=list.filter(g=>getGameYear(g)===yearFilter);
   if(platformFilter!=='all') list=list.filter(g=>(g.platform||'Other')===platformFilter);
   if(ratingFilter==='rated') list=list.filter(g=>g.rating);
   else if(ratingFilter==='unrated') list=list.filter(g=>!g.rating);
   else if(ratingFilter!=='all'){const exact=parseInt(ratingFilter);list=list.filter(g=>g.rating===exact);}
+  if(librarySort==='time')list.sort((a,b)=>(b.playtime||0)-(a.playtime||0));
+  else if(librarySort==='title')list.sort((a,b)=>a.title.localeCompare(b.title,'uk'));
+  else if(librarySort==='added')list.sort((a,b)=>(b.added||0)-(a.added||0));
+  else list.sort((a,b)=>(b.lastPlayed||0)-(a.lastPlayed||0));
   return list;
 }
 
@@ -1711,6 +1721,8 @@ document.getElementById('refetch-start').onclick=()=>{if(!guestBlock())refetchAl
 document.getElementById('f-bar-year').onchange=e=>{yearFilter=e.target.value==='all'?'all':parseInt(e.target.value);buildFilterBar();renderGrid();updateStats();};
 document.getElementById('f-bar-rating').onchange=e=>{ratingFilter=e.target.value;buildFilterBar();renderGrid();updateStats();};
 document.getElementById('f-bar-platform').onchange=e=>{platformFilter=e.target.value;buildFilterBar();renderGrid();updateStats();};
+document.getElementById('library-search').oninput=e=>{libraryQuery=e.target.value.trim().toLocaleLowerCase();renderGrid();};
+document.getElementById('library-sort').value=librarySort;document.getElementById('library-sort').onchange=e=>{librarySort=e.target.value;localStorage.setItem('gv-library-sort-v1',librarySort);renderGrid();};
 document.querySelectorAll('.platform-opt').forEach(opt=>opt.onclick=()=>setPlatformUI(opt.dataset.val));
 document.querySelectorAll('.rating-btn').forEach(btn=>btn.onclick=()=>setRatingUI(parseInt(btn.dataset.val)));
 document.getElementById('cover-clear').onclick=()=>{document.getElementById('f-cover').value='';showCoverPreview('');};
