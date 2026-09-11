@@ -1,0 +1,4215 @@
+{
+  "version": 1,
+  "createdAt": 1789122033443,
+  "games": [
+    {
+      "id": "mtwpnadeszk6fy9i34",
+      "title": "Bayonetta 2",
+      "status": "Completed",
+      "platform": "Nintendo Switch",
+      "cover": "https://media.rawg.io/media/games/3d7/3d7c8e749b18cfc898c80016594981fe.jpg",
+      "notes": null,
+      "genres": [],
+      "tags": [
+        "Nintendo Sync"
+      ],
+      "rating": null,
+      "steamAppId": null,
+      "playtime": 50400000,
+      "sessions": [],
+      "lastPlayed": 1680890722000,
+      "added": 1789116292418,
+      "nintendoTitleId": "01007960049a0000",
+      "nintendoLastSeenMinutes": 840,
+      "nintendoLastSync": 1789117032625,
+      "nintendoLastSeenPlayedAt": 1680890722000
+    },
+    {
+      "id": "mtwpnades51lil2bph",
+      "title": "Metro 2033 Redux",
+      "status": "Completed",
+      "platform": "Nintendo Switch",
+      "cover": "https://media.rawg.io/media/games/4fb/4fb548e4816c84d1d70f1a228fb167cc.jpg",
+      "notes": null,
+      "genres": [],
+      "tags": [
+        "Nintendo Sync"
+      ],
+      "rating": null,
+      "steamAppId": null,
+      "playtime": 37800000,
+      "sessions": [],
+      "lastPlayed": 1687294958000,
+      "added": 1789116292418,
+      "nintendoTitleId": "0100d4900e82c000",
+      "nintendoLastSeenMinutes": 630,
+      "nintendoLastSync": 1789117032625,
+      "nintendoLastSeenPlayedAt": 1687294958000
+    },
+    {
+      "id": "mtwpnade74ne2bg3xtn",
+      "title": "Hotline Miami",
+      "status": "Completed",
+      "platform": "Nintendo Switch",
+      "cover": "https://media.rawg.io/media/games/9fa/9fa63622543e5d4f6d99aa9d73b043de.jpg",
+      "notes": null,
+      "genres": [],
+      "tags": [
+        "Nintendo Sync"
+      ],
+      "rating": null,
+      "steamAppId": null,
+      "playtime": 23640000,
+      "sessions": [],
+      "lastPlayed": 1704557367000,
+      "added": 1789116292418,
+      "nintendoTitleId": "0100d0e00e51e000",
+      "nintendoLastSeenMinutes": 394,
+      "nintendoLastSync": 1789117032625,
+      "nintendoLastSeenPlayedAt": 1704557367000
+    },
+    {
+      "id": "mtwpnadedmn5q8cg6sg",
+      "title": "No More Heroes 2: Desperate Struggle",
+      "status": "Completed",
+      "platform": "Nintendo Switch",
+      "cover": "https://media.rawg.io/media/games/07a/07ac3210d7bb25ce4edae3fc30b02356.jpg",
+      "notes": null,
+      "genres": [],
+      "tags": [
+        "Nintendo Sync"
+      ],
+      "rating": null,
+      "steamAppId": null,
+      "playtime": 29160000,
+      "sessions": [],
+      "lastPlayed": 1735600463000,
+      "added": 1789116292418,
+      "nintendoTitleId": "010071400f204000",
+      "nintendoLastSeenMinutes": 486,
+      "nintendoLastSync": 1789117032625,
+      "nintendoLastSeenPlayedAt": 1735600463000
+    },
+    {
+      "id": "mtwpnadev6vwcz5dzza",
+      "title": "No More Heroes",
+      "status": "Completed",
+      "platform": "Nintendo Switch",
+      "cover": "https://media.rawg.io/media/games/e48/e4887e872c0e3ab9055ba2ab82477c40.jpg",
+      "notes": null,
+      "genres": [],
+      "tags": [
+        "Nintendo Sync"
+      ],
+      "rating": null,
+      "steamAppId": null,
+      "playtime": 41220000,
+      "sessions": [],
+      "lastPlayed": 1735676006000,
+      "added": 1789116292418,
+      "nintendoTitleId": "0100f0400f202000",
+      "nintendoLastSeenMinutes": 687,
+      "nintendoLastSync": 1789117032625,
+      "nintendoLastSeenPlayedAt": 1735676006000
+    },
+    {
+      "id": "mtwpnade1duknpue1i5",
+      "title": "Metro: Last Light Redux",
+      "status": "Completed",
+      "platform": "Nintendo Switch",
+      "cover": "https://media.rawg.io/media/games/7a4/7a45e4cdc5b07f316d49cf147b083b27.jpg",
+      "notes": null,
+      "genres": [],
+      "tags": [
+        "Nintendo Sync"
+      ],
+      "rating": null,
+      "steamAppId": null,
+      "playtime": 76020000,
+      "sessions": [],
+      "lastPlayed": 1735845097000,
+      "added": 1789116292418,
+      "nintendoTitleId": "0100f0400e850000",
+      "nintendoLastSeenMinutes": 1267,
+      "nintendoLastSync": 1789117032625,
+      "nintendoLastSeenPlayedAt": 1735845097000
+    },
+    {
+      "id": "mtwpnadetrxa3v9nwvm",
+      "title": "The Legend of Zelda: Tears of the Kingdom",
+      "status": "Completed",
+      "platform": "Nintendo Switch",
+      "cover": "https://media.rawg.io/media/games/556/55684bfd048706f4266d331d70050b37.jpg",
+      "notes": null,
+      "genres": [],
+      "tags": [
+        "Nintendo Sync"
+      ],
+      "rating": null,
+      "steamAppId": null,
+      "playtime": 363420000,
+      "sessions": [],
+      "lastPlayed": 1741039647000,
+      "added": 1789116292418,
+      "nintendoTitleId": "0100f2c0115b6000",
+      "nintendoLastSeenMinutes": 6057,
+      "nintendoLastSync": 1789117032625,
+      "nintendoLastSeenPlayedAt": 1741039647000
+    },
+    {
+      "id": "mtwpnadd6azomaf9e6m",
+      "title": "Bayonetta",
+      "status": "Backlog",
+      "platform": "Nintendo Switch",
+      "cover": "https://media.rawg.io/media/games/bee/bee483efadcf9d7e657e52184316a34e.jpg",
+      "notes": null,
+      "genres": [],
+      "tags": [
+        "Nintendo Sync"
+      ],
+      "rating": null,
+      "steamAppId": null,
+      "playtime": 34440000,
+      "sessions": [],
+      "lastPlayed": 1746732117000,
+      "added": 1789116292417,
+      "nintendoTitleId": "010076f0049a2000",
+      "nintendoLastSeenMinutes": 574,
+      "nintendoLastSync": 1789117032625,
+      "nintendoLastSeenPlayedAt": 1746732117000
+    },
+    {
+      "id": "mtwpnaddrycnaygz5qm",
+      "title": "Diablo III: Eternal Collection",
+      "status": "Completed",
+      "platform": "Nintendo Switch",
+      "cover": "https://media.rawg.io/media/games/1e7/1e788787a5f0708b47cf5c7193816383.jpg",
+      "notes": null,
+      "genres": [],
+      "tags": [
+        "Nintendo Sync"
+      ],
+      "rating": null,
+      "steamAppId": null,
+      "playtime": 203280000,
+      "sessions": [],
+      "lastPlayed": 1756306507000,
+      "added": 1789116292417,
+      "nintendoTitleId": "01001b300b9be000",
+      "nintendoLastSeenMinutes": 3388,
+      "nintendoLastSync": 1789117032625,
+      "nintendoLastSeenPlayedAt": 1756306507000
+    },
+    {
+      "id": "mtwpnaddy7c85nqg1mh",
+      "title": "Persona 5 Royal",
+      "status": "Completed",
+      "platform": "Nintendo Switch",
+      "cover": "https://media.rawg.io/media/games/a9c/a9c789951de65da545d51f664b4f2ce0.jpg",
+      "notes": null,
+      "genres": [],
+      "tags": [
+        "Nintendo Sync"
+      ],
+      "rating": null,
+      "steamAppId": null,
+      "playtime": 541860000,
+      "sessions": [],
+      "lastPlayed": 1762879939000,
+      "added": 1789116292417,
+      "nintendoTitleId": "01005ca01580e000",
+      "nintendoLastSeenMinutes": 9031,
+      "nintendoLastSync": 1789117032625,
+      "nintendoLastSeenPlayedAt": 1762879939000
+    },
+    {
+      "id": "mtwpnadd90xdtrglgel",
+      "title": "Assassin’s Creed® The Ezio Collection",
+      "status": "Completed",
+      "platform": "Nintendo Switch",
+      "cover": "https://media.rawg.io/media/games/efd/efd50d3cf0ebe96aa77b81e29ea3540f.jpg",
+      "notes": null,
+      "genres": [],
+      "tags": [
+        "Nintendo Sync"
+      ],
+      "rating": null,
+      "steamAppId": null,
+      "playtime": 286920000,
+      "sessions": [],
+      "lastPlayed": 1769525873000,
+      "added": 1789116292417,
+      "nintendoTitleId": "0100670014482000",
+      "nintendoLastSeenMinutes": 4782,
+      "nintendoLastSync": 1789117032625,
+      "nintendoLastSeenPlayedAt": 1769525873000
+    },
+    {
+      "id": "mtwpnaddxjk9epsmo1",
+      "title": "ONE PIECE: PIRATE WARRIORS 4 Nintendo Switch 2 Edition",
+      "status": "Completed",
+      "platform": "Nintendo Switch",
+      "cover": "https://media.rawg.io/media/games/7a3/7a3f0042e23365c3bb4d4cf300e92d00.jpg",
+      "notes": null,
+      "genres": [],
+      "tags": [
+        "Nintendo Sync"
+      ],
+      "rating": null,
+      "steamAppId": null,
+      "playtime": 130560000,
+      "sessions": [],
+      "lastPlayed": 1773938742000,
+      "added": 1789116292417,
+      "nintendoTitleId": "0100ba400e2f4000",
+      "nintendoLastSeenMinutes": 2176,
+      "nintendoLastSync": 1789117032625,
+      "nintendoLastSeenPlayedAt": 1773938742000
+    },
+    {
+      "id": "mtwpnaddyixge77tnr",
+      "title": "The Legend of Zelda: Breath of the Wild – Nintendo Switch 2 Edition",
+      "status": "Backlog",
+      "platform": "Nintendo Switch",
+      "cover": "https://media.rawg.io/media/games/cc1/cc196a5ad763955d6532cdba236f730c.jpg",
+      "notes": null,
+      "genres": [],
+      "tags": [
+        "Nintendo Sync"
+      ],
+      "rating": null,
+      "steamAppId": null,
+      "playtime": 552360000,
+      "sessions": [],
+      "lastPlayed": 1777819459000,
+      "added": 1789116292417,
+      "nintendoTitleId": "01007ef00011e000",
+      "nintendoLastSeenMinutes": 9206,
+      "nintendoLastSync": 1789117032624,
+      "nintendoLastSeenPlayedAt": 1777819459000
+    },
+    {
+      "id": "mtwpnaddhmfwro8231g",
+      "title": "Super Mario Bros. Wonder – Nintendo Switch 2 Edition + Meetup in Bellabel Park",
+      "status": "Backlog",
+      "platform": "Nintendo Switch",
+      "cover": "https://media.rawg.io/media/games/1fd/1fd3f030bee73452d46a0678084a7ed9.jpg",
+      "notes": null,
+      "genres": [],
+      "tags": [
+        "Nintendo Sync"
+      ],
+      "rating": null,
+      "steamAppId": null,
+      "playtime": 15420000,
+      "sessions": [],
+      "lastPlayed": 1778708638000,
+      "added": 1789116292417,
+      "nintendoTitleId": "010015100b514000",
+      "nintendoLastSeenMinutes": 257,
+      "nintendoLastSync": 1789117032624,
+      "nintendoLastSeenPlayedAt": 1778708638000
+    },
+    {
+      "id": "mtwpnaddb9i2th8zrpi",
+      "title": "NARUTO SHIPPUDEN™: Ultimate Ninja® STORM TRILOGY",
+      "status": "Completed",
+      "platform": "Nintendo Switch",
+      "cover": "https://media.rawg.io/media/screenshots/790/79020a2a01040c93f07591052f90ddbf.jpg",
+      "notes": null,
+      "genres": [],
+      "tags": [
+        "Nintendo Sync"
+      ],
+      "rating": null,
+      "steamAppId": null,
+      "playtime": 86940000,
+      "sessions": [],
+      "lastPlayed": 1780431519000,
+      "added": 1789116292417,
+      "nintendoTitleId": "0100ec800800c000",
+      "nintendoLastSeenMinutes": 1449,
+      "nintendoLastSync": 1789117032624,
+      "nintendoLastSeenPlayedAt": 1780431519000
+    },
+    {
+      "playtime": 2317599,
+      "genres": [
+        "Shooter",
+        "Adventure",
+        "Action"
+      ],
+      "added": 1767218400000,
+      "id": "mnyv0bq2ixg6wzrv3ka",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Инди",
+        "Глубокий сюжет",
+        "Story Rich",
+        "Открытый мир",
+        "Open World",
+        "Шутер"
+      ],
+      "cover": "https://media.rawg.io/media/games/815/815cab8e9048b0610b6fdb946cf940ed.jpg",
+      "notes": null,
+      "lastPlayed": 1789112594129,
+      "status": "Backlog",
+      "rating": null,
+      "platform": "PC",
+      "sessions": [
+        {
+          "end": 1787855661867,
+          "dur": 2280283,
+          "start": 1787853381584
+        },
+        {
+          "start": 1788938821257,
+          "end": 1788938822625,
+          "dur": 1368
+        },
+        {
+          "start": 1788942697744,
+          "end": 1788942710740,
+          "dur": 12996
+        },
+        {
+          "start": 1788943043953,
+          "end": 1788943051848,
+          "dur": 7895
+        },
+        {
+          "start": 1789112579072,
+          "end": 1789112594129,
+          "dur": 15057
+        }
+      ],
+      "title": "Postal 4: No Regrets",
+      "steamAppId": 707030
+    },
+    {
+      "id": "mtwmeh31ixydf2vnfgi",
+      "title": "Tails of Iron",
+      "status": "Backlog",
+      "platform": "PC",
+      "cover": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1283410/header.jpg?t=1737877432",
+      "notes": null,
+      "genres": [],
+      "tags": [
+        "Steam BACKLOG"
+      ],
+      "rating": null,
+      "steamAppId": 1283410,
+      "playtime": 0,
+      "sessions": [],
+      "lastPlayed": null,
+      "added": 1789110842365
+    },
+    {
+      "id": "mtwmeh31pf7mvrnuav",
+      "title": "Serious Sam II",
+      "status": "Backlog",
+      "platform": "PC",
+      "cover": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/204340/4fd1858a1c10a3d92c4f33f5ce65322782f95774/header.jpg?t=1781867959",
+      "notes": null,
+      "genres": [],
+      "tags": [
+        "Steam BACKLOG"
+      ],
+      "rating": null,
+      "steamAppId": 204340,
+      "playtime": 0,
+      "sessions": [],
+      "lastPlayed": null,
+      "added": 1789110842365
+    },
+    {
+      "id": "mtwmeh31uyk71jqa0l",
+      "title": "The Rogue Prince of Persia",
+      "status": "Backlog",
+      "platform": "PC",
+      "cover": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2717880/60249410daa51cc5e6cac5b32cafb369c44937e5/header.jpg?t=1770066280",
+      "notes": null,
+      "genres": [],
+      "tags": [
+        "Steam BACKLOG"
+      ],
+      "rating": null,
+      "steamAppId": 2717880,
+      "playtime": 0,
+      "sessions": [],
+      "lastPlayed": null,
+      "added": 1789110842365
+    },
+    {
+      "id": "mtwmeh3140eo6zcviwu",
+      "title": "Stardew Valley",
+      "status": "Backlog",
+      "platform": "PC",
+      "cover": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/413150/header.jpg?t=1786554168",
+      "notes": null,
+      "genres": [],
+      "tags": [
+        "Steam BACKLOG"
+      ],
+      "rating": null,
+      "steamAppId": 413150,
+      "playtime": 0,
+      "sessions": [],
+      "lastPlayed": null,
+      "added": 1789110842365
+    },
+    {
+      "id": "mtwmeh31j9nco3dcuc",
+      "title": "Mad Max",
+      "status": "Backlog",
+      "platform": "PC",
+      "cover": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/234140/header.jpg?t=1780595138",
+      "notes": null,
+      "genres": [],
+      "tags": [
+        "Steam BACKLOG"
+      ],
+      "rating": null,
+      "steamAppId": 234140,
+      "playtime": 0,
+      "sessions": [],
+      "lastPlayed": null,
+      "added": 1789110842365
+    },
+    {
+      "id": "mtwmeh314a0xaznayfx",
+      "title": "Sleeping Dogs: Definitive Edition",
+      "status": "Backlog",
+      "platform": "PC",
+      "cover": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/307690/header.jpg?t=1766070052",
+      "notes": null,
+      "genres": [],
+      "tags": [
+        "Steam BACKLOG"
+      ],
+      "rating": null,
+      "steamAppId": 307690,
+      "playtime": 0,
+      "sessions": [],
+      "lastPlayed": null,
+      "added": 1789110842365
+    },
+    {
+      "id": "mtwmeh314iilz8q5upf",
+      "title": "UNBEATABLE",
+      "status": "Backlog",
+      "platform": "PC",
+      "cover": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2240620/a3fe80f8848d0583be61f24292799e7f796e6319/header.jpg?t=1785173133",
+      "notes": null,
+      "genres": [],
+      "tags": [
+        "Steam BACKLOG"
+      ],
+      "rating": null,
+      "steamAppId": 2240620,
+      "playtime": 0,
+      "sessions": [],
+      "lastPlayed": null,
+      "added": 1789110842365
+    },
+    {
+      "id": "mtwmeh31xui1jjikhii",
+      "title": "FINAL FANTASY XVI",
+      "status": "Backlog",
+      "platform": "PC",
+      "cover": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/2515020/header.jpg?t=1773294537",
+      "notes": null,
+      "genres": [],
+      "tags": [
+        "Steam BACKLOG"
+      ],
+      "rating": null,
+      "steamAppId": 2515020,
+      "playtime": 0,
+      "sessions": [],
+      "lastPlayed": null,
+      "added": 1789110842365
+    },
+    {
+      "id": "mtwmeh31sw75bw1dw0k",
+      "title": "The Plucky Squire",
+      "status": "Backlog",
+      "platform": "PC",
+      "cover": "https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/1627570/header.jpg?t=1757545827",
+      "notes": null,
+      "genres": [],
+      "tags": [
+        "Steam BACKLOG"
+      ],
+      "rating": null,
+      "steamAppId": 1627570,
+      "playtime": 0,
+      "sessions": [],
+      "lastPlayed": null,
+      "added": 1789110842365
+    },
+    {
+      "notes": null,
+      "id": "mtj0wu7co6id9vd0bpk",
+      "status": "Playing",
+      "playtime": 4804000,
+      "cover": "https://media.rawg.io/media/games/bce/bce62fbc7cf74bf6a1a37340993ec148.jpg",
+      "lastPlayed": 1788425648703,
+      "added": 1767218400000,
+      "rating": null,
+      "title": "Far Cry 5",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Multiplayer",
+        "Atmospheric",
+        "Для нескольких игроков",
+        "Атмосфера",
+        "steam-trading-cards",
+        "Отличный саундтрек"
+      ],
+      "genres": [
+        "Shooter",
+        "Action"
+      ],
+      "steamAppId": 552520,
+      "sessions": [
+        {
+          "start": 1788417337817,
+          "end": 1788419168045,
+          "dur": 1830228
+        },
+        {
+          "start": 1788422678375,
+          "end": 1788425648703,
+          "dur": 2970328
+        }
+      ],
+      "platform": "PC"
+    },
+    {
+      "title": "Postal: Brain Damaged",
+      "steamAppId": 1359980,
+      "genres": [
+        "Action"
+      ],
+      "playtime": 38790835,
+      "cover": "https://media.rawg.io/media/games/8d8/8d89895e3c3926c4e3f1a9c58aecf9d7.jpg",
+      "id": "mn7jvx6m3iwlj7jtkfg",
+      "rating": 7,
+      "sessions": [
+        {
+          "end": 1780403384707,
+          "start": 1780399214362,
+          "dur": 4170345
+        },
+        {
+          "dur": 5820490,
+          "start": 1780412325355,
+          "end": 1780418145845
+        }
+      ],
+      "platform": "PC",
+      "notes": null,
+      "lastPlayed": 1780418145845,
+      "added": 1735682400000,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Steam Achievements",
+        "Full controller support",
+        "Atmospheric",
+        "Шутер",
+        "От первого лица",
+        "First-Person",
+        "Horror"
+      ],
+      "status": "Completed"
+    },
+    {
+      "cover": "https://media.rawg.io/media/games/f6c/f6cfffdb246351c35b6f07a8bcf6e748.jpg",
+      "playtime": 70985364,
+      "notes": null,
+      "added": 1767218400000,
+      "lastPlayed": 1780395224054,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Full controller support",
+        "Steam Cloud",
+        "Глубокий сюжет",
+        "RPG",
+        "Ролевая игра"
+      ],
+      "genres": [
+        "Adventure",
+        "Action",
+        "RPG"
+      ],
+      "id": "mpjvcumvdmhvcbdjlsk",
+      "title": "Crisis Core: Final Fantasy VII Reunion",
+      "rating": 10,
+      "sessions": [
+        {
+          "dur": 4020316,
+          "start": 1779632722730,
+          "end": 1779636743046
+        },
+        {
+          "dur": 4770360,
+          "start": 1779770015342,
+          "end": 1779774785702
+        },
+        {
+          "dur": 9300692,
+          "end": 1779802477688,
+          "start": 1779793176996
+        },
+        {
+          "end": 1779820539178,
+          "start": 1779816338870,
+          "dur": 4200308
+        },
+        {
+          "end": 1779908029553,
+          "start": 1779904459280,
+          "dur": 3570273
+        },
+        {
+          "end": 1779988609818,
+          "start": 1779986719634,
+          "dur": 1890184
+        },
+        {
+          "start": 1780128704945,
+          "end": 1780152316692,
+          "dur": 23611747
+        },
+        {
+          "end": 1780225000520,
+          "start": 1780216959930,
+          "dur": 8040590
+        },
+        {
+          "dur": 9030657,
+          "start": 1780234274465,
+          "end": 1780243305122
+        },
+        {
+          "start": 1780392673817,
+          "dur": 2550237,
+          "end": 1780395224054
+        }
+      ],
+      "platform": "PC",
+      "steamAppId": 1608070,
+      "status": "Completed"
+    },
+    {
+      "lastPlayed": 1779619911656,
+      "added": 1767218400000,
+      "genres": [
+        "Adventure",
+        "Action",
+        "RPG"
+      ],
+      "cover": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/1462040/capsule_616x353.jpg?t=1773895755",
+      "id": "mnyuvuuzaprcegxulqp",
+      "platform": "PC",
+      "tags": [
+        "Singleplayer",
+        "Atmospheric",
+        "RPG",
+        "Story Rich",
+        "Sci-fi",
+        "Fantasy",
+        "Exploration",
+        "Action-Adventure",
+        "exclusive",
+        "Cinematic"
+      ],
+      "sessions": [
+        {
+          "start": 1778236728890,
+          "end": 1778236848922,
+          "dur": 120032
+        },
+        {
+          "dur": 390050,
+          "end": 1778325658707,
+          "start": 1778325268657
+        },
+        {
+          "dur": 4890353,
+          "end": 1778330579083,
+          "start": 1778325688730
+        },
+        {
+          "start": 1778409016752,
+          "dur": 4740347,
+          "end": 1778413757099
+        },
+        {
+          "dur": 5670425,
+          "start": 1778413787131,
+          "end": 1778419457556
+        },
+        {
+          "dur": 13710967,
+          "start": 1778419487576,
+          "end": 1778433198543
+        },
+        {
+          "end": 1778611693484,
+          "start": 1778600292676,
+          "dur": 11400808
+        },
+        {
+          "end": 1778776350272,
+          "start": 1778772269964,
+          "dur": 4080308
+        },
+        {
+          "end": 1778932132476,
+          "start": 1778927752121,
+          "dur": 4380355
+        },
+        {
+          "start": 1778953734122,
+          "end": 1778963634869,
+          "dur": 9900747
+        },
+        {
+          "dur": 7170533,
+          "end": 1779198994350,
+          "start": 1779191823817
+        },
+        {
+          "dur": 7470563,
+          "end": 1779213455409,
+          "start": 1779205984846
+        },
+        {
+          "dur": 90041,
+          "start": 1779300315190,
+          "end": 1779300405231
+        },
+        {
+          "end": 1779381223735,
+          "dur": 13260975,
+          "start": 1779367962760
+        },
+        {
+          "dur": 6570506,
+          "start": 1779522589023,
+          "end": 1779529159529
+        },
+        {
+          "dur": 12990980,
+          "start": 1779531829897,
+          "end": 1779544820877
+        },
+        {
+          "start": 1779548478794,
+          "dur": 19561431,
+          "end": 1779568040225
+        },
+        {
+          "start": 1779610100926,
+          "dur": 9810730,
+          "end": 1779619911656
+        }
+      ],
+      "notes": "1. 2к за екологічний тероризм)))))))) ахуй",
+      "rating": 9,
+      "steamAppId": 1462040,
+      "playtime": 141450861,
+      "status": "Completed",
+      "title": "Final Fantasy VII Remake Intergrade"
+    },
+    {
+      "rating": 10,
+      "lastPlayed": 1779531619854,
+      "status": "Completed",
+      "playtime": 146413748,
+      "title": "Elden Ring Nightreign",
+      "platform": "PC",
+      "sessions": [
+        {
+          "end": 1778782410902,
+          "start": 1778778240435,
+          "dur": 4170467
+        },
+        {
+          "end": 1779531619854,
+          "start": 1779529189573,
+          "dur": 2430281
+        }
+      ],
+      "added": 1735682400000,
+      "id": "mn7k4gw0s3tfvzrt8c8",
+      "steamAppId": 2622380,
+      "genres": [
+        "Action",
+        "RPG"
+      ],
+      "cover": "https://media.rawg.io/media/games/a14/a143ef815d323a3000840fc774d834c7.jpg",
+      "notes": null,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Multiplayer",
+        "Steam Cloud",
+        "Для нескольких игроков",
+        "Глубокий сюжет",
+        "RPG",
+        "Co-op",
+        "Ролевая игра"
+      ]
+    },
+    {
+      "cover": "https://media.rawg.io/media/games/423/423daed7dff3c65978aa7a8480defc33.jpg",
+      "status": "Playing",
+      "notes": null,
+      "id": "mpbjvarc8pbuv29coeu",
+      "steamAppId": 1612420,
+      "playtime": 9690747,
+      "added": 1767218400000,
+      "rating": null,
+      "tags": [
+        "Singleplayer",
+        "Экшен",
+        "Шутер",
+        "Partial Controller Support",
+        "Сложная",
+        "Мясо",
+        "Gore",
+        "Difficult",
+        "Sandbox",
+        "Песочница"
+      ],
+      "sessions": [
+        {
+          "dur": 510065,
+          "end": 1779131139625,
+          "start": 1779130629560
+        },
+        {
+          "dur": 4530324,
+          "start": 1779131169638,
+          "end": 1779135699962
+        },
+        {
+          "end": 1779185673368,
+          "start": 1779182223114,
+          "dur": 3450254
+        },
+        {
+          "start": 1779213485429,
+          "dur": 1200104,
+          "end": 1779214685533
+        }
+      ],
+      "platform": "PC",
+      "genres": [
+        "Indie",
+        "Action"
+      ],
+      "title": "Suit for Hire",
+      "lastPlayed": 1779214685533
+    },
+    {
+      "genres": [
+        "Shooter",
+        "Action",
+        "RPG"
+      ],
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Multiplayer",
+        "Full controller support",
+        "Steam Cloud",
+        "Atmospheric",
+        "Для нескольких игроков"
+      ],
+      "playtime": 99607307,
+      "title": "Borderlands 2",
+      "steamAppId": 49520,
+      "status": "Completed",
+      "added": 1767218400000,
+      "id": "mo7i2gm40uoj4w1z1bpm",
+      "rating": null,
+      "notes": "с===8",
+      "cover": "https://media.rawg.io/media/games/49c/49c3dfa4ce2f6f140cc4825868e858cb.jpg",
+      "lastPlayed": 1778947493678,
+      "platform": "PC",
+      "sessions": [
+        {
+          "end": 1776708154553,
+          "start": 1776708064532,
+          "dur": 90021
+        },
+        {
+          "end": 1776709054634,
+          "start": 1776708274572,
+          "dur": 780062
+        },
+        {
+          "end": 1776712114827,
+          "start": 1776709084645,
+          "dur": 3030182
+        },
+        {
+          "end": 1776796182791,
+          "start": 1776794652669,
+          "dur": 1530122
+        },
+        {
+          "start": 1776796482819,
+          "end": 1776801493156,
+          "dur": 5010337
+        },
+        {
+          "start": 1777318557871,
+          "end": 1777324858313,
+          "dur": 6300442
+        },
+        {
+          "end": 1777489333210,
+          "dur": 5130363,
+          "start": 1777484202847
+        },
+        {
+          "dur": 10680780,
+          "start": 1777643552839,
+          "end": 1777654233619
+        },
+        {
+          "dur": 7140531,
+          "start": 1777661194188,
+          "end": 1777668334719
+        },
+        {
+          "end": 1777744735699,
+          "start": 1777730154657,
+          "dur": 14581042
+        },
+        {
+          "dur": 11970864,
+          "start": 1777807230027,
+          "end": 1777819200891
+        },
+        {
+          "end": 1777838583246,
+          "start": 1777834112894,
+          "dur": 4470352
+        },
+        {
+          "end": 1777984638077,
+          "start": 1777972127144,
+          "dur": 12510933
+        },
+        {
+          "end": 1778011940312,
+          "dur": 6030516,
+          "start": 1778005909796
+        },
+        {
+          "dur": 5580406,
+          "start": 1778932162498,
+          "end": 1778937742904
+        },
+        {
+          "dur": 4770354,
+          "start": 1778942723324,
+          "end": 1778947493678
+        }
+      ]
+    },
+    {
+      "added": 1767218400000,
+      "rating": 10,
+      "steamAppId": 1229490,
+      "cover": "https://media.rawg.io/media/games/096/096856c7b8b790cdf35c327652e4055e.jpg",
+      "status": "Completed",
+      "platform": "PC",
+      "notes": null,
+      "sessions": [
+        {
+          "start": 1778242369324,
+          "end": 1778254490265,
+          "dur": 12120941
+        },
+        {
+          "start": 1778257640525,
+          "end": 1778264841105,
+          "dur": 7200580
+        },
+        {
+          "end": 1778271351639,
+          "start": 1778267811340,
+          "dur": 3540299
+        },
+        {
+          "end": 1778319748239,
+          "start": 1778313867762,
+          "dur": 5880477
+        }
+      ],
+      "id": "mowvihsiz2dxzg2sxu",
+      "lastPlayed": 1778319748239,
+      "playtime": 28742297,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Инди",
+        "Steam Cloud",
+        "Шутер",
+        "От первого лица",
+        "First-Person",
+        "Научная фантастика",
+        "Sci-fi"
+      ],
+      "genres": [
+        "Indie",
+        "Action"
+      ],
+      "title": "Ultrakill"
+    },
+    {
+      "lastPlayed": 1778172842589,
+      "title": "Batman: Arkham Knight",
+      "genres": [
+        "Action"
+      ],
+      "sessions": [
+        {
+          "dur": 4590372,
+          "start": 1777377422281,
+          "end": 1777382012653
+        },
+        {
+          "dur": 990089,
+          "start": 1777383572801,
+          "end": 1777384562890
+        },
+        {
+          "dur": 330036,
+          "start": 1777384742918,
+          "end": 1777385072954
+        },
+        {
+          "end": 1777385252981,
+          "dur": 60011,
+          "start": 1777385192970
+        },
+        {
+          "end": 1777388553230,
+          "dur": 3270239,
+          "start": 1777385282991
+        },
+        {
+          "end": 1777660504120,
+          "start": 1777659214006,
+          "dur": 1290114
+        },
+        {
+          "end": 1777730124617,
+          "dur": 13290979,
+          "start": 1777716833638
+        },
+        {
+          "start": 1777744765739,
+          "dur": 2880227,
+          "end": 1777747645966
+        },
+        {
+          "end": 1777996279050,
+          "start": 1777989048503,
+          "dur": 7230547
+        },
+        {
+          "start": 1778065551954,
+          "dur": 7200671,
+          "end": 1778072752625
+        },
+        {
+          "start": 1778076502943,
+          "end": 1778098584543,
+          "dur": 22081600
+        },
+        {
+          "start": 1778160001568,
+          "end": 1778172842589,
+          "dur": 12841021
+        }
+      ],
+      "platform": "PC",
+      "cover": "https://media.rawg.io/media/games/310/3106b0e012271c5ffb16497b070be739.jpg",
+      "id": "mnyuutig4rxzyalq8k6",
+      "steamAppId": 208650,
+      "rating": 8,
+      "notes": null,
+      "playtime": 76055906,
+      "added": 1767218400000,
+      "status": "Completed",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Full controller support",
+        "Steam Cloud",
+        "Atmospheric",
+        "Атмосфера",
+        "steam-trading-cards"
+      ]
+    },
+    {
+      "status": "Playing",
+      "added": 1767218400000,
+      "id": "mopwnla6z3vuwe6zd9b",
+      "rating": null,
+      "cover": "https://media.rawg.io/media/games/624/624ee5ea783877a9ad8ccf68b8d8300b.jpg",
+      "platform": "PC",
+      "sessions": [
+        {
+          "start": 1777820890794,
+          "dur": 2774953,
+          "end": 1777823665747
+        }
+      ],
+      "lastPlayed": 1777823665747,
+      "notes": null,
+      "genres": [
+        "Adventure",
+        "Action"
+      ],
+      "playtime": 2774953,
+      "steamAppId": 123123,
+      "title": "The Legend of Zelda: Skyward Sword HD",
+      "tags": []
+    },
+    {
+      "notes": null,
+      "cover": "https://media.rawg.io/media/games/b6f/b6fa0cde8a1204c7d6edc2ec3c753df9.jpg",
+      "sessions": [
+        {
+          "end": 1776194028748,
+          "start": 1776186104835,
+          "dur": 7923913
+        },
+        {
+          "end": 1776348217214,
+          "start": 1776342491684,
+          "dur": 5725530
+        },
+        {
+          "end": 1776359220305,
+          "dur": 1836090,
+          "start": 1776357384215
+        },
+        {
+          "dur": 2016473,
+          "start": 1776363037329,
+          "end": 1776365053802
+        },
+        {
+          "start": 1776498530602,
+          "dur": 10165829,
+          "end": 1776508696431
+        },
+        {
+          "end": 1776535351961,
+          "dur": 5745895,
+          "start": 1776529606066
+        },
+        {
+          "end": 1776621653829,
+          "start": 1776615176140,
+          "dur": 6477689
+        },
+        {
+          "dur": 6208692,
+          "start": 1776625472099,
+          "end": 1776631680791
+        },
+        {
+          "end": 1776786072148,
+          "start": 1776774341446,
+          "dur": 11730702
+        },
+        {
+          "start": 1776789402345,
+          "dur": 5220306,
+          "end": 1776794622651
+        },
+        {
+          "dur": 507590,
+          "end": 1776952035748,
+          "start": 1776951528158
+        },
+        {
+          "end": 1776952040875,
+          "start": 1776952038218,
+          "dur": 2657
+        },
+        {
+          "end": 1776955668906,
+          "start": 1776953598768,
+          "dur": 2070138
+        },
+        {
+          "end": 1776963919447,
+          "dur": 3030200,
+          "start": 1776960889247
+        },
+        {
+          "start": 1777108819860,
+          "end": 1777118750491,
+          "dur": 9930631
+        },
+        {
+          "dur": 27151690,
+          "start": 1777122784640,
+          "end": 1777149936330
+        },
+        {
+          "start": 1777195739912,
+          "end": 1777201710353,
+          "dur": 5970441
+        },
+        {
+          "start": 1777202010400,
+          "end": 1777222832059,
+          "dur": 20821659
+        }
+      ],
+      "platform": "PC",
+      "steamAppId": 1850570,
+      "genres": [
+        "Adventure",
+        "Action"
+      ],
+      "added": 1767218400000,
+      "title": "Death Stranding Director's Cut",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Multiplayer",
+        "Full controller support",
+        "Steam Cloud",
+        "Atmospheric",
+        "Для нескольких игроков"
+      ],
+      "rating": 10,
+      "lastPlayed": 1777222832059,
+      "id": "mnyuv1isiqx18s8szt9",
+      "status": "Completed",
+      "playtime": 132717000
+    },
+    {
+      "id": "mn7kcf5u2q30i76jap8",
+      "platform": "PC",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Multiplayer",
+        "Steam Cloud",
+        "Atmospheric",
+        "Для нескольких игроков",
+        "Co-op",
+        "cooperative",
+        "От третьего лица"
+      ],
+      "genres": [
+        "Action"
+      ],
+      "sessions": [
+        {
+          "end": 1774546936089,
+          "dur": 79224,
+          "start": 1774546856865
+        },
+        {
+          "end": 1774870262004,
+          "dur": 10263094,
+          "start": 1774859998910
+        },
+        {
+          "dur": 1362186,
+          "start": 1774870166094,
+          "end": 1774871528280
+        },
+        {
+          "start": 1774876361063,
+          "dur": 1828,
+          "end": 1774876362891
+        },
+        {
+          "dur": 13561,
+          "start": 1774876379845,
+          "end": 1774876393406
+        }
+      ],
+      "added": 1767218400000,
+      "notes": null,
+      "steamAppId": 1888160,
+      "cover": "https://media.rawg.io/media/games/c97/c97aba78a97038867d4b32a81fe48567.jpg",
+      "status": "Completed",
+      "playtime": 59747669,
+      "title": "Armored Core VI: Fires of Rubicon",
+      "lastPlayed": 1774876393406,
+      "rating": 10
+    },
+    {
+      "id": "mtppkpyh8y4vhfu3nxp",
+      "title": "Elden Ring",
+      "rating": null,
+      "steamAppId": 1245620,
+      "sessions": [],
+      "platform": "PC",
+      "status": "Backlog",
+      "notes": null,
+      "playtime": 0,
+      "cover": "https://media.rawg.io/media/games/b29/b294fdd866dcdb643e7bab370a552855.jpg",
+      "lastPlayed": null,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Steam Achievements",
+        "Multiplayer",
+        "Full controller support",
+        "Atmospheric",
+        "Для нескольких игроков",
+        "Отличный саундтрек",
+        "Great Soundtrack"
+      ],
+      "genres": [
+        "Action",
+        "RPG"
+      ],
+      "added": 1767218400000
+    },
+    {
+      "notes": null,
+      "playtime": 66600000,
+      "cover": "https://media.rawg.io/media/games/c6b/c6bfece1daf8d06bc0a60632ac78e5bf.jpg",
+      "rating": 7,
+      "status": "Completed",
+      "steamAppId": 1285190,
+      "added": 1767218400000,
+      "title": "Borderlands",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Multiplayer",
+        "Steam Cloud",
+        "Для нескольких игроков",
+        "RPG",
+        "Co-op"
+      ],
+      "sessions": [],
+      "platform": "PC",
+      "id": "mohpijh5b28t6s3zh1",
+      "lastPlayed": null,
+      "genres": [
+        "Shooter",
+        "Action",
+        "RPG"
+      ]
+    },
+    {
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Multiplayer",
+        "Full controller support",
+        "Steam Cloud",
+        "Atmospheric",
+        "Для нескольких игроков"
+      ],
+      "added": 1767218400000,
+      "platform": "PC",
+      "notes": null,
+      "sessions": [],
+      "steamAppId": 339340,
+      "genres": [
+        "Adventure",
+        "Action"
+      ],
+      "id": "mo7mobf20a3t2kpa41vb",
+      "cover": "https://media.rawg.io/media/games/955/9554440f1c17236c0233b644e47909d2.jpg",
+      "playtime": 0,
+      "rating": null,
+      "title": "Resident Evil 0 / Biohazard 0 HD REMASTER",
+      "lastPlayed": null,
+      "status": "Backlog"
+    },
+    {
+      "cover": "https://media.rawg.io/media/games/ca1/ca16da30f86d8f4d36261de45fb35430.jpg",
+      "sessions": [],
+      "platform": "PC",
+      "notes": null,
+      "added": 1767218400000,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Multiplayer",
+        "Full controller support",
+        "Steam Cloud",
+        "Atmospheric",
+        "Атмосфера"
+      ],
+      "status": "Backlog",
+      "steamAppId": 2988580,
+      "title": "Yakuza 0",
+      "playtime": 0,
+      "genres": [
+        "Action",
+        "RPG"
+      ],
+      "lastPlayed": null,
+      "id": "mo0fif7unfrq8c5sd9"
+    },
+    {
+      "added": 1767218400000,
+      "lastPlayed": null,
+      "playtime": 0,
+      "cover": "https://media.rawg.io/media/games/be0/be084b850302abe81675bc4ffc08a0d0.jpg",
+      "genres": [
+        "Adventure"
+      ],
+      "id": "mnyv4iyokoqb71txb1f",
+      "notes": null,
+      "steamAppId": 250320,
+      "status": "Backlog",
+      "platform": "PC",
+      "sessions": [],
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Приключение",
+        "Full controller support",
+        "Atmospheric",
+        "Атмосфера",
+        "Отличный саундтрек",
+        "Great Soundtrack",
+        "Глубокий сюжет",
+        "Story Rich"
+      ],
+      "title": "The Wolf Among Us"
+    },
+    {
+      "sessions": [],
+      "platform": "PC",
+      "cover": "https://media.rawg.io/media/games/693/693952316d4b90984a92e7ab0f5c9b81.jpg",
+      "notes": null,
+      "added": 1767218400000,
+      "id": "mnyv40yw4ekw6kqrapd",
+      "genres": [
+        "Adventure",
+        "Action"
+      ],
+      "lastPlayed": null,
+      "title": "STAR WARS: The Force Unleashed II",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Cloud",
+        "Глубокий сюжет",
+        "Ролевая игра",
+        "Story Rich",
+        "Шедевр",
+        "От третьего лица"
+      ],
+      "playtime": 0,
+      "steamAppId": 32500,
+      "status": "Backlog"
+    },
+    {
+      "cover": "https://media.rawg.io/media/games/932/93221053809511fde4a0c6a9fddaf558.jpg",
+      "sessions": [],
+      "platform": "PC",
+      "lastPlayed": null,
+      "notes": null,
+      "added": 1767218400000,
+      "id": "mnyv3t6pqzbxiq7sffg",
+      "tags": [
+        "Story",
+        "galaxy"
+      ],
+      "status": "Backlog",
+      "steamAppId": 32500,
+      "title": "Star Wars: The Force Unleashed",
+      "playtime": 0,
+      "genres": [
+        "Adventure",
+        "Action"
+      ]
+    },
+    {
+      "notes": null,
+      "cover": "https://media.rawg.io/media/screenshots/123/123091c44f5310dfca1415c750c6aafb_ECUoDPz.jpg",
+      "steamAppId": 476650,
+      "added": 1767218400000,
+      "status": "Backlog",
+      "playtime": 0,
+      "title": "The Silver Case",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Приключение",
+        "Steam Achievements",
+        "Инди",
+        "Atmospheric",
+        "Атмосфера",
+        "steam-trading-cards",
+        "Отличный саундтрек",
+        "Great Soundtrack"
+      ],
+      "sessions": [],
+      "platform": "PC",
+      "id": "mnyv3gfpr75a6gnya4j",
+      "lastPlayed": null,
+      "genres": [
+        "Adventure"
+      ]
+    },
+    {
+      "genres": [
+        "Adventure",
+        "Action"
+      ],
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Full controller support",
+        "Steam Cloud",
+        "Atmospheric",
+        "Атмосфера",
+        "steam-trading-cards"
+      ],
+      "id": "mnyv32mb66totyavufp",
+      "platform": "PC",
+      "lastPlayed": null,
+      "sessions": [],
+      "title": "Shadow of the Tomb Raider",
+      "added": 1767218400000,
+      "playtime": 0,
+      "status": "Backlog",
+      "steamAppId": 750920,
+      "cover": "https://media.rawg.io/media/games/7f6/7f6cd70ba2ad57053b4847c13569f2d8.jpg",
+      "notes": null
+    },
+    {
+      "title": "Sekiro: Shadows Die Twice",
+      "status": "Backlog",
+      "id": "mnyv2vbvnic4mkm6jnr",
+      "steamAppId": 814380,
+      "playtime": 0,
+      "cover": "https://media.rawg.io/media/games/67f/67f62d1f062a6164f57575e0604ee9f6.jpg",
+      "sessions": [],
+      "platform": "PC",
+      "genres": [
+        "Action",
+        "RPG"
+      ],
+      "notes": null,
+      "added": 1767218400000,
+      "lastPlayed": null,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Atmospheric",
+        "Атмосфера",
+        "Отличный саундтрек",
+        "Great Soundtrack",
+        "Глубокий сюжет",
+        "RPG"
+      ]
+    },
+    {
+      "title": "Saints Row: Gat Out of Hell",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Multiplayer",
+        "Full controller support",
+        "Steam Cloud",
+        "Atmospheric",
+        "Для нескольких игроков"
+      ],
+      "sessions": [],
+      "steamAppId": 301910,
+      "platform": "PC",
+      "status": "Backlog",
+      "notes": null,
+      "id": "mnyv2oqxsuec1rxerl",
+      "cover": "https://media.rawg.io/media/games/1ad/1ad3737af2c4a4ff8e7f5540b5dcade8.jpg",
+      "playtime": 0,
+      "added": 1767218400000,
+      "lastPlayed": null,
+      "genres": [
+        "Adventure",
+        "Action"
+      ]
+    },
+    {
+      "title": "Rise of the Tomb Raider",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Full controller support",
+        "Steam Cloud",
+        "Atmospheric",
+        "Атмосфера",
+        "steam-trading-cards"
+      ],
+      "status": "Backlog",
+      "playtime": 0,
+      "lastPlayed": null,
+      "notes": null,
+      "cover": "https://media.rawg.io/media/games/b45/b45575f34285f2c4479c9a5f719d972e.jpg",
+      "genres": [
+        "Action"
+      ],
+      "steamAppId": 391220,
+      "added": 1767218400000,
+      "id": "mnyv2c7rcfb3ow0qoaj",
+      "sessions": [],
+      "platform": "PC"
+    },
+    {
+      "steamAppId": 9010,
+      "genres": [
+        "Shooter"
+      ],
+      "title": "Return to Castle Wolfenstein",
+      "playtime": 0,
+      "platform": "PC",
+      "sessions": [],
+      "id": "mnyv1vwux8h87js6ib",
+      "added": 1767218400000,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Multiplayer",
+        "Steam Cloud",
+        "Atmospheric",
+        "Для нескольких игроков",
+        "Атмосфера",
+        "Отличный саундтрек"
+      ],
+      "status": "Backlog",
+      "notes": null,
+      "lastPlayed": null,
+      "cover": "https://media.rawg.io/media/games/b47/b47c20aa6cfd4c825d37e2bc68462e9c.jpg"
+    },
+    {
+      "status": "Backlog",
+      "title": "Resident Evil",
+      "steamAppId": 304240,
+      "platform": "PC",
+      "sessions": [],
+      "id": "mnyv1eb861vno70iisb",
+      "added": 1767218400000,
+      "genres": [
+        "Action"
+      ],
+      "playtime": 0,
+      "tags": [
+        "Singleplayer"
+      ],
+      "cover": "https://media.rawg.io/media/games/510/51039d0ec5dc8c3e08ae4374dfceecec.jpg",
+      "notes": null,
+      "lastPlayed": null
+    },
+    {
+      "sessions": [],
+      "platform": "PC",
+      "id": "mnyv157rnakl7b8zcai",
+      "title": "Red Dead Redemption 2",
+      "steamAppId": 1174180,
+      "status": "Backlog",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Multiplayer",
+        "Atmospheric",
+        "Для нескольких игроков",
+        "Атмосфера",
+        "Отличный саундтрек",
+        "Great Soundtrack"
+      ],
+      "cover": "https://media.rawg.io/media/games/511/5118aff5091cb3efec399c808f8c598f.jpg",
+      "notes": null,
+      "added": 1767218400000,
+      "playtime": 0,
+      "genres": [
+        "Action"
+      ],
+      "lastPlayed": null
+    },
+    {
+      "lastPlayed": null,
+      "id": "mnyv0tjzetzp3t7jm87",
+      "status": "Backlog",
+      "platform": "PC",
+      "sessions": [],
+      "title": "Rayman Legends",
+      "steamAppId": 242550,
+      "playtime": 0,
+      "added": 1767218400000,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Atmospheric",
+        "Отличный саундтрек",
+        "Great Soundtrack",
+        "Co-op",
+        "cooperative",
+        "Шедевр"
+      ],
+      "genres": [
+        "Platformer"
+      ],
+      "notes": null,
+      "cover": "https://media.rawg.io/media/games/85c/85c8ae70e7cdf0105f06ef6bdce63b8b.jpg"
+    },
+    {
+      "platform": "PC",
+      "genres": [
+        "Family",
+        "Platformer",
+        "Arcade",
+        "Action"
+      ],
+      "sessions": [],
+      "steamAppId": 207490,
+      "title": "Rayman Origins",
+      "status": "Backlog",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Full controller support",
+        "Для нескольких игроков",
+        "Отличный саундтрек",
+        "Great Soundtrack",
+        "Co-op",
+        "cooperative"
+      ],
+      "added": 1767218400000,
+      "lastPlayed": null,
+      "playtime": 0,
+      "notes": null,
+      "id": "mnyv0o8xdpiskfwt8n5",
+      "cover": "https://media.rawg.io/media/screenshots/375/375f84d018242d7519a230f623981217.jpg"
+    },
+    {
+      "notes": null,
+      "cover": "https://media.rawg.io/media/games/242/242549402861ce32c9173e5a17c67bfa.jpg",
+      "genres": [
+        "Shooter",
+        "Action"
+      ],
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Multiplayer",
+        "Steam Cloud",
+        "Atmospheric",
+        "Для нескольких игроков",
+        "Атмосфера",
+        "Шутер"
+      ],
+      "steamAppId": 2210,
+      "playtime": 0,
+      "added": 1767218400000,
+      "title": "Quake IV",
+      "status": "Backlog",
+      "id": "mnyv0ifatxyy7mmgr87",
+      "sessions": [],
+      "platform": "PC",
+      "lastPlayed": null
+    },
+    {
+      "status": "Backlog",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Steam Achievements",
+        "Инди",
+        "Full controller support",
+        "Steam Cloud",
+        "Отличный саундтрек",
+        "Great Soundtrack",
+        "2D"
+      ],
+      "lastPlayed": null,
+      "id": "mnyv051dn7p9kc9ii7l",
+      "title": "Pizza Tower",
+      "platform": "PC",
+      "sessions": [],
+      "added": 1767218400000,
+      "genres": [
+        "Indie",
+        "Action"
+      ],
+      "playtime": 0,
+      "cover": "https://media.rawg.io/media/games/2d0/2d02bcfc07f4b5ed8623599ff999ee91.jpg",
+      "steamAppId": 2231450,
+      "notes": null
+    },
+    {
+      "cover": "https://media.rawg.io/media/games/161/16107bc17254244531927450ad9716a7.jpg",
+      "notes": null,
+      "steamAppId": 1382330,
+      "added": 1767218400000,
+      "id": "mnyuzusvm3x0n8ph3n",
+      "status": "Backlog",
+      "playtime": 0,
+      "title": "Persona 5 Strikers",
+      "sessions": [],
+      "platform": "PC",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Full controller support",
+        "Atmospheric",
+        "Атмосфера",
+        "Отличный саундтрек",
+        "Great Soundtrack"
+      ],
+      "lastPlayed": null,
+      "genres": [
+        "Adventure",
+        "Action",
+        "RPG"
+      ]
+    },
+    {
+      "platform": "PC",
+      "sessions": [],
+      "status": "Backlog",
+      "lastPlayed": null,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Приключение",
+        "Глубокий сюжет",
+        "RPG",
+        "Ролевая игра",
+        "Story Rich",
+        "Открытый мир",
+        "Open World",
+        "От третьего лица"
+      ],
+      "title": "One Piece Odyssey",
+      "id": "mnyuzlvgv2iqzgm6ei",
+      "added": 1767218400000,
+      "genres": [
+        "Action",
+        "RPG"
+      ],
+      "cover": "https://media.rawg.io/media/games/cf8/cf8f731368240a2048b9f153b835f529.jpg",
+      "playtime": 0,
+      "steamAppId": 814000,
+      "notes": null
+    },
+    {
+      "steamAppId": 524220,
+      "id": "mnyuzclkntg3lg5rqan",
+      "title": "NieR:Automata",
+      "status": "Backlog",
+      "playtime": 0,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Steam Cloud",
+        "Atmospheric",
+        "Атмосфера",
+        "steam-trading-cards",
+        "Отличный саундтрек"
+      ],
+      "platform": "PC",
+      "sessions": [],
+      "added": 1767218400000,
+      "lastPlayed": null,
+      "notes": null,
+      "genres": [
+        "Action",
+        "RPG"
+      ],
+      "cover": "https://media.rawg.io/media/games/5a4/5a44112251d70a25291cc33757220fce.jpg"
+    },
+    {
+      "steamAppId": 1454970,
+      "status": "Backlog",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Full controller support",
+        "Мясо",
+        "Gore",
+        "Насилие",
+        "Violent"
+      ],
+      "title": "New Tales from the Borderlands",
+      "platform": "PC",
+      "sessions": [],
+      "lastPlayed": null,
+      "added": 1767218400000,
+      "genres": [
+        "Adventure"
+      ],
+      "playtime": 0,
+      "cover": "https://media.rawg.io/media/games/01d/01dbd8a899ba93b6302a3956c534c550.jpg",
+      "id": "mnyuyvbna0q7x0k983l",
+      "notes": null
+    },
+    {
+      "title": "Marvel's Guardians of the Galaxy",
+      "steamAppId": 1088850,
+      "sessions": [],
+      "platform": "PC",
+      "genres": [
+        "Shooter",
+        "Adventure",
+        "Action"
+      ],
+      "notes": null,
+      "id": "mnyuyljtfxcyc7ya5a",
+      "cover": "https://media.rawg.io/media/games/708/7080e6c87e0825cb02888bf3c44b3889.jpg",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Full controller support",
+        "Steam Cloud",
+        "Atmospheric",
+        "Глубокий сюжет",
+        "RPG"
+      ],
+      "playtime": 0,
+      "lastPlayed": null,
+      "status": "Backlog",
+      "added": 1767218400000
+    },
+    {
+      "title": "Legacy of Kain™ Soul Reaver 1&2 Remastered",
+      "status": "Backlog",
+      "steamAppId": 2521380,
+      "tags": [],
+      "playtime": 0,
+      "id": "mnyuy4fokerhlwwsor",
+      "cover": "https://media.rawg.io/media/games/e03/e03a08a32805ecac6463f503c929b0c5.jpg",
+      "notes": null,
+      "genres": [
+        "Platformer",
+        "Adventure",
+        "Action",
+        "Puzzle"
+      ],
+      "sessions": [],
+      "platform": "PC",
+      "added": 1767218400000,
+      "lastPlayed": null
+    },
+    {
+      "sessions": [],
+      "platform": "PC",
+      "steamAppId": 2552430,
+      "title": "KINGDOM HEARTS -HD 1.5+2.5 ReMIX",
+      "status": "Backlog",
+      "id": "mnyuxqv0ahuastye55t",
+      "rating": null,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Full controller support",
+        "Steam Cloud",
+        "Atmospheric",
+        "Отличный саундтрек",
+        "Great Soundtrack"
+      ],
+      "cover": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/2552430/header.jpg?t=1726050740",
+      "genres": [
+        "Adventure",
+        "Action",
+        "RPG"
+      ],
+      "lastPlayed": null,
+      "notes": null,
+      "playtime": 0,
+      "added": 1767218400000
+    },
+    {
+      "cover": "https://media.rawg.io/media/games/d8f/d8f3b28fc747ed6f92943cdd33fb91b5.jpeg",
+      "steamAppId": 379430,
+      "notes": null,
+      "playtime": 0,
+      "added": 1767218400000,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Инди",
+        "Full controller support",
+        "Atmospheric",
+        "Атмосфера",
+        "Отличный саундтрек"
+      ],
+      "id": "mnyuxdgc8m6ojsnbe3h",
+      "status": "Backlog",
+      "title": "Kingdom Come: Deliverance",
+      "lastPlayed": null,
+      "sessions": [],
+      "genres": [
+        "Adventure",
+        "Action",
+        "RPG"
+      ],
+      "platform": "PC"
+    },
+    {
+      "playtime": 79200000,
+      "cover": "https://media.rawg.io/media/games/5bb/5bb55ccb8205aadbb6a144cf6d8963f1.jpg",
+      "id": "mnyux22qxygm41wrc1",
+      "notes": "Супер чіл прек ахуй бліііін як воно все красиво взривається на вінгсьюті вжууууух бааааааам блять бум ги, корова летаєть на нахуй",
+      "genres": [
+        "Shooter",
+        "Action"
+      ],
+      "added": 1767218400000,
+      "steamAppId": 225540,
+      "title": "Just Cause 3",
+      "status": "Completed",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Multiplayer",
+        "Full controller support",
+        "Atmospheric",
+        "Для нескольких игроков",
+        "Атмосфера"
+      ],
+      "sessions": [],
+      "platform": "PC",
+      "lastPlayed": null,
+      "rating": 7
+    },
+    {
+      "notes": null,
+      "sessions": [],
+      "steamAppId": 990080,
+      "platform": "PC",
+      "cover": "https://media.rawg.io/media/games/044/044b2ee023930ca138deda151f40c18c.jpg",
+      "genres": [
+        "Action",
+        "RPG"
+      ],
+      "added": 1767218400000,
+      "id": "mnyuwoz8hayfdqb1h4j",
+      "title": "Hogwarts Legacy",
+      "lastPlayed": null,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Cloud",
+        "Atmospheric",
+        "Отличный саундтрек",
+        "Great Soundtrack",
+        "Глубокий сюжет",
+        "RPG"
+      ],
+      "status": "Backlog",
+      "playtime": 0
+    },
+    {
+      "lastPlayed": null,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Atmospheric",
+        "Атмосфера",
+        "Отличный саундтрек",
+        "Great Soundtrack",
+        "Глубокий сюжет",
+        "RPG"
+      ],
+      "added": 1767218400000,
+      "platform": "PC",
+      "status": "Backlog",
+      "sessions": [],
+      "notes": null,
+      "cover": "https://media.rawg.io/media/games/e75/e75c54e5a9a2754bab181b2240472389.jpg",
+      "steamAppId": 1297900,
+      "playtime": 0,
+      "title": "Gothic",
+      "genres": [
+        "Action",
+        "RPG"
+      ],
+      "id": "mnyuwh2999m9nx7iwwn"
+    },
+    {
+      "status": "Completed",
+      "added": 1767218400000,
+      "id": "mnuc30xdyayr14zb87",
+      "notes": null,
+      "lastPlayed": null,
+      "rating": 8,
+      "platform": "PC",
+      "cover": "https://media.rawg.io/media/games/264/2642b17a7885f7abc4fd018e98943242.jpg",
+      "sessions": [],
+      "genres": [
+        "Adventure"
+      ],
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Full controller support",
+        "Atmospheric",
+        "Атмосфера",
+        "Отличный саундтрек",
+        "Great Soundtrack"
+      ],
+      "playtime": 72000000,
+      "steamAppId": 330830,
+      "title": "Tales from the Borderlands: A Telltale Game Series"
+    },
+    {
+      "rating": 7,
+      "playtime": 46800000,
+      "lastPlayed": null,
+      "status": "Completed",
+      "title": "Dead Rising Deluxe Remaster",
+      "added": 1767218400000,
+      "steamAppId": 2527390,
+      "id": "mn7kbxn281jot7dsty2",
+      "genres": [
+        "Adventure",
+        "Action"
+      ],
+      "platform": "PC",
+      "cover": "https://media.rawg.io/media/screenshots/37b/37b5993a45d6114a3eb44d9705dd76e6.jpg",
+      "sessions": [],
+      "notes": null,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Full controller support",
+        "Steam Cloud",
+        "От третьего лица",
+        "Third Person",
+        "Научная фантастика"
+      ]
+    },
+    {
+      "id": "mn7kbmdag1hga81dza5",
+      "cover": "https://media.rawg.io/media/games/366/3660f7923d5b16bb8bb67ac5a93f5b76.jpg",
+      "notes": null,
+      "lastPlayed": null,
+      "genres": [
+        "Shooter",
+        "Adventure",
+        "Action"
+      ],
+      "added": 1767218400000,
+      "sessions": [],
+      "platform": "PC",
+      "playtime": 14400000,
+      "title": "Shadow Warrior 3",
+      "steamAppId": 1036890,
+      "status": "Completed",
+      "tags": [
+        "Singleplayer",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Full controller support",
+        "Atmospheric",
+        "Атмосфера",
+        "Шутер",
+        "От первого лица",
+        "First-Person"
+      ],
+      "rating": 7
+    },
+    {
+      "sessions": [],
+      "platform": "PC",
+      "title": "Portal",
+      "lastPlayed": null,
+      "genres": [
+        "Action",
+        "Puzzle"
+      ],
+      "notes": null,
+      "id": "mn7kb8dfwie8wcfu21l",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Atmospheric",
+        "Атмосфера",
+        "Отличный саундтрек",
+        "Great Soundtrack",
+        "Глубокий сюжет"
+      ],
+      "cover": "https://media.rawg.io/media/games/7fa/7fa0b586293c5861ee32490e953a4996.jpg",
+      "steamAppId": 400,
+      "rating": 8,
+      "playtime": 4800000,
+      "status": "Completed",
+      "added": 1735682400000
+    },
+    {
+      "rating": 3,
+      "steamAppId": 2379230,
+      "id": "mn7katuzo0bwj6ott9k",
+      "platform": "PC",
+      "sessions": [],
+      "status": "Completed",
+      "title": "Blessed Burden",
+      "lastPlayed": null,
+      "playtime": 5400000,
+      "added": 1735682400000,
+      "genres": [
+        "Indie",
+        "Platformer",
+        "Adventure",
+        "Action"
+      ],
+      "cover": "https://cdn.impress.games/presskits/c1f523401849af886a3511372b63ca91/box-art.png?t=1751428519",
+      "notes": null,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Atmospheric",
+        "От первого лица",
+        "First-Person",
+        "Partial Controller Support",
+        "Horror"
+      ]
+    },
+    {
+      "status": "Completed",
+      "playtime": 30000000,
+      "rating": 10,
+      "title": "Mullet MadJack",
+      "lastPlayed": null,
+      "added": 1735682400000,
+      "genres": [
+        "Indie",
+        "Action"
+      ],
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Steam Achievements",
+        "Инди",
+        "Full controller support",
+        "Steam Cloud",
+        "Шутер",
+        "От первого лица",
+        "First-Person"
+      ],
+      "cover": "https://media.rawg.io/media/games/abb/abb7001813e2976becc44289d61d59c3.jpg",
+      "id": "mn7kai4fm3isffykkd",
+      "notes": null,
+      "steamAppId": 2111190,
+      "platform": "PC",
+      "sessions": []
+    },
+    {
+      "platform": "PC",
+      "lastPlayed": null,
+      "sessions": [],
+      "id": "mn7ka76r5omaap3wmt2",
+      "genres": [
+        "Indie",
+        "Adventure"
+      ],
+      "title": "Firewatch",
+      "added": 1735682400000,
+      "rating": 2,
+      "steamAppId": 383870,
+      "playtime": 14400000,
+      "status": "Completed",
+      "cover": "https://media.rawg.io/media/games/0be/0bea0a08a4d954337305391b778a7f37.jpg",
+      "tags": [
+        "Для одного игрока",
+        "Приключение",
+        "Инди",
+        "Atmospheric",
+        "Атмосфера",
+        "Отличный саундтрек",
+        "Great Soundtrack",
+        "Глубокий сюжет",
+        "Story Rich",
+        "Открытый мир"
+      ],
+      "notes": null
+    },
+    {
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Full controller support",
+        "Steam Cloud",
+        "Atmospheric",
+        "Атмосфера",
+        "Отличный саундтрек"
+      ],
+      "playtime": 30600000,
+      "added": 1735682400000,
+      "lastPlayed": null,
+      "notes": null,
+      "genres": [
+        "Shooter",
+        "Action"
+      ],
+      "cover": "https://media.rawg.io/media/games/a28/a289e23b4d4d84f26ab59125e3be4483.jpg",
+      "rating": 6,
+      "steamAppId": 474960,
+      "title": "Quantum Break",
+      "platform": "PC",
+      "id": "mn7k9twt95fiygqlxag",
+      "sessions": [],
+      "status": "Completed"
+    },
+    {
+      "sessions": [],
+      "platform": "PC",
+      "cover": "https://media.rawg.io/media/games/d37/d37e110ddcc0bd52d99f0f647b737a0a.jpg",
+      "notes": null,
+      "added": 1735682400000,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Steam Achievements",
+        "Инди",
+        "Full controller support",
+        "Отличный саундтрек",
+        "Great Soundtrack",
+        "Глубокий сюжет",
+        "2D"
+      ],
+      "genres": [
+        "Platformer",
+        "Indie",
+        "Action"
+      ],
+      "id": "mn7k9f5phl1bjl3kenb",
+      "lastPlayed": null,
+      "title": "Katana ZERO",
+      "rating": 8,
+      "playtime": 25200000,
+      "steamAppId": 460950,
+      "status": "Completed"
+    },
+    {
+      "status": "Completed",
+      "added": 1735682400000,
+      "notes": null,
+      "steamAppId": 1547000,
+      "rating": 9,
+      "platform": "PC",
+      "cover": "https://media.rawg.io/media/games/ae3/ae3ba4e4d73ab8ec9dd6bfd8ab9d4efb.jpg",
+      "sessions": [],
+      "genres": [
+        "Adventure",
+        "Action"
+      ],
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Full controller support",
+        "Открытый мир",
+        "Open World",
+        "От третьего лица",
+        "Third Person",
+        "Насилие"
+      ],
+      "playtime": 72000000,
+      "id": "mn7k91q6m5sr1pddtr",
+      "title": "Grand Theft Auto: San Andreas – The Definitive Edition",
+      "lastPlayed": null
+    },
+    {
+      "status": "Completed",
+      "added": 1735682400000,
+      "steamAppId": 1213131321,
+      "notes": null,
+      "rating": 9,
+      "playtime": 30600000,
+      "cover": "https://upload.wikimedia.org/wikipedia/en/d/d6/Robobotboxart.png",
+      "genres": [
+        "Platformer"
+      ],
+      "tags": [
+        "exclusive",
+        "true exclusive"
+      ],
+      "lastPlayed": null,
+      "platform": "PC",
+      "id": "mn7k8jpeb315a4hf66e",
+      "sessions": [],
+      "title": "Kirby: Planet Robobot"
+    },
+    {
+      "title": "Half-Life: Opposing Force",
+      "steamAppId": 50,
+      "genres": [
+        "Shooter",
+        "Action"
+      ],
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Multiplayer",
+        "Atmospheric",
+        "Атмосфера",
+        "Отличный саундтрек",
+        "Great Soundtrack",
+        "Глубокий сюжет"
+      ],
+      "playtime": 14400000,
+      "cover": "https://media.rawg.io/media/games/110/1106ebafac87cc573161f1f4f16e84cf.jpeg",
+      "rating": 7,
+      "sessions": [],
+      "platform": "PC",
+      "id": "mn7k7zmtkbp0x0k307i",
+      "notes": null,
+      "lastPlayed": null,
+      "added": 1735682400000,
+      "status": "Completed"
+    },
+    {
+      "id": "mn7k7ppn0qypgtcy8vu",
+      "cover": "https://media.rawg.io/media/games/4cb/4cb463b5588adc672124fb041f09e91c.jpg",
+      "lastPlayed": null,
+      "genres": [
+        "Shooter",
+        "Action"
+      ],
+      "notes": null,
+      "added": 1735682400000,
+      "sessions": [],
+      "platform": "PC",
+      "playtime": 14400000,
+      "steamAppId": 130,
+      "status": "Completed",
+      "title": "Half-Life: Blue Shift",
+      "rating": 5,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Atmospheric",
+        "Атмосфера",
+        "Отличный саундтрек",
+        "Глубокий сюжет",
+        "Story Rich",
+        "Шутер"
+      ]
+    },
+    {
+      "sessions": [],
+      "platform": "PC",
+      "id": "mn7k7dpe0jv9pj5fnej",
+      "title": "Call of Duty: Black Ops 7",
+      "rating": 4,
+      "lastPlayed": null,
+      "status": "Completed",
+      "notes": null,
+      "cover": "https://media.rawg.io/media/games/4ca/4cabe38446288beb37fc73b2fe047b08.jpg",
+      "steamAppId": 3606480,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Steam Achievements",
+        "Multiplayer",
+        "Для нескольких игроков",
+        "Глубокий сюжет",
+        "Co-op",
+        "Story Rich",
+        "cooperative"
+      ],
+      "playtime": 28800000,
+      "genres": [
+        "Shooter",
+        "Action"
+      ],
+      "added": 1735682400000
+    },
+    {
+      "lastPlayed": null,
+      "genres": [
+        "Platformer"
+      ],
+      "tags": [
+        "exclusive",
+        "true exclusive",
+        "Side-Scrolling"
+      ],
+      "title": "Kirby: Triple Deluxe",
+      "platform": "Nintendo 3DS",
+      "sessions": [],
+      "steamAppId": 65465413,
+      "status": "Completed",
+      "added": 1735682400000,
+      "playtime": 34380000,
+      "cover": "https://upload.wikimedia.org/wikipedia/en/1/1d/Kirbytstest.jpg",
+      "rating": 7,
+      "id": "mn7k6ti1cg6306oyfgf",
+      "notes": null
+    },
+    {
+      "tags": [
+        "Retro",
+        "16-bit",
+        "8-Bit"
+      ],
+      "lastPlayed": null,
+      "rating": 9,
+      "platform": "PC",
+      "added": 1735682400000,
+      "sessions": [],
+      "notes": null,
+      "status": "Completed",
+      "id": "mn7k6e9v6rk2aociolf",
+      "cover": "https://media.rawg.io/media/screenshots/16c/16c1f5e91a061e064f373406164d1e40.jpg",
+      "steamAppId": 764790,
+      "title": "The Messenger",
+      "genres": [
+        "Adventure",
+        "Action",
+        "RPG",
+        "Indie",
+        "Platformer"
+      ],
+      "playtime": 39960000
+    },
+    {
+      "lastPlayed": null,
+      "notes": null,
+      "sessions": [],
+      "id": "mn7k62i9pvtn96l46ir",
+      "platform": "PC",
+      "status": "Completed",
+      "cover": "https://media.rawg.io/media/games/4be/4be6a6ad0364751a96229c56bf69be59.jpg",
+      "rating": 9,
+      "added": 1735682400000,
+      "steamAppId": 1593500,
+      "title": "God of War (2018)",
+      "genres": [
+        "Action"
+      ],
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Full controller support",
+        "Steam Cloud",
+        "Atmospheric",
+        "Глубокий сюжет",
+        "RPG"
+      ],
+      "playtime": 68400000
+    },
+    {
+      "notes": null,
+      "cover": "https://media.rawg.io/media/games/2f6/2f6c45362818859574ac0e37edf3d3c4.jpg",
+      "genres": [
+        "Adventure",
+        "Action",
+        "Casual",
+        "Strategy",
+        "Indie"
+      ],
+      "tags": [
+        "Atmospheric",
+        "Horror",
+        "Pixel Graphics",
+        "Dark",
+        "creepy",
+        "8-Bit",
+        "ascii",
+        "glitch"
+      ],
+      "steamAppId": 2592160,
+      "sessions": [],
+      "platform": "PC",
+      "added": 1735682400000,
+      "title": "Dispatch",
+      "status": "Completed",
+      "playtime": 36000000,
+      "id": "mn7k5ei213bp0zbrb3vq",
+      "lastPlayed": null,
+      "rating": 10
+    },
+    {
+      "status": "Completed",
+      "lastPlayed": null,
+      "tags": [
+        "Singleplayer",
+        "Co-op",
+        "controller support",
+        "Co-op Campaign"
+      ],
+      "id": "mn7k4vhkry9cdctbyaa",
+      "title": "Saints Row (2022)",
+      "platform": "PC",
+      "rating": 7,
+      "sessions": [],
+      "playtime": 71921000,
+      "genres": [
+        "Adventure",
+        "Action"
+      ],
+      "steamAppId": 742420,
+      "added": 1735682400000,
+      "notes": null,
+      "cover": "https://media.rawg.io/media/games/253/2538c831423559834329741e44d3c718.jpg"
+    },
+    {
+      "platform": "PC",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Multiplayer",
+        "Full controller support",
+        "Atmospheric",
+        "Для нескольких игроков",
+        "Атмосфера"
+      ],
+      "sessions": [],
+      "added": 1735682400000,
+      "genres": [
+        "Action",
+        "RPG"
+      ],
+      "steamAppId": 335300,
+      "notes": null,
+      "cover": "https://media.rawg.io/media/games/8fc/8fc59e74133fd8a8a436b7e2d0fb36c2.jpg",
+      "rating": 8,
+      "lastPlayed": null,
+      "status": "Completed",
+      "id": "mn7k3qlfd2gpbcz9p39",
+      "title": "Dark Souls II: Scholar of the First Sin",
+      "playtime": 54000000
+    },
+    {
+      "tags": [
+        "Music",
+        "lifestyle",
+        "fitness"
+      ],
+      "id": "mn7k35e58pzum5r3yd3",
+      "genres": [],
+      "added": 1735682400000,
+      "lastPlayed": null,
+      "notes": null,
+      "platform": "Nintendo 3DS",
+      "sessions": [],
+      "cover": "https://assets-prd.ignimgs.com/2022/03/01/rhythmthief-sq1-1646097238797.jpg",
+      "playtime": 19920000,
+      "status": "Completed",
+      "steamAppId": 21321321321,
+      "title": "Rhythm Thief & the Emperor's Treasure",
+      "rating": 5
+    },
+    {
+      "sessions": [],
+      "platform": "PC",
+      "title": "Halo: Combat Evolved",
+      "genres": [
+        "Shooter",
+        "Action"
+      ],
+      "lastPlayed": null,
+      "cover": "https://media.rawg.io/media/games/abf/abffd94ed6fe34027c720bee593c06d2.jpg",
+      "id": "mn7k2em7dd56vs4jbhe",
+      "rating": 7,
+      "notes": null,
+      "added": 1735682400000,
+      "steamAppId": 1064221,
+      "status": "Completed",
+      "tags": [
+        "combat",
+        "secrets",
+        "alien"
+      ],
+      "playtime": 36000000
+    },
+    {
+      "lastPlayed": null,
+      "notes": null,
+      "playtime": 63540000,
+      "cover": "https://m.media-amazon.com/images/I/814XZYDbfZL.jpg",
+      "added": 1735682400000,
+      "genres": [
+        "Puzzle"
+      ],
+      "title": "Professor Layton and the Azran Legacy",
+      "tags": [
+        "exclusive",
+        "true exclusive",
+        "puzzles"
+      ],
+      "steamAppId": 23136246546,
+      "rating": 9,
+      "sessions": [],
+      "platform": "Nintendo 3DS",
+      "id": "mn7k0zukqbh3j5be28i",
+      "status": "Completed"
+    },
+    {
+      "lastPlayed": null,
+      "cover": "https://media.rawg.io/media/games/e04/e041cc430f6b6681477580d3bcddf29f.jpg",
+      "playtime": 216360000,
+      "notes": null,
+      "status": "Completed",
+      "added": 1735682400000,
+      "rating": 8,
+      "steamAppId": 65564645,
+      "id": "mn7k02vtjjo00u20f2o",
+      "genres": [
+        "RPG"
+      ],
+      "title": "DRAGON QUEST XI: Echoes of an Elusive Age",
+      "sessions": [],
+      "platform": "Nintendo Switch",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Full controller support",
+        "Steam Cloud",
+        "steam-trading-cards",
+        "Отличный саундтрек",
+        "Great Soundtrack"
+      ]
+    },
+    {
+      "notes": null,
+      "cover": "https://media.rawg.io/media/games/b2c/b2c9c6115114c8f7d461b5430e8a7d4a.jpg",
+      "rating": 10,
+      "id": "mn7jzlsvz6uirqdq2bg",
+      "sessions": [],
+      "added": 1735682400000,
+      "platform": "Nintendo Switch",
+      "status": "Completed",
+      "steamAppId": 1113000,
+      "title": "Persona 4 Golden",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Приключение",
+        "Steam Achievements",
+        "Full controller support",
+        "Steam Cloud",
+        "Отличный саундтрек",
+        "Great Soundtrack",
+        "Глубокий сюжет",
+        "RPG"
+      ],
+      "playtime": 297120000,
+      "lastPlayed": null,
+      "genres": [
+        "RPG"
+      ]
+    },
+    {
+      "lastPlayed": null,
+      "rating": 8,
+      "added": 1735682400000,
+      "platform": "PC",
+      "sessions": [],
+      "notes": null,
+      "status": "Completed",
+      "cover": "https://upload.wikimedia.org/wikipedia/ru/1/1b/WWE_2K25_cover.jpg",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Steam Achievements",
+        "Multiplayer",
+        "Steam Cloud",
+        "Для нескольких игроков",
+        "Co-op",
+        "cooperative",
+        "Partial Controller Support",
+        "Симулятор"
+      ],
+      "steamAppId": 2878960,
+      "title": "WWE 2K25",
+      "genres": [
+        "Simulation",
+        "Sports"
+      ],
+      "playtime": 68400000,
+      "id": "mn7jyop2eqffdnqgw5"
+    },
+    {
+      "notes": null,
+      "cover": "https://media.rawg.io/media/games/2ae/2ae4150474a27f90595c9092917ab2d3.jpg",
+      "playtime": 50400000,
+      "genres": [
+        "Adventure",
+        "Action"
+      ],
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Full controller support",
+        "Steam Cloud",
+        "Atmospheric",
+        "Глубокий сюжет",
+        "RPG"
+      ],
+      "steamAppId": 3743240,
+      "added": 1735682400000,
+      "title": "RoboCop: Rogue City",
+      "status": "Completed",
+      "id": "mn7jy7ihoqnhun1791",
+      "lastPlayed": null,
+      "rating": 8,
+      "sessions": [],
+      "platform": "PC"
+    },
+    {
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Приключение",
+        "Steam Achievements",
+        "Full controller support",
+        "Steam Cloud",
+        "Глубокий сюжет",
+        "RPG",
+        "Ролевая игра",
+        "Story Rich"
+      ],
+      "genres": [
+        "Adventure",
+        "Action",
+        "RPG",
+        "Simulation"
+      ],
+      "title": "Dave the Diver",
+      "lastPlayed": null,
+      "id": "mn7jxhc2k2qfxl151fq",
+      "platform": "PC",
+      "sessions": [],
+      "playtime": 99313000,
+      "status": "Completed",
+      "added": 1735682400000,
+      "notes": null,
+      "steamAppId": 1868140,
+      "rating": 9,
+      "cover": "https://media.rawg.io/media/games/1ee/1eec43616e3ff00a674124d746926b23.jpg"
+    },
+    {
+      "id": "mn7jwzfsuu3vd6a9f",
+      "lastPlayed": null,
+      "title": "Serious Sam 4",
+      "sessions": [],
+      "platform": "PC",
+      "genres": [
+        "Shooter",
+        "Adventure",
+        "Action"
+      ],
+      "notes": null,
+      "steamAppId": 257420,
+      "cover": "https://media.rawg.io/media/games/6de/6de6fc22dcf802a549be5a41fabc84a9.jpg",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Multiplayer",
+        "Full controller support",
+        "Для нескольких игроков",
+        "Отличный саундтрек",
+        "Co-op",
+        "Открытый мир"
+      ],
+      "rating": 7,
+      "playtime": 25200000,
+      "status": "Completed",
+      "added": 1735682400000
+    },
+    {
+      "lastPlayed": null,
+      "cover": "https://media.rawg.io/media/games/66a/66ac0adcf70fa59638db9fbba39c345a.jpg",
+      "genres": [
+        "Shooter",
+        "Action"
+      ],
+      "notes": null,
+      "added": 1735682400000,
+      "playtime": 14400000,
+      "tags": [],
+      "steamAppId": 2674620,
+      "sessions": [],
+      "status": "Completed",
+      "title": "Postal 3",
+      "platform": "PC",
+      "id": "mn7jwj4c0ga6e2k8h2ip",
+      "rating": 6
+    },
+    {
+      "title": "Darksiders II Deathinitive Edition",
+      "rating": 7,
+      "id": "mn7jvjrpigsgzapnzgp",
+      "lastPlayed": null,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Multiplayer",
+        "Full controller support",
+        "Steam Cloud",
+        "Для нескольких игроков",
+        "steam-trading-cards"
+      ],
+      "playtime": 72720000,
+      "status": "Completed",
+      "cover": "https://media.rawg.io/media/games/cfe/cfe5960b5caca432f3575fc7d8ff736b.jpg",
+      "notes": null,
+      "sessions": [],
+      "steamAppId": 388410,
+      "platform": "PC",
+      "added": 1735682400000,
+      "genres": [
+        "Action",
+        "RPG"
+      ]
+    },
+    {
+      "cover": "https://media.rawg.io/media/games/6d3/6d33014a4ed48a19c30a77ead5a0f62e.jpg",
+      "genres": [
+        "Educational",
+        "Indie",
+        "Simulation",
+        "Puzzle"
+      ],
+      "notes": null,
+      "steamAppId": 239030,
+      "sessions": [],
+      "platform": "PC",
+      "added": 1735682400000,
+      "id": "mn7ju87pugunbzfzejc",
+      "lastPlayed": null,
+      "status": "Completed",
+      "title": "Papers, Please",
+      "rating": 8,
+      "playtime": 21600000,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Приключение",
+        "Steam Achievements",
+        "Инди",
+        "Steam Cloud",
+        "Atmospheric",
+        "Атмосфера",
+        "steam-trading-cards",
+        "Отличный саундтрек"
+      ]
+    },
+    {
+      "id": "mn7jtklh1csak3i1tca",
+      "title": "Wolfenstein II: The New Colossus",
+      "playtime": 28800000,
+      "steamAppId": 612880,
+      "genres": [
+        "Shooter",
+        "Action"
+      ],
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Atmospheric",
+        "Атмосфера",
+        "Отличный саундтрек",
+        "Great Soundtrack",
+        "Глубокий сюжет",
+        "Story Rich"
+      ],
+      "cover": "https://media.rawg.io/media/games/a0e/a0ef08621301a1eab5e04fa5c96978fa.jpeg",
+      "rating": 10,
+      "notes": null,
+      "lastPlayed": null,
+      "added": 1735682400000,
+      "sessions": [],
+      "platform": "PC",
+      "status": "Completed"
+    },
+    {
+      "title": "Wolfenstein: The Old Blood",
+      "sessions": [],
+      "platform": "PC",
+      "status": "Completed",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Multiplayer",
+        "Steam Cloud",
+        "Atmospheric",
+        "Для нескольких игроков",
+        "Атмосфера"
+      ],
+      "lastPlayed": null,
+      "rating": 10,
+      "id": "mn7jt16f220fj3jpz17h",
+      "notes": null,
+      "cover": "https://media.rawg.io/media/games/f14/f1422eacab98c5f85a5123da4e9d9e89.jpg",
+      "steamAppId": 350080,
+      "genres": [
+        "Shooter",
+        "Action"
+      ],
+      "playtime": 14400000,
+      "added": 1735682400000
+    },
+    {
+      "genres": [
+        "Shooter",
+        "Action"
+      ],
+      "added": 1735682400000,
+      "id": "mn7jslxy9nwntiup9x",
+      "notes": null,
+      "playtime": 25200000,
+      "steamAppId": 201810,
+      "cover": "https://media.rawg.io/media/games/c80/c80bcf321da44d69b18a06c04d942662.jpg",
+      "status": "Completed",
+      "platform": "PC",
+      "sessions": [],
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Multiplayer",
+        "Atmospheric",
+        "Атмосфера",
+        "Отличный саундтрек",
+        "Great Soundtrack"
+      ],
+      "title": "Wolfenstein: The New Order",
+      "rating": 10,
+      "lastPlayed": null
+    },
+    {
+      "title": "Prototype",
+      "id": "mn7jroejf2dwors0zw9",
+      "rating": 3,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Atmospheric",
+        "Атмосфера",
+        "Глубокий сюжет",
+        "RPG",
+        "Ролевая игра"
+      ],
+      "sessions": [],
+      "platform": "PC",
+      "status": "Completed",
+      "lastPlayed": null,
+      "notes": null,
+      "playtime": 37800000,
+      "cover": "https://media.rawg.io/media/games/b74/b74b15a48ac7bc37fbb42ee4afcc0b91.jpg",
+      "steamAppId": 115320,
+      "genres": [
+        "Casual",
+        "Strategy",
+        "Adventure",
+        "Action"
+      ],
+      "added": 1735682400000
+    },
+    {
+      "notes": null,
+      "lastPlayed": null,
+      "cover": "https://media.rawg.io/media/games/5ad/5adab016a307c2902a82b60d487fe287.jpg",
+      "rating": 9,
+      "id": "mn7jq4myb6ton8r2jow",
+      "added": 1735682400000,
+      "sessions": [],
+      "platform": "PC",
+      "status": "Completed",
+      "title": "S.T.A.L.K.E.R.: Call of Pripyat",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Multiplayer",
+        "Atmospheric",
+        "Для нескольких игроков",
+        "Атмосфера",
+        "RPG",
+        "Ролевая игра"
+      ],
+      "steamAppId": 41700,
+      "playtime": 81600000,
+      "genres": [
+        "Shooter",
+        "RPG"
+      ]
+    },
+    {
+      "id": "mn7joq1zzn2jg3tdgtj",
+      "title": "Batman: Arkham Origins",
+      "rating": 7,
+      "steamAppId": 209000,
+      "sessions": [],
+      "platform": "PC",
+      "status": "Completed",
+      "notes": null,
+      "playtime": 54420000,
+      "cover": "https://media.rawg.io/media/games/fc3/fc30790a3b3c738d7a271b02c1e26dc2.jpg",
+      "lastPlayed": null,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Multiplayer",
+        "Full controller support",
+        "Steam Cloud",
+        "Atmospheric",
+        "Для нескольких игроков"
+      ],
+      "genres": [
+        "Action"
+      ],
+      "added": 1735682400000
+    },
+    {
+      "playtime": 184872000,
+      "status": "Completed",
+      "title": "Ghost of Tsushima Director's Cut",
+      "rating": 10,
+      "tags": [],
+      "lastPlayed": null,
+      "cover": "https://media.rawg.io/media/games/193/193c9fe23ca026914fdf41d551ff3df9.jpg",
+      "genres": [
+        "Adventure",
+        "Action",
+        "RPG"
+      ],
+      "notes": null,
+      "added": 1735682400000,
+      "sessions": [],
+      "platform": "PC",
+      "steamAppId": 2215430,
+      "id": "mn7jn1m5y5zh3wjwcnl"
+    },
+    {
+      "notes": null,
+      "cover": "https://media.rawg.io/media/games/009/009e4e84975d6a60173ec1199db25aa3.jpg",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Инди",
+        "Multiplayer",
+        "Atmospheric",
+        "Для нескольких игроков",
+        "Атмосфера",
+        "Отличный саундтрек"
+      ],
+      "id": "mn7jg2lkreo0das26oo",
+      "sessions": [],
+      "platform": "PC",
+      "added": 1735682400000,
+      "genres": [
+        "Shooter",
+        "Indie",
+        "Action"
+      ],
+      "steamAppId": 362890,
+      "title": "Black Mesa",
+      "rating": 8,
+      "playtime": 46800000,
+      "lastPlayed": null,
+      "status": "Completed"
+    },
+    {
+      "added": 1735682400000,
+      "platform": "PC",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Multiplayer",
+        "Full controller support",
+        "Для нескольких игроков",
+        "Отличный саундтрек",
+        "Great Soundtrack",
+        "Co-op",
+        "cooperative"
+      ],
+      "genres": [
+        "Action",
+        "Simulation",
+        "Sports"
+      ],
+      "sessions": [],
+      "id": "mn7jffxyixakm49kfng",
+      "cover": "https://media.rawg.io/media/games/884/884e6a520b60aac011a38f4954303448.jpg",
+      "notes": null,
+      "lastPlayed": null,
+      "rating": 7,
+      "playtime": 46800000,
+      "status": "Completed",
+      "title": "WWE 2K16",
+      "steamAppId": 2654654
+    },
+    {
+      "genres": [
+        "Action"
+      ],
+      "added": 1735682400000,
+      "platform": "PC",
+      "sessions": [],
+      "id": "mn7jeb4w93ta6be2z1",
+      "lastPlayed": null,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Full controller support",
+        "Steam Cloud",
+        "Отличный саундтрек",
+        "Great Soundtrack",
+        "Глубокий сюжет"
+      ],
+      "cover": "https://media.rawg.io/media/games/8e6/8e699e91cf77c2060b6d515e2135b1b1.jpg",
+      "notes": null,
+      "status": "Completed",
+      "playtime": 32400000,
+      "rating": 9,
+      "steamAppId": 235460,
+      "title": "Metal Gear Rising: Revengeance"
+    },
+    {
+      "genres": [
+        "Shooter",
+        "Adventure",
+        "Action"
+      ],
+      "lastPlayed": null,
+      "platform": "PC",
+      "sessions": [],
+      "title": "Shadow Warrior 2",
+      "id": "mn7jdr5f8y2o7pmwcgq",
+      "added": 1735682400000,
+      "playtime": 56400000,
+      "steamAppId": 324800,
+      "status": "Completed",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Multiplayer",
+        "Full controller support",
+        "Steam Cloud",
+        "Для нескольких игроков",
+        "steam-trading-cards"
+      ],
+      "rating": 7,
+      "cover": "https://media.rawg.io/media/games/0b2/0b240149610b8b20eac098b8071f575a.jpg",
+      "notes": null
+    },
+    {
+      "genres": [
+        "Adventure",
+        "Action"
+      ],
+      "id": "mn7jd9r4bemk7bc7239",
+      "lastPlayed": null,
+      "playtime": 64800000,
+      "tags": [
+        "Controller",
+        "War",
+        "Story",
+        "online",
+        "friends",
+        "school",
+        "ball",
+        "girl",
+        "Shadows",
+        "dodge"
+      ],
+      "title": "Bully",
+      "status": "Completed",
+      "added": 1735682400000,
+      "platform": "PC",
+      "sessions": [],
+      "cover": "https://media.rawg.io/media/games/682/682973f711e9ea6fcf11f71cbb39cdd5.jpeg",
+      "rating": 10,
+      "steamAppId": 12200,
+      "notes": null
+    },
+    {
+      "title": "Stranglehold",
+      "tags": [
+        "Story",
+        "gun"
+      ],
+      "steamAppId": 3861500,
+      "rating": 7,
+      "sessions": [],
+      "platform": "PC",
+      "status": "Completed",
+      "notes": null,
+      "lastPlayed": null,
+      "id": "mn7jckc9itqxn5enyca",
+      "cover": "https://media.rawg.io/media/games/909/909f20ae2181edfe413e4b672d712474.jpg",
+      "playtime": 28800000,
+      "added": 1735682400000,
+      "genres": [
+        "Shooter",
+        "Action"
+      ]
+    },
+    {
+      "notes": null,
+      "sessions": [],
+      "platform": "PS3",
+      "status": "Completed",
+      "cover": "https://media.rawg.io/media/games/baf/baf9905270314e07e6850cffdb51df41.jpg",
+      "lastPlayed": null,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Приключение",
+        "Steam Achievements",
+        "Инди",
+        "Multiplayer",
+        "Full controller support",
+        "Atmospheric",
+        "Атмосфера",
+        "Отличный саундтрек"
+      ],
+      "rating": 7,
+      "added": 1735682400000,
+      "title": "Journey",
+      "steamAppId": 638230,
+      "genres": [
+        "Family",
+        "Indie",
+        "Adventure"
+      ],
+      "id": "mn7jbxzkfudmywct0g",
+      "playtime": 10800000
+    },
+    {
+      "playtime": 68400000,
+      "rating": 8,
+      "lastPlayed": null,
+      "title": "Doom: The Dark Ages",
+      "status": "Completed",
+      "cover": "https://media.rawg.io/media/games/018/01897340a06b9ed8e92ed1cc1b1eecb9.jpg",
+      "id": "mn7jbiee6g0tuvs3jhg",
+      "notes": null,
+      "steamAppId": 3017860,
+      "sessions": [],
+      "platform": "PC",
+      "added": 1735682400000,
+      "genres": [
+        "Action"
+      ],
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Full controller support",
+        "Steam Cloud",
+        "Atmospheric",
+        "Глубокий сюжет",
+        "Story Rich"
+      ]
+    },
+    {
+      "cover": "https://m.media-amazon.com/images/M/MV5BYmZkYmI1MTktMGY4My00YzMyLTlhYzEtMzc4NDAwMzdiODE3XkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg",
+      "sessions": [],
+      "platform": "Other",
+      "rating": 8,
+      "notes": null,
+      "added": 1735682400000,
+      "steamAppId": 2858646,
+      "tags": [
+        "exclusive",
+        "true exclusive",
+        "Rhythm"
+      ],
+      "status": "Completed",
+      "id": "mn7jb31gjsy6a4byk1k",
+      "title": "Elite Beat Agents",
+      "lastPlayed": null,
+      "playtime": 25200000,
+      "genres": [
+        "Action"
+      ]
+    },
+    {
+      "notes": null,
+      "cover": "https://media.rawg.io/media/games/dd8/dd8f2a04d55c3556dc3cbdc59158df80.jpg",
+      "tags": [
+        "Singleplayer",
+        "Экшен",
+        "Приключение",
+        "Инди",
+        "RPG",
+        "Ролевая игра",
+        "Partial Controller Support",
+        "Мясо",
+        "Gore",
+        "Насилие"
+      ],
+      "rating": 8,
+      "sessions": [],
+      "platform": "PC",
+      "status": "Completed",
+      "steamAppId": 899770,
+      "added": 1735682400000,
+      "title": "Last Epoch",
+      "playtime": 25200000,
+      "genres": [
+        "Indie",
+        "Adventure",
+        "Action",
+        "RPG"
+      ],
+      "lastPlayed": null,
+      "id": "mn7jao5vusw3zpg3pd"
+    },
+    {
+      "rating": 6,
+      "playtime": 25200000,
+      "id": "mn7j93590cpk80safhzl",
+      "status": "Completed",
+      "lastPlayed": null,
+      "title": "The Lord of the Rings: The Return of the King",
+      "added": 1735682400000,
+      "genres": [
+        "Action"
+      ],
+      "platform": "PC",
+      "cover": "https://media.rawg.io/media/games/3f2/3f214611fb5dc9a45f0ac66a5c4c0142.jpg",
+      "sessions": [],
+      "notes": null,
+      "steamAppId": 12312312312,
+      "tags": [
+        "Singleplayer",
+        "Multiplayer",
+        "cooperative"
+      ]
+    },
+    {
+      "status": "Completed",
+      "added": 1735682400000,
+      "id": "mn7j89e0lrtvws6sqkl",
+      "platform": "PC",
+      "sessions": [],
+      "lastPlayed": null,
+      "notes": null,
+      "rating": 8,
+      "cover": "https://media.rawg.io/media/games/a12/a120fc7faed7666f8c320a755137e316.jpg",
+      "genres": [
+        "Indie",
+        "Shooter",
+        "Adventure",
+        "Action"
+      ],
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Инди",
+        "Full controller support",
+        "Steam Cloud",
+        "Отличный саундтрек",
+        "Great Soundtrack"
+      ],
+      "title": "Neon White",
+      "steamAppId": 1533420,
+      "playtime": 15026000
+    },
+    {
+      "id": "mn7ihwwxpbv2j5y5syl",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Cloud",
+        "Глубокий сюжет",
+        "RPG",
+        "Ролевая игра",
+        "Story Rich",
+        "От третьего лица"
+      ],
+      "playtime": 78360000,
+      "genres": [
+        "RPG"
+      ],
+      "title": "Clair Obscur: Expedition 33",
+      "lastPlayed": null,
+      "rating": 10,
+      "added": 1735682400000,
+      "status": "Completed",
+      "notes": null,
+      "platform": "PC",
+      "cover": "https://media.rawg.io/media/games/466/4667f17fdee9ebbcea2049e54f8e2b96.jpg",
+      "sessions": [],
+      "steamAppId": 1903340
+    },
+    {
+      "cover": "https://media.rawg.io/media/games/c50/c5085506fe4b5e20fc7aa5ace842c20b.jpg",
+      "notes": null,
+      "playtime": 63600000,
+      "status": "Completed",
+      "steamAppId": 200260,
+      "added": 1735682400000,
+      "rating": 9,
+      "id": "mn7ihhiqye07dilnz5",
+      "title": "Batman: Arkham City - Game of the Year Edition",
+      "genres": [
+        "Adventure",
+        "Action"
+      ],
+      "lastPlayed": null,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Steam Cloud",
+        "Atmospheric",
+        "Атмосфера",
+        "steam-trading-cards",
+        "Глубокий сюжет"
+      ],
+      "sessions": [],
+      "platform": "PC"
+    },
+    {
+      "tags": [
+        "Exploration",
+        "Stealth",
+        "puzzles",
+        "hero",
+        "island"
+      ],
+      "notes": null,
+      "playtime": 36000000,
+      "steamAppId": 35140,
+      "cover": "https://media.rawg.io/media/games/d56/d564ee964eb3c17892b3b35dd607f836.jpg",
+      "added": 1735682400000,
+      "genres": [
+        "Action"
+      ],
+      "title": "Batman: Arkham Asylum",
+      "lastPlayed": null,
+      "rating": 8,
+      "sessions": [],
+      "platform": "PC",
+      "status": "Completed",
+      "id": "mn7ih14hxir27i8fgp"
+    },
+    {
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Full controller support",
+        "Steam Cloud",
+        "Atmospheric",
+        "Отличный саундтрек",
+        "Great Soundtrack"
+      ],
+      "playtime": 31200000,
+      "genres": [
+        "Adventure",
+        "Action"
+      ],
+      "title": "South of Midnight",
+      "steamAppId": 1934570,
+      "status": "Completed",
+      "added": 1735682400000,
+      "lastPlayed": null,
+      "notes": null,
+      "platform": "PC",
+      "id": "mn7ibwcqnpq1ut5owpk",
+      "sessions": [],
+      "rating": 6,
+      "cover": "https://media.rawg.io/media/games/734/73451dc0abd013bee5b7d88faaacec11.jpg"
+    },
+    {
+      "lastPlayed": null,
+      "added": 1735682400000,
+      "platform": "PC",
+      "sessions": [],
+      "cover": "https://media.rawg.io/media/games/b4e/b4ec8e98127914d0a38051f641dcf2f1.jpg",
+      "genres": [
+        "Shooter",
+        "Action"
+      ],
+      "id": "mn7ibflhmeiv67xbzf",
+      "tags": [
+        "bundle"
+      ],
+      "notes": null,
+      "rating": 8,
+      "steamAppId": 206420,
+      "status": "Completed",
+      "title": "Saints Row IV: Re-Elected",
+      "playtime": 30120000
+    },
+    {
+      "genres": [
+        "Adventure",
+        "Action"
+      ],
+      "added": 1735682400000,
+      "platform": "PS3",
+      "lastPlayed": null,
+      "sessions": [],
+      "id": "mn7ib0asq9kcybly1q",
+      "cover": "https://media.rawg.io/media/games/438/438c07ddb573d47f1c50e2ca1859982f.jpg",
+      "notes": null,
+      "steamAppId": 123123123123,
+      "status": "Completed",
+      "playtime": 36000000,
+      "rating": 10,
+      "tags": [
+        "rage",
+        "survive"
+      ],
+      "title": "ASURA'S WRATH"
+    },
+    {
+      "genres": [
+        "Action"
+      ],
+      "added": 1735682400000,
+      "playtime": 12600000,
+      "steamAppId": 67370,
+      "cover": "https://media.rawg.io/media/games/744/744adc36e6573dd67a0cb0e373738d19.jpg",
+      "notes": null,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Multiplayer",
+        "Atmospheric",
+        "Для нескольких игроков",
+        "Атмосфера",
+        "Глубокий сюжет"
+      ],
+      "id": "mn7ia2y1o61ibywimgr",
+      "status": "Completed",
+      "lastPlayed": null,
+      "rating": 8,
+      "platform": "PC",
+      "title": "The Darkness II",
+      "sessions": []
+    },
+    {
+      "notes": null,
+      "status": "Completed",
+      "playtime": 60540000,
+      "cover": "https://media.rawg.io/media/games/02a/02ac22b3b90717dabaa535640c38534c.jpg",
+      "steamAppId": 2001120,
+      "added": 1735682400000,
+      "rating": 10,
+      "title": "Split Fiction",
+      "tags": [
+        "Экшен",
+        "Приключение",
+        "Multiplayer",
+        "Steam Cloud",
+        "Для нескольких игроков",
+        "Глубокий сюжет",
+        "Co-op",
+        "Story Rich",
+        "cooperative",
+        "От третьего лица"
+      ],
+      "id": "mn7i9mg3tejet6cr2ss",
+      "genres": [
+        "Adventure",
+        "Action"
+      ],
+      "lastPlayed": null,
+      "sessions": [],
+      "platform": "Other"
+    },
+    {
+      "rating": 10,
+      "lastPlayed": null,
+      "tags": [
+        "Singleplayer",
+        "Multiplayer",
+        "Co-op"
+      ],
+      "status": "Completed",
+      "title": "Saints Row: The Third - The Full Package",
+      "playtime": 28320000,
+      "added": 1735682400000,
+      "id": "mn7i98wp6w9v9yy4bk",
+      "platform": "PC",
+      "sessions": [],
+      "steamAppId": 17933,
+      "genres": [
+        "Adventure",
+        "Action"
+      ],
+      "cover": "https://media.rawg.io/media/games/09b/09ba5a476a877b957c717aad1cf709fd.jpg",
+      "notes": null
+    },
+    {
+      "notes": null,
+      "cover": "https://media.rawg.io/media/games/fe3/fe3ab374b913d3e44cf377e614526111.jpg",
+      "genres": [
+        "Fighting",
+        "Sports"
+      ],
+      "playtime": 54000000,
+      "added": 1735682400000,
+      "steamAppId": 123545635,
+      "title": "WWE 2K15",
+      "sessions": [],
+      "tags": [
+        "Multiplayer",
+        "3D",
+        "online",
+        "Programming",
+        "reality-based",
+        "Wrestling"
+      ],
+      "id": "mn7i8mt0qzkpu1007k",
+      "platform": "PC",
+      "status": "Completed",
+      "lastPlayed": null,
+      "rating": 7
+    },
+    {
+      "title": "F.E.A.R. 2: Project Origin",
+      "lastPlayed": null,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Multiplayer",
+        "Atmospheric",
+        "Для нескольких игроков",
+        "Атмосфера",
+        "Глубокий сюжет",
+        "Story Rich",
+        "Открытый мир"
+      ],
+      "playtime": 32400000,
+      "rating": 7,
+      "id": "mn7i7o33b46gphztr2f",
+      "status": "Completed",
+      "notes": null,
+      "steamAppId": 16450,
+      "cover": "https://media.rawg.io/media/games/d1d/d1dd46e2ef7f8a1ee946d3ab779c3754.jpg",
+      "sessions": [],
+      "platform": "PC",
+      "added": 1735682400000,
+      "genres": [
+        "Shooter",
+        "Action"
+      ]
+    },
+    {
+      "platform": "PC",
+      "sessions": [],
+      "rating": 5,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Инди",
+        "От третьего лица",
+        "Third Person",
+        "Сложная",
+        "Difficult",
+        "Action-Adventure",
+        "Action RPG"
+      ],
+      "added": 1735682400000,
+      "status": "Completed",
+      "notes": null,
+      "cover": "https://media.rawg.io/media/games/3a9/3a9ea2db24f879e61fe7b824f5888d2a.jpg",
+      "steamAppId": 2138710,
+      "title": "Sifu",
+      "genres": [
+        "Action",
+        "Fighting"
+      ],
+      "playtime": 18000000,
+      "id": "mn7i79mz7ue66ff2s6q",
+      "lastPlayed": null
+    },
+    {
+      "genres": [
+        "Shooter"
+      ],
+      "added": 1735682400000,
+      "id": "mn7i4q3ukkrz0aovpkj",
+      "playtime": 18000000,
+      "lastPlayed": null,
+      "cover": "https://media.rawg.io/media/games/51b/51ba5f9b280c6fec71c293fe276e24ec.jpg",
+      "notes": null,
+      "platform": "Other",
+      "sessions": [],
+      "status": "Completed",
+      "steamAppId": 4124124435,
+      "rating": 8,
+      "tags": [
+        "exclusive"
+      ],
+      "title": "Gears of War 2"
+    },
+    {
+      "added": 1735682400000,
+      "status": "Completed",
+      "playtime": 116473000,
+      "id": "mn7i28j9p9s9gmrhh6d",
+      "steamAppId": 1245620,
+      "rating": 9,
+      "cover": "https://media.rawg.io/media/games/b29/b294fdd866dcdb643e7bab370a552855.jpg",
+      "notes": null,
+      "genres": [
+        "Action",
+        "RPG"
+      ],
+      "lastPlayed": null,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Steam Achievements",
+        "Multiplayer",
+        "Full controller support",
+        "Atmospheric",
+        "Для нескольких игроков",
+        "Отличный саундтрек",
+        "Great Soundtrack"
+      ],
+      "title": "Elden Ring",
+      "platform": "PC",
+      "sessions": []
+    },
+    {
+      "status": "Completed",
+      "steamAppId": 3453243,
+      "rating": 7,
+      "platform": "PC",
+      "sessions": [],
+      "id": "mn7i1rlxybqxrhikwja",
+      "title": "The Suffering: Ties That Bind",
+      "genres": [
+        "Shooter",
+        "Action"
+      ],
+      "playtime": 18000000,
+      "added": 1735682400000,
+      "lastPlayed": null,
+      "cover": "https://media.rawg.io/media/games/814/8141c08ab6786cda63b1cedca5ccba24.jpg",
+      "tags": [],
+      "notes": null
+    },
+    {
+      "tags": [],
+      "status": "Completed",
+      "title": "The Suffering",
+      "lastPlayed": null,
+      "id": "mn7i15jz02a98h6hecjn",
+      "rating": 8,
+      "platform": "PC",
+      "sessions": [],
+      "genres": [
+        "Shooter",
+        "Action"
+      ],
+      "added": 1735682400000,
+      "playtime": 25200000,
+      "notes": null,
+      "steamAppId": 5433532,
+      "cover": "https://media.rawg.io/media/games/930/930ae02027c73129a863a7ad793a768d.jpg"
+    },
+    {
+      "cover": "https://media.rawg.io/media/games/5bf/5bf88a28de96321c86561a65ee48e6c2.jpg",
+      "notes": null,
+      "sessions": [],
+      "platform": "PC",
+      "status": "Completed",
+      "added": 1735682400000,
+      "steamAppId": 204100,
+      "rating": 5,
+      "id": "mn7i0pfxzir31xvc2s",
+      "genres": [
+        "Shooter",
+        "Action"
+      ],
+      "title": "Max Payne 3",
+      "lastPlayed": null,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Multiplayer",
+        "Atmospheric",
+        "Для нескольких игроков",
+        "Атмосфера",
+        "Отличный саундтрек"
+      ],
+      "playtime": 28800000
+    },
+    {
+      "title": "Cuphead",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Steam Achievements",
+        "Инди",
+        "Full controller support",
+        "Steam Cloud",
+        "Для нескольких игроков",
+        "Атмосфера",
+        "Отличный саундтрек"
+      ],
+      "genres": [
+        "Platformer",
+        "Indie",
+        "Action"
+      ],
+      "steamAppId": 268910,
+      "playtime": 50400000,
+      "notes": null,
+      "cover": "https://media.rawg.io/media/games/226/2262cea0b385db6cf399f4be831603b0.jpg",
+      "status": "Completed",
+      "sessions": [],
+      "platform": "PC",
+      "lastPlayed": null,
+      "id": "mn7i064rbcj12qr0x55",
+      "added": 1735682400000,
+      "rating": 10
+    },
+    {
+      "notes": null,
+      "cover": "https://media.rawg.io/media/games/686/686909717c3aa01518bc42ae2bf4259e.jpg",
+      "lastPlayed": null,
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Приключение",
+        "Steam Achievements",
+        "Multiplayer",
+        "Full controller support",
+        "Atmospheric",
+        "Отличный саундтрек",
+        "Great Soundtrack"
+      ],
+      "rating": 10,
+      "sessions": [],
+      "platform": "Nintendo Switch",
+      "status": "Completed",
+      "added": 1735682400000,
+      "title": "Red Dead Redemption",
+      "playtime": 54563000,
+      "steamAppId": 2668510,
+      "genres": [
+        "Shooter",
+        "Action"
+      ],
+      "id": "mn7hz8my2zc5hge85oz"
+    },
+    {
+      "genres": [
+        "Adventure",
+        "Action"
+      ],
+      "id": "mn7hyei87ql19xrhj3r",
+      "added": 1735682400000,
+      "steamAppId": 1744330,
+      "cover": "https://media.rawg.io/media/games/fce/fce0716b555c161ef1b286eecb7abc16.jpg",
+      "notes": null,
+      "platform": "Nintendo Switch",
+      "tags": [
+        "Singleplayer",
+        "Для одного игрока",
+        "Экшен",
+        "Steam Achievements",
+        "Steam Cloud",
+        "Отличный саундтрек",
+        "Great Soundtrack",
+        "От третьего лица",
+        "Third Person",
+        "Partial Controller Support"
+      ],
+      "sessions": [],
+      "status": "Completed",
+      "playtime": 44053000,
+      "rating": 6,
+      "lastPlayed": null,
+      "title": "No More Heroes 3"
+    }
+  ],
+  "theme": "neon",
+  "nintendoIgnoredIds": []
+}
