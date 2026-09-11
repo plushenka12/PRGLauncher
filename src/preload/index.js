@@ -2,6 +2,7 @@ const { contextBridge, ipcRenderer } = require('electron')
 
 contextBridge.exposeInMainWorld('launcher', {
   // Steam
+  getSteamProfileLibrary: (profile, token) => ipcRenderer.invoke('steam:profileLibrary', { profile, token }),
   launchGame:      (appId) => ipcRenderer.invoke('steam:launchGame', appId),
   gameStatus:      (appId) => ipcRenderer.invoke('steam:gameStatus', appId),
   installStatus:   (appId) => ipcRenderer.invoke('steam:installStatus', appId),
@@ -16,6 +17,8 @@ contextBridge.exposeInMainWorld('launcher', {
   onSteamRunningApp: (callback) => ipcRenderer.on('steam:runningApp', (_, status) => callback(status)),
 
   // Nintendo (experimental connector)
+  setNintendoProfile: (uid) => ipcRenderer.invoke('nintendo:setProfile', uid),
+  getSteamImportGames: () => ipcRenderer.invoke('steam:importGames'),
   openNintendoAuth:  () => ipcRenderer.invoke('nintendo:openAuth'),
   closeNintendoAuth: () => ipcRenderer.invoke('nintendo:closeAuth'),
   nintendoAuthStatus: () => ipcRenderer.invoke('nintendo:authStatus'),

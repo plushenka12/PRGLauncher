@@ -1,5 +1,11 @@
 [build]
   publish = "web-dashboard"
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/u/*"
+  to = "/index.html"
+  status = 200
 
 # The launcher itself is an Electron app. Netlify should publish only its
 # browser companion, which deliberately contains no launcher controls.

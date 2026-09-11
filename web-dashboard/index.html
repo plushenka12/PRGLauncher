@@ -50,10 +50,12 @@
       $('platforms').innerHTML=Object.entries(d.platforms||{}).sort((a,b)=>b[1]-a[1]).map(([name,count])=>`<div class="chip">${esc(name)} <b>${count}</b></div>`).join('')||'<span class="empty">Платформ ще немає</span>';
     }
     const db=getFirestore(initializeApp(cfg));
+    const profileId=new URLSearchParams(location.search).get('u');
     const unavailable=()=>{$('app').classList.add('hidden');$('error').classList.remove('hidden')};
     let fallbackUnsub=null;
     const readFallback=()=>{if(fallbackUnsub)return;fallbackUnsub=onSnapshot(doc(db,'gamevault','gamevault-data'),snap=>{const data=snap.data();if(data?.statsDashboard){render(data.statsDashboard);return}unavailable()},unavailable)};
-    onSnapshot(doc(db,'public-dashboard','dashboard'),snap=>{if(snap.exists())render(snap.data());else readFallback()},readFallback);
+    if(profileId){onSnapshot(doc(db,'public-dashboard',profileId),snap=>{if(snap.exists())render(snap.data());else unavailable()},unavailable);}
+    else onSnapshot(doc(db,'public-dashboard','dashboard'),snap=>{if(snap.exists())render(snap.data());else readFallback()},readFallback);
   </script>
 </body>
 </html>

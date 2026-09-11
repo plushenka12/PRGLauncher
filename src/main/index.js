@@ -336,6 +336,39 @@ ipcMain.handle('steam:trackApps', (_, appIds) => {
 
 ipcMain.handle('steam:getCollection', (_, name) => getSteamCollection(name))
 
+ipcMain.handle('steam:profileLibrary', async (_, payload) => {
+  if (!payload || typeof payload.profile !== 'string' || payload.profile.length > 300 || typeof payload.token !== 'string' || payload.token.length > 10000) return { error: 'INVALID_PROFILE' }
+  try {
+    return await new Promise((resolve, reject) => {
+      const request = https.request('https://prgtracker.netlify.app/.netlify/functions/steam-library', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${payload.token}` } }, response => {
+        let body = ''; response.setEncoding('utf8');
+        response.on('data', chunk => { body += chunk; if (body.length > 10000000) request.destroy(new Error('Response too large')) });
+        response.on('end', () => { try { resolve(JSON.parse(body)) } catch { resolve({ error: 'SERVER_NOT_DEPLOYED' }) } });
+        response.on('error', reject);
+      });
+      request.setTimeout(45000, () => request.destroy(new Error('Timeout')));
+      request.on('error', reject); request.end(JSON.stringify({ profile: payload.profile }));
+    });
+  } catch { return { error: 'STEAM_UNAVAILABLE' } }
+})
+
+ipcMain.handle('steam:importGames', async () => {
+  const found = new Map()
+  for (const library of getSteamLibraries()) {
+    const directory = path.join(library, 'steamapps')
+    let files = []; try { files = fs.readdirSync(directory) } catch { continue }
+    for (const file of files.filter(name => /^appmanifest_\d+\.acf$/.test(name))) {
+      try {
+        const data = fs.readFileSync(path.join(directory, file), 'utf8')
+        const appId = readVdfNumber(data, 'appid')
+        if (!appId) continue
+        found.set(appId, { appId, title: data.match(/"name"\s+"([^"]+)"/)?.[1] || `Steam game #${appId}`, cover: `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${appId}/header.jpg` })
+      } catch {}
+    }
+  }
+  return { found: Boolean(steamPath), games: [...found.values()].sort((a,b) => a.title.localeCompare(b.title)) }
+})
+
 ipcMain.handle('steam:getStoreGames', async (_, appIds) => {
   const ids = [...new Set((Array.isArray(appIds) ? appIds : []).map(Number).filter(id => Number.isInteger(id) && id > 0))].slice(0, 100)
   return Promise.all(ids.map(getSteamStoreGame))
@@ -348,7 +381,21 @@ ipcMain.handle('steam:getRunningAppId', async () => {
 const NINTENDO_CLIENT_ID = '5c38e31cd085304b'
 const NINTENDO_REDIRECT_URI = 'npf5c38e31cd085304b://auth'
 const NINTENDO_SCOPE = 'openid user user.mii user.email user.links[].id'
-const NINTENDO_TOKEN_FILE = () => path.join(app.getPath('userData'), 'nintendo-session.enc')
+let nintendoProfile = null
+const NINTENDO_TOKEN_FILE = () => {
+  if (!nintendoProfile) throw new Error('Select a PRG profile first')
+  return path.join(app.getPath('userData'), `nintendo-${nintendoProfile}.enc`)
+}
+ipcMain.handle('nintendo:setProfile', (_, uid) => {
+  if (uid !== null && (typeof uid !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(uid))) throw new Error('Invalid profile')
+  const next = uid === null ? null : crypto.createHash('sha256').update(uid).digest('hex')
+  if (next !== nintendoProfile) {
+    nintendoAuthState = null; nintendoPlayHistory = null
+    if (nintendoAuthWindow && !nintendoAuthWindow.isDestroyed()) nintendoAuthWindow.close()
+    nintendoProfile = next
+  }
+  return { connected: Boolean(loadNintendoSession()) }
+})
 
 function nintendoPkceChallenge(verifier) { return crypto.createHash('sha256').update(verifier).digest('base64url') }
 function nintendoRequest(url, options = {}, body = null) {
@@ -372,10 +419,12 @@ function loadNintendoSession() {
   try { if (!safeStorage.isEncryptionAvailable()) return null; const raw = fs.readFileSync(NINTENDO_TOKEN_FILE(), 'utf8'); return safeStorage.decryptString(Buffer.from(raw, 'base64')) } catch { return null }
 }
 async function nintendoExchangeSessionCode(code, verifier) {
+  const profile = nintendoProfile
   const body = new URLSearchParams({ client_id: NINTENDO_CLIENT_ID, session_token_code: code, session_token_code_verifier: verifier }).toString()
   const session = await nintendoRequest('https://accounts.nintendo.com/connect/1.0.0/api/session_token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }, body)
   const sessionToken = session?.session_token || session?.sessionToken
   if (!sessionToken) throw new Error('Nintendo did not return a session token')
+  if (!profile || profile !== nintendoProfile) throw new Error('PRG account changed')
   saveNintendoSession(sessionToken)
   return sessionToken
 }
@@ -383,8 +432,10 @@ async function nintendoGetAccessToken(sessionToken) {
   return nintendoRequest('https://accounts.nintendo.com/connect/1.0.0/api/token', { method: 'POST', headers: { 'Content-Type': 'application/json' } }, { client_id: NINTENDO_CLIENT_ID, session_token: sessionToken, grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer-session-token' })
 }
 async function nintendoFetchPlayHistory() {
+  const profile = nintendoProfile
   const sessionToken = loadNintendoSession(); if (!sessionToken) throw new Error('Nintendo account is not connected')
   const token = await nintendoGetAccessToken(sessionToken)
+  if (!profile || profile !== nintendoProfile) throw new Error('PRG account changed')
   const accessToken = token?.access_token || token?.accessToken
   if (!accessToken) throw new Error('Nintendo access token unavailable')
   return nintendoRequest('https://app-api.znej.nintendo.com/api/v2.0/users/me/play_histories', { headers: { Authorization: `${token.token_type || 'Bearer'} ${accessToken}`, 'User-Agent': 'com.nintendo.znej/1.13.0 (Windows; PRGLauncher)', 'gentry-locale': 'en-US' } })
@@ -405,6 +456,7 @@ async function completeNintendoCallback(url) {
 }
 
 ipcMain.handle('nintendo:openAuth', async () => {
+  if (!nintendoProfile) throw new Error('Select a PRG profile first')
   if (nintendoAuthWindow && !nintendoAuthWindow.isDestroyed()) {
     nintendoAuthWindow.focus()
     return { action: 'already_open' }
@@ -422,6 +474,7 @@ ipcMain.handle('nintendo:openAuth', async () => {
     autoHideMenuBar: true,
     backgroundColor: '#10131c',
     webPreferences: {
+      partition: `nintendo-auth-${nintendoProfile}-${crypto.randomBytes(8).toString('hex')}`,
       contextIsolation: true,
       sandbox: true,
       nodeIntegration: false,
@@ -464,7 +517,8 @@ ipcMain.handle('nintendo:completeAuth', async (_, callbackUrl) => {
 })
 
 ipcMain.handle('nintendo:fetchHistory', async () => {
-  try { nintendoPlayHistory = await nintendoFetchPlayHistory(); return { ok: true, data: nintendoPlayHistory } }
+  const profile = nintendoProfile
+  try { const history = await nintendoFetchPlayHistory(); if (!profile || profile !== nintendoProfile) return { ok: false, error: 'PRG account changed' }; nintendoPlayHistory = history; return { ok: true, data: history } }
   catch (error) { return { ok: false, error: error.message } }
 })
 
