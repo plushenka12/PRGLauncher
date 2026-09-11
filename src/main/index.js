@@ -1,4 +1,5 @@
 const { app, BrowserWindow, ipcMain, shell, Tray, Menu, nativeImage, screen, safeStorage, dialog } = require('electron')
+const { autoUpdater } = require('electron-updater')
 const path = require('path')
 const fs = require('fs')
 const https = require('https')
@@ -19,6 +20,7 @@ let miniBar    = null
 let nintendoAuthWindow = null
 let nintendoAuthState = null
 let nintendoPlayHistory = null
+let updateState = { status: 'idle', version: null, error: null }
 let miniBarStandby = false
 let tray       = null
 let steamPath  = null
@@ -501,6 +503,14 @@ ipcMain.handle('app:importBackup', async () => {
   } catch (error) { return { ok: false, error: error.message } }
 })
 
+ipcMain.handle('app:checkForUpdates', async () => {
+  if (!app.isPackaged) return { status: 'dev', message: 'Оновлення доступні лише у packaged-версії' }
+  try { updateState = { status: 'checking', version: null, error: null }; const result = await autoUpdater.checkForUpdates(); return { status: result?.updateInfo?.version && result.updateInfo.version !== app.getVersion() ? 'available' : 'latest', version: result?.updateInfo?.version || null } }
+  catch (error) { updateState = { status: 'error', version: null, error: error.message }; return { status: 'error', error: error.message } }
+})
+ipcMain.handle('app:downloadUpdate', async () => { try { await autoUpdater.downloadUpdate(); return { ok: true } } catch (error) { return { ok: false, error: error.message } } })
+ipcMain.handle('app:installUpdate', () => { if (updateState.status === 'downloaded') autoUpdater.quitAndInstall(); return { ok: updateState.status === 'downloaded' } })
+
 ipcMain.handle('app:setSize', (_, w, h) => {
   if (mainWindow) mainWindow.setSize(w, h, true)
 })
@@ -650,6 +660,14 @@ app.whenReady().then(() => {
   if (process.platform === 'win32' && app.isPackaged) {
     app.setLoginItemSettings({ openAtLogin: true, path: process.execPath, args: ['--hidden'] })
   }
+
+  autoUpdater.autoDownload = false
+  autoUpdater.on('checking-for-update', () => { updateState = { status: 'checking', version: null, error: null }; mainWindow?.webContents.send('app:updateStatus', updateState) })
+  autoUpdater.on('update-available', info => { updateState = { status: 'available', version: info.version, error: null }; mainWindow?.webContents.send('app:updateStatus', updateState) })
+  autoUpdater.on('update-not-available', info => { updateState = { status: 'latest', version: info.version, error: null }; mainWindow?.webContents.send('app:updateStatus', updateState) })
+  autoUpdater.on('download-progress', progress => { updateState = { status: 'downloading', version: updateState.version, percent: Math.round(progress.percent), error: null }; mainWindow?.webContents.send('app:updateStatus', updateState) })
+  autoUpdater.on('update-downloaded', info => { updateState = { status: 'downloaded', version: info.version, error: null }; mainWindow?.webContents.send('app:updateStatus', updateState) })
+  autoUpdater.on('error', error => { updateState = { status: 'error', version: null, error: error.message }; mainWindow?.webContents.send('app:updateStatus', updateState) })
 
   createWindow()
   createTray()

@@ -16,7 +16,9 @@
       "output": "release"
     },
     "win": {
-      "target": ["nsis"],
+      "target": [
+        "nsis"
+      ],
       "icon": "assets/icon-256.png",
       "signAndEditExecutable": false
     },
@@ -30,6 +32,12 @@
       "runAfterFinish": true,
       "deleteAppDataOnUninstall": false
     },
+    "publish": {
+      "provider": "github",
+      "owner": "plushenka12",
+      "repo": "PRGLauncher",
+      "releaseType": "release"
+    },
     "files": [
       "src/**/*",
       "assets/**/*"
@@ -40,6 +48,7 @@
     "electron-builder": "^24.0.0"
   },
   "dependencies": {
+    "electron-updater": "^6.8.9",
     "firebase": "^10.0.0"
   }
 }

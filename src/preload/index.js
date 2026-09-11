@@ -33,6 +33,10 @@ contextBridge.exposeInMainWorld('launcher', {
   setSize:     (w, h) => ipcRenderer.invoke('app:setSize', w, h),
   exportBackup: (payload) => ipcRenderer.invoke('app:exportBackup', payload),
   importBackup: () => ipcRenderer.invoke('app:importBackup'),
+  checkForUpdates: () => ipcRenderer.invoke('app:checkForUpdates'),
+  downloadUpdate: () => ipcRenderer.invoke('app:downloadUpdate'),
+  installUpdate: () => ipcRenderer.invoke('app:installUpdate'),
+  onUpdateStatus: (callback) => ipcRenderer.on('app:updateStatus', (_, status) => callback(status)),
 
   // Floating mini bar
   showMiniBar:  (state) => ipcRenderer.invoke('mini:show', state),
