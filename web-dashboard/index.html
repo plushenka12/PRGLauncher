@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#100d1e">
+  <title>PRGTracker — Stats</title>
+  <style>
+    :root{--bg:#100d1e;--panel:#19152a;--panel2:#211b36;--line:#332b52;--text:#f4f0ff;--muted:#9d94b7;--purple:#9b6cff;--green:#3ee3a4;--blue:#65b8ff;--amber:#ffc36a;--red:#ff7785}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(900px 500px at 15% -10%,#332259 0%,transparent 65%),var(--bg);color:var(--text);font:14px Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
+    .wrap{max-width:1180px;margin:auto;padding:34px 24px 54px}.head{display:flex;justify-content:space-between;gap:22px;align-items:flex-start;margin-bottom:34px}.eyebrow{color:var(--green);font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}.title{margin:6px 0 0;font-size:31px;letter-spacing:-.04em}.sub{color:var(--muted);margin:8px 0 0}.live{display:flex;align-items:center;gap:8px;color:var(--muted);white-space:nowrap;padding-top:10px}.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 12px var(--green)}
+    .stats{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}.stat,.card{background:linear-gradient(145deg,rgba(34,28,55,.92),rgba(21,18,37,.92));border:1px solid var(--line);border-radius:16px}.stat{padding:17px}.stat label{color:var(--muted);font-size:11px;text-transform:uppercase;font-weight:750;letter-spacing:.07em}.stat strong{display:block;font-size:26px;letter-spacing:-.04em;margin-top:9px}.stat em{font-style:normal;color:var(--muted);font-size:14px;margin-left:2px}
+    .grid{display:grid;grid-template-columns:1.12fr .88fr;gap:16px;margin-top:16px}.card{padding:21px}.card h2{font-size:15px;margin:0 0 18px;letter-spacing:-.01em}.top{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid rgba(157,148,183,.12)}.top:first-of-type{border-top:0;padding-top:0}.rank{color:var(--purple);font-weight:800;width:20px}.cover{width:42px;height:50px;border-radius:8px;overflow:hidden;flex:none;background:linear-gradient(135deg,#563c92,#1e735e)}.cover img{width:100%;height:100%;object-fit:cover}.game{min-width:0;flex:1}.game b{display:block;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}.game span,.session span{color:var(--muted);font-size:12px;margin-top:3px;display:block}.hours{font-weight:800;color:var(--green);white-space:nowrap}.statusbar{display:flex;height:12px;border-radius:20px;overflow:hidden;background:#2a2440;margin:10px 0 19px}.statusbar i{display:block}.legend{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.legend div{color:var(--muted);font-size:12px}.legend b{color:var(--text);font-size:16px;display:block;margin-top:3px}.legend i{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px}.sessions{max-height:360px;overflow:auto}.session{display:flex;gap:10px;align-items:center;padding:10px 0;border-top:1px solid rgba(157,148,183,.12)}.session:first-child{border-top:0;padding-top:0}.session .cover{width:31px;height:38px}.session b{font-size:13px}.session time{margin-left:auto;color:var(--muted);font-size:12px;white-space:nowrap}.activity{height:122px;display:flex;align-items:end;gap:3px;padding-top:10px}.day{flex:1;min-width:2px;border-radius:3px 3px 0 0;background:#2d2745}.day[data-level="1"]{background:#4d3f79}.day[data-level="2"]{background:#6c51ad}.day[data-level="3"]{background:#9270e8}.day[data-level="4"]{background:var(--green)}.activity-label{display:flex;justify-content:space-between;color:var(--muted);font-size:11px;margin-top:9px}.chips{display:flex;flex-wrap:wrap;gap:8px}.chip{padding:7px 9px;border:1px solid var(--line);border-radius:8px;color:#cec4e8;background:rgba(255,255,255,.025)}.chip b{color:var(--green);margin-left:4px}.empty{color:var(--muted);padding:22px 0;text-align:center}.footer{color:var(--muted);font-size:12px;text-align:center;margin-top:26px}.error{max-width:640px;margin:12vh auto;padding:28px;text-align:center}.hidden{display:none}
+    @media(max-width:900px){.stats{grid-template-columns:repeat(3,1fr)}.grid{grid-template-columns:1fr}}@media(max-width:540px){.wrap{padding:22px 14px}.head{display:block}.live{padding-top:14px}.title{font-size:27px}.stats{grid-template-columns:repeat(2,1fr)}.stat strong{font-size:23px}.legend{grid-template-columns:1fr}.grid{gap:12px}.card{padding:16px}}
+  </style>
+</head>
+<body>
+  <main class="wrap" id="app">
+    <header class="head"><div><div class="eyebrow">PRGTracker · personal gaming report</div><h1 class="title">Статистика ігор</h1><p class="sub" id="updated">Завантажуємо актуальні дані…</p></div><div class="live"><i class="dot"></i>Синхронізовано з PRGLauncher</div></header>
+    <section class="stats" id="stats"></section>
+    <section class="grid">
+      <article class="card"><h2>Найбільше часу в іграх</h2><div id="top-games"></div></article>
+      <article class="card"><h2>Стан бібліотеки</h2><div class="statusbar" id="statusbar"></div><div class="legend" id="legend"></div><h2 style="margin-top:27px">Улюблені жанри</h2><div class="chips" id="genres"></div></article>
+      <article class="card"><h2>Останні сесії</h2><div class="sessions" id="sessions"></div></article>
+      <article class="card"><h2>Активність за останні 90 днів</h2><div class="activity" id="activity"></div><div class="activity-label"><span>90 днів тому</span><span>Сьогодні</span></div><h2 style="margin-top:27px">Платформи</h2><div class="chips" id="platforms"></div></article>
+    </section>
+    <footer class="footer">Це read-only статистичне вікно. Бібліотекою та Steam керує PRGLauncher на ПК.</footer>
+  </main>
+  <section class="error hidden" id="error"><h1>Статистика поки недоступна</h1><p>Відкрий PRGLauncher на ПК — він опублікує перший статистичний знімок.</p></section>
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import { getFirestore, doc, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+    const cfg={apiKey:'AIzaSyBL-IHjUiSlmJ2N_caWx_MWAI8v2RL4Rpw',authDomain:'gametracker-30c93.firebaseapp.com',projectId:'gametracker-30c93',storageBucket:'gametracker-30c93.appspot.com',appId:'1:982157495201:web:950a69a05274c04f1899e0'};
+    const $=id=>document.getElementById(id), esc=value=>{const el=document.createElement('span');el.textContent=value??'';return el.innerHTML};
+    const hours=ms=>{const h=(ms||0)/3600000;return h<1?`${Math.round((ms||0)/60000)}m`:`${h.toFixed(h>=10?0:1)}h`};
+    const date=ts=>new Date(ts).toLocaleDateString('uk-UA',{day:'2-digit',month:'short'});
+    function cover(url,title){return `<div class="cover">${url?`<img src="${esc(url)}" alt="">`:esc((title||'?').slice(0,1).toUpperCase())}</div>`}
+    function render(d){
+      const t=d.totals||{},status=d.status||{};
+      $('updated').textContent=`Оновлено ${new Date(d.updatedAt||Date.now()).toLocaleString('uk-UA',{dateStyle:'medium',timeStyle:'short'})}`;
+      const cards=[['Усього ігор',t.games||0],['Награно',hours(t.playtime)],['Steam',hours(t.steamPlaytime)],['Nintendo',hours(t.nintendoPlaytime)],['Сесій',t.sessions||0],['Пройдено',t.completed||0],['Backlog',t.backlog||0],['Completion',`${t.completionRate||0}%`]];
+      $('stats').innerHTML=cards.map(([name,val])=>`<div class="stat"><label>${name}</label><strong>${esc(val)}</strong></div>`).join('');
+      const top=d.topGames||[];$('top-games').innerHTML=top.length?top.map((g,i)=>`<div class="top"><div class="rank">#${i+1}</div>${cover(g.cover,g.title)}<div class="game"><b>${esc(g.title)}</b><span>${esc(g.platform||'')} · ${g.sessions||0} сесій</span></div><div class="hours">${hours(g.playtime)}</div></div>`).join(''):'<div class="empty">Ще немає ігрових даних</div>';
+      const items=[['Playing','#65b8ff'],['Backlog','#ffc36a'],['Completed','#3ee3a4']],total=Math.max(1,(t.games||0));
+      $('statusbar').innerHTML=items.map(([key,color])=>`<i style="background:${color};width:${(status[key]||0)/total*100}%"></i>`).join('');
+      $('legend').innerHTML=items.map(([key,color])=>`<div><i style="background:${color}"></i>${key}<b>${status[key]||0}</b></div>`).join('');
+      $('genres').innerHTML=(d.genres||[]).length?d.genres.map(g=>`<div class="chip">${esc(g.name)} <b>${g.count}</b></div>`).join(''):'<span class="empty">Жанри з’являться після додавання ігор</span>';
+      const recent=d.recentSessions||[];$('sessions').innerHTML=recent.length?recent.map(s=>`<div class="session">${cover(s.cover,s.title)}<div><b>${esc(s.title)}</b><span>${hours(s.duration)}</span></div><time>${date(s.start)}</time></div>`).join(''):'<div class="empty">Ще немає завершених сесій</div>';
+      const activity=(d.activity||[]).slice(-90),max=Math.max(1,...activity.map(x=>x.playtime||0));$('activity').innerHTML=activity.map(x=>{const ratio=(x.playtime||0)/max,level=ratio===0?0:Math.min(4,Math.ceil(ratio*4));return `<div class="day" data-level="${level}" style="height:${Math.max(5,ratio*100)}%" title="${esc(x.date)}: ${hours(x.playtime)}"></div>`}).join('')||'<div class="empty">Активність з’явиться після першої сесії</div>';
+      $('platforms').innerHTML=Object.entries(d.platforms||{}).sort((a,b)=>b[1]-a[1]).map(([name,count])=>`<div class="chip">${esc(name)} <b>${count}</b></div>`).join('')||'<span class="empty">Платформ ще немає</span>';
+    }
+    const db=getFirestore(initializeApp(cfg));
+    const unavailable=()=>{$('app').classList.add('hidden');$('error').classList.remove('hidden')};
+    let fallbackUnsub=null;
+    const readFallback=()=>{if(fallbackUnsub)return;fallbackUnsub=onSnapshot(doc(db,'gamevault','gamevault-data'),snap=>{const data=snap.data();if(data?.statsDashboard){render(data.statsDashboard);return}unavailable()},unavailable)};
+    onSnapshot(doc(db,'public-dashboard','dashboard'),snap=>{if(snap.exists())render(snap.data());else readFallback()},readFallback);
+  </script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+{
+  "name": "prg-launcher",
+  "version": "1.0.0",
+  "description": "PRGLauncher — Game Launcher & Tracker",
+  "main": "src/main/index.js",
+  "scripts": {
+    "start": "electron . --enable-logging",
+    "dev": "electron . --enable-logging",
+    "build": "electron-builder --win --x64"
+  },
+  "build": {
+    "appId": "com.prgtracker.launcher",
+    "productName": "PRGLauncher",
+    "artifactName": "PRGLauncher-Setup-${version}.${ext}",
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "target": ["nsis"],
+      "icon": "assets/icon-256.png",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "PRGLauncher",
+      "uninstallDisplayName": "PRGLauncher",
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*"
+    ]
+  },
+  "devDependencies": {
+    "electron": "^29.0.0",
+    "electron-builder": "^24.0.0"
+  },
+  "dependencies": {
+    "firebase": "^10.0.0"
+  }
+}

@@ -1,0 +1,677 @@
+const { app, BrowserWindow, ipcMain, shell, Tray, Menu, nativeImage, screen, safeStorage, dialog } = require('electron')
+const path = require('path')
+const fs = require('fs')
+const https = require('https')
+const { execSync, execFile, spawn } = require('child_process')
+const crypto = require('crypto')
+
+// ── CONFIG ────────────────────────────────────────────────────────────────
+const STEAM_PATHS = [
+  'C:\\Program Files (x86)\\Steam',
+  'C:\\Program Files\\Steam',
+  process.env.PROGRAMFILES + '\\Steam',
+  process.env['PROGRAMFILES(X86)'] + '\\Steam',
+]
+
+// ── STATE ─────────────────────────────────────────────────────────────────
+let mainWindow = null
+let miniBar    = null
+let nintendoAuthWindow = null
+let nintendoAuthState = null
+let nintendoPlayHistory = null
+let miniBarStandby = false
+let tray       = null
+let steamPath  = null
+let steamMonitorTimer = null
+let steamTrackedApps = new Set()
+let steamMonitorStates = new Map()
+let steamRunningAppId = null
+let steamCollectionTimer = null
+let lastBacklogSignature = null
+const steamStoreCache = new Map()
+const launchedAtLogin = process.argv.includes('--hidden')
+
+// ── STEAM DETECTION ───────────────────────────────────────────────────────
+function findSteamPath() {
+  // Try registry first
+  try {
+    const reg = execSync('reg query "HKCU\\Software\\Valve\\Steam" /v SteamPath', { encoding: 'utf8' })
+    const match = reg.match(/SteamPath\s+REG_SZ\s+(.+)/)
+    if (match) return match[1].trim().replace(/\//g, '\\')
+  } catch {}
+
+  // Fallback to known paths
+  for (const p of STEAM_PATHS) {
+    if (p && fs.existsSync(p)) return p
+  }
+  return null
+}
+
+function isGameInstalled(appId) {
+  if (!steamPath) return false
+  const appsDir = path.join(steamPath, 'steamapps')
+  if (!fs.existsSync(appsDir)) return false
+
+  // Check main steamapps folder
+  const manifest = path.join(appsDir, `appmanifest_${appId}.acf`)
+  if (isInstalledManifest(manifest)) return true
+
+  // Check library folders (libraryfolders.vdf)
+  try {
+    const vdf = fs.readFileSync(path.join(appsDir, 'libraryfolders.vdf'), 'utf8')
+    const pathMatches = [...vdf.matchAll(/"path"\s+"([^"]+)"/g)]
+    for (const m of pathMatches) {
+      const libManifest = path.join(m[1].replace(/\\\\/g, '\\'), 'steamapps', `appmanifest_${appId}.acf`)
+      if (isInstalledManifest(libManifest)) return true
+    }
+  } catch {}
+
+  return false
+}
+
+function isInstalledManifest(manifest) {
+  try {
+    const data = fs.readFileSync(manifest, 'utf8')
+    const flags = readVdfNumber(data, 'StateFlags')
+    // Steam's installed bit is 4. An absent flag is treated conservatively as not ready.
+    return flags !== null && (flags & 4) === 4
+  } catch {
+    return false
+  }
+}
+
+function getSteamLibraries() {
+  if (!steamPath) return []
+  const libraries = [steamPath]
+  try {
+    const vdf = fs.readFileSync(path.join(steamPath, 'steamapps', 'libraryfolders.vdf'), 'utf8')
+    for (const match of vdf.matchAll(/"path"\s+"([^"]+)"/g)) {
+      const library = match[1].replace(/\\\\/g, '\\')
+      if (!libraries.includes(library)) libraries.push(library)
+    }
+  } catch {}
+  return libraries
+}
+
+function readVdfNumber(contents, key) {
+  const match = contents.match(new RegExp(`"${key}"\\s+"(\\d+)"`))
+  return match ? Number(match[1]) : null
+}
+
+function getInstallProgress(appId) {
+  if (isGameInstalled(appId)) return { state: 'ready', progress: 100, downloaded: null, total: null }
+  for (const library of getSteamLibraries()) {
+    const steamApps = path.join(library, 'steamapps')
+    const manifest = path.join(steamApps, `appmanifest_${appId}.acf`)
+    const downloadDir = path.join(steamApps, 'downloading', String(appId))
+    let downloaded = null
+    let total = null
+    try {
+      const manifestData = fs.readFileSync(manifest, 'utf8')
+      downloaded = readVdfNumber(manifestData, 'BytesDownloaded')
+      total = readVdfNumber(manifestData, 'BytesToDownload')
+    } catch {}
+    // Steam removes this directory when a queued download is cancelled. Do not
+    // infer "downloading" from stale byte counters left in an app manifest.
+    if (fs.existsSync(downloadDir)) {
+      const progress = total && downloaded !== null ? Math.min(99, Math.floor(downloaded / total * 100)) : null
+      return { state: 'downloading', progress, downloaded, total }
+    }
+  }
+  return { state: steamPath ? 'waiting' : 'steam_not_found', progress: null, downloaded: null, total: null }
+}
+
+function isGameInLibrary(appId) {
+  // Check Steam registry for owned games
+  try {
+    execSync(`reg query "HKCU\\Software\\Valve\\Steam\\Apps\\${appId}"`, { encoding: 'utf8' })
+    return true
+  } catch {
+    return false
+  }
+}
+
+function isSteamRunning() {
+  try {
+    const result = execSync('tasklist /fi "imagename eq steam.exe" /fo csv /nh', { encoding: 'utf8' })
+    return result.toLowerCase().includes('steam.exe')
+  } catch { return false }
+}
+
+function startSteamSilent() {
+  if (!steamPath) return
+  const steamExe = path.join(steamPath, 'steam.exe')
+  if (!fs.existsSync(steamExe)) return
+  // Only launch if not already running
+  if (isSteamRunning()) {
+    console.log('[Steam] Already running')
+    return
+  }
+  // -silent = start minimized to tray, no main window
+  const proc = spawn(steamExe, ['-silent', '-nochatui', '-nofriendsui'], {
+    detached: true,
+    stdio: 'ignore',
+    windowsHide: true,   // hide console window
+  })
+  proc.unref()
+  console.log('[Steam] Started silently')
+}
+
+function hideSteamWindow() {
+  // Steam has no Electron API. Hide only its top-level window; the client and
+  // downloads keep running in its tray process.
+  const script = `Add-Type @'
+using System;
+using System.Runtime.InteropServices;
+public static class SteamWindow { [DllImport("user32.dll")] public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow); }
+'@; Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.ProcessName -like 'steam*' -and $_.MainWindowHandle -ne 0 } | ForEach-Object { [SteamWindow]::ShowWindowAsync($_.MainWindowHandle, 0) | Out-Null }`
+  const hide = () => execFile('powershell.exe', ['-NoProfile', '-NonInteractive', '-WindowStyle', 'Hidden', '-Command', script], { windowsHide: true }, () => {})
+  // Steam may create its window after accepting the install URL, so hide it
+  // several times during that short handoff and leave its background client on.
+  ;[0, 500, 1500, 3000].forEach(delay => setTimeout(hide, delay))
+}
+
+function publishSteamStatus(appId, status) {
+  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('steam:status', { appId, ...status })
+}
+
+function pollSteamStatus() {
+  for (const appId of steamTrackedApps) {
+    const status = getInstallProgress(appId)
+    const signature = JSON.stringify(status)
+    if (steamMonitorStates.get(appId) !== signature) {
+      steamMonitorStates.set(appId, signature)
+      publishSteamStatus(appId, status)
+    }
+  }
+  pollSteamActivity()
+}
+
+function getRunningSteamAppId() {
+  try {
+    const result = execSync('reg query "HKCU\\Software\\Valve\\Steam\\Apps" /s /v Running', { encoding: 'utf8' })
+    let currentAppId = null
+    for (const line of result.split(/\r?\n/)) {
+      const keyMatch = line.match(/\\Apps\\(\d+)\s*$/i)
+      if (keyMatch) { currentAppId = keyMatch[1]; continue }
+      if (currentAppId && /\bRunning\b\s+REG_DWORD\s+0x1\b/i.test(line)) return currentAppId
+    }
+  } catch {}
+  return null
+}
+
+function pollSteamActivity() {
+  const runningAppId = getRunningSteamAppId()
+  if (runningAppId === steamRunningAppId) return
+  steamRunningAppId = runningAppId
+  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('steam:runningApp', { appId: runningAppId })
+}
+
+function startSteamMonitor() {
+  if (steamMonitorTimer) return
+  steamMonitorTimer = setInterval(pollSteamStatus, 1500)
+}
+
+function getSteamCollection(name) {
+  if (!steamPath) return { found: false, appIds: [] }
+  const usersDir = path.join(steamPath, 'userdata')
+  let users = []
+  try { users = fs.readdirSync(usersDir, { withFileTypes: true }).filter(item => item.isDirectory() && /^\d+$/.test(item.name)).map(item => item.name) } catch {}
+  for (const userId of users) {
+    const cloudDir = path.join(usersDir, userId, 'config', 'cloudstorage')
+    try {
+      const namespaces = JSON.parse(fs.readFileSync(path.join(cloudDir, 'cloud-storage-namespaces.json'), 'utf8'))
+      const active = [...namespaces].filter(item => Number(item[1]) > 0).sort((a, b) => Number(b[1]) - Number(a[1]))[0]?.[0] ?? 1
+      const entries = JSON.parse(fs.readFileSync(path.join(cloudDir, `cloud-storage-namespace-${active}.json`), 'utf8'))
+      for (const [key, entry] of entries) {
+        if (!String(key).startsWith('user-collections.') || entry?.is_deleted || !entry?.value) continue
+        const collection = JSON.parse(entry.value)
+        if (String(collection.name || '').trim().toLocaleLowerCase() !== String(name).trim().toLocaleLowerCase()) continue
+        const removed = new Set((collection.removed || []).map(Number))
+        const appIds = [...new Set((collection.added || []).map(Number).filter(appId => Number.isInteger(appId) && appId > 0 && !removed.has(appId)))]
+        return { found: true, userId, name: collection.name, appIds }
+      }
+    } catch {}
+  }
+  return { found: false, appIds: [] }
+}
+
+function pollBacklogCollection() {
+  const collection = getSteamCollection('BACKLOG')
+  const signature = JSON.stringify(collection.appIds)
+  if (signature !== lastBacklogSignature) {
+    lastBacklogSignature = signature
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('steam:collection', collection)
+  }
+}
+
+function startSteamCollectionMonitor() {
+  if (steamCollectionTimer) return
+  steamCollectionTimer = setInterval(pollBacklogCollection, 60000)
+  pollBacklogCollection()
+}
+
+// Store lookups run in the main process rather than the renderer. Steam's API
+// does not consistently allow browser-context requests from an Electron file,
+// which previously made collection imports fall back to numeric App IDs.
+function getSteamStoreGame(appId) {
+  const id = String(appId || '')
+  if (!/^\d+$/.test(id)) return Promise.resolve({ appId: Number(appId), title: null, cover: null })
+  if (steamStoreCache.has(id)) return Promise.resolve(steamStoreCache.get(id))
+  return new Promise(resolve => {
+    const request = https.get(`https://store.steampowered.com/api/appdetails?appids=${id}&l=ukrainian&cc=UA`, {
+      headers: { 'User-Agent': 'PRGLauncher/1.0 (+local Steam collection importer)', Accept: 'application/json' }
+    }, response => {
+      let body = ''
+      response.setEncoding('utf8')
+      response.on('data', chunk => { body += chunk })
+      response.on('end', () => {
+        try {
+          const data = JSON.parse(body)[id]?.data
+          const game = { appId: Number(id), title: data?.name || null, cover: data?.header_image || null }
+          if (game.title) steamStoreCache.set(id, game)
+          resolve(game)
+        } catch { resolve({ appId: Number(id), title: null, cover: null }) }
+      })
+    })
+    request.setTimeout(8000, () => request.destroy())
+    request.on('error', () => resolve({ appId: Number(id), title: null, cover: null }))
+  })
+}
+
+// ── IPC HANDLERS ──────────────────────────────────────────────────────────
+ipcMain.handle('steam:launchGame', async (_, appId) => {
+  const normalizedAppId = String(appId || '')
+  if (!/^\d+$/.test(normalizedAppId)) return { action: 'error', message: 'Invalid Steam App ID' }
+
+  const installed = isGameInstalled(normalizedAppId)
+
+  // Ownership is not reliably stored in the Windows registry. Let the logged-in
+  // Steam client make that decision: it can launch an owned game or offer its
+  // normal install/purchase flow without producing a false "not owned" result.
+  await shell.openExternal(`steam://run/${normalizedAppId}`)
+  // Steam may briefly surface its main window to hand off a launch. Hide it
+  // only for this launcher-initiated path; manually opening Steam from tray is
+  // intentionally left alone.
+  ;[500, 1800].forEach(delay => setTimeout(hideSteamWindow, delay))
+  return { action: 'requested', appId: normalizedAppId, installed }
+})
+
+ipcMain.handle('steam:gameStatus', async (_, appId) => {
+  if (!appId) return { status: 'unknown' }
+  const installed = isGameInstalled(appId)
+  const inLibrary = installed || isGameInLibrary(appId)
+  return {
+    status: installed ? 'installed' : inLibrary ? 'in_library' : 'not_owned',
+    steamPath
+  }
+})
+
+ipcMain.handle('steam:installStatus', async (_, appId) => {
+  const normalizedAppId = String(appId || '')
+  if (!/^\d+$/.test(normalizedAppId)) return { state: 'error', message: 'Invalid Steam App ID' }
+  return getInstallProgress(normalizedAppId)
+})
+
+ipcMain.handle('steam:requestInstall', async (_, appId) => {
+  const normalizedAppId = String(appId || '')
+  if (!/^\d+$/.test(normalizedAppId)) return { action: 'error', message: 'Invalid Steam App ID' }
+  await shell.openExternal(`steam://install/${normalizedAppId}`)
+  mainWindow?.focus()
+  return { action: 'requested' }
+})
+
+ipcMain.handle('steam:hideWindow', () => hideSteamWindow())
+
+ipcMain.handle('steam:trackApps', (_, appIds) => {
+  steamTrackedApps = new Set((Array.isArray(appIds) ? appIds : [])
+    .map(appId => String(appId))
+    .filter(appId => /^\d+$/.test(appId)))
+  steamMonitorStates.clear()
+  pollSteamStatus()
+  startSteamMonitor()
+})
+
+ipcMain.handle('steam:getCollection', (_, name) => getSteamCollection(name))
+
+ipcMain.handle('steam:getStoreGames', async (_, appIds) => {
+  const ids = [...new Set((Array.isArray(appIds) ? appIds : []).map(Number).filter(id => Number.isInteger(id) && id > 0))].slice(0, 100)
+  return Promise.all(ids.map(getSteamStoreGame))
+})
+
+ipcMain.handle('steam:getRunningAppId', async () => {
+  return { appId: getRunningSteamAppId() }
+})
+
+const NINTENDO_CLIENT_ID = '5c38e31cd085304b'
+const NINTENDO_REDIRECT_URI = 'npf5c38e31cd085304b://auth'
+const NINTENDO_SCOPE = 'openid user user.mii user.email user.links[].id'
+const NINTENDO_TOKEN_FILE = () => path.join(app.getPath('userData'), 'nintendo-session.enc')
+
+function nintendoPkceChallenge(verifier) { return crypto.createHash('sha256').update(verifier).digest('base64url') }
+function nintendoRequest(url, options = {}, body = null) {
+  return new Promise((resolve, reject) => {
+    const request = https.request(url, { method: options.method || 'GET', headers: { Accept: 'application/json', ...(options.headers || {}) } }, response => {
+      let text = ''
+      response.setEncoding('utf8'); response.on('data', chunk => { text += chunk })
+      response.on('end', () => { let data = null; try { data = JSON.parse(text) } catch {} if (response.statusCode >= 200 && response.statusCode < 300) resolve(data); else reject(new Error(`Nintendo HTTP ${response.statusCode}`)) })
+    })
+    request.setTimeout(15000, () => request.destroy(new Error('Nintendo request timeout')))
+    request.on('error', reject)
+    if (body) request.write(typeof body === 'string' ? body : JSON.stringify(body))
+    request.end()
+  })
+}
+function saveNintendoSession(sessionToken) {
+  if (!safeStorage.isEncryptionAvailable()) throw new Error('OS encryption unavailable')
+  fs.writeFileSync(NINTENDO_TOKEN_FILE(), safeStorage.encryptString(sessionToken).toString('base64'), { mode: 0o600 })
+}
+function loadNintendoSession() {
+  try { if (!safeStorage.isEncryptionAvailable()) return null; const raw = fs.readFileSync(NINTENDO_TOKEN_FILE(), 'utf8'); return safeStorage.decryptString(Buffer.from(raw, 'base64')) } catch { return null }
+}
+async function nintendoExchangeSessionCode(code, verifier) {
+  const body = new URLSearchParams({ client_id: NINTENDO_CLIENT_ID, session_token_code: code, session_token_code_verifier: verifier }).toString()
+  const session = await nintendoRequest('https://accounts.nintendo.com/connect/1.0.0/api/session_token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }, body)
+  const sessionToken = session?.session_token || session?.sessionToken
+  if (!sessionToken) throw new Error('Nintendo did not return a session token')
+  saveNintendoSession(sessionToken)
+  return sessionToken
+}
+async function nintendoGetAccessToken(sessionToken) {
+  return nintendoRequest('https://accounts.nintendo.com/connect/1.0.0/api/token', { method: 'POST', headers: { 'Content-Type': 'application/json' } }, { client_id: NINTENDO_CLIENT_ID, session_token: sessionToken, grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer-session-token' })
+}
+async function nintendoFetchPlayHistory() {
+  const sessionToken = loadNintendoSession(); if (!sessionToken) throw new Error('Nintendo account is not connected')
+  const token = await nintendoGetAccessToken(sessionToken)
+  const accessToken = token?.access_token || token?.accessToken
+  if (!accessToken) throw new Error('Nintendo access token unavailable')
+  return nintendoRequest('https://app-api.znej.nintendo.com/api/v2.0/users/me/play_histories', { headers: { Authorization: `${token.token_type || 'Bearer'} ${accessToken}`, 'User-Agent': 'com.nintendo.znej/1.13.0 (Windows; PRGLauncher)', 'gentry-locale': 'en-US' } })
+}
+async function completeNintendoCallback(url) {
+  if (!nintendoAuthState || !String(url || '').includes('auth')) throw new Error('Nintendo callback is missing')
+  const parsed = new URL(String(url).trim())
+  const hash = parsed.hash.replace(/^#/, '')
+  const hashParams = new URLSearchParams(hash)
+  const returnedState = parsed.searchParams.get('state') || hashParams.get('state')
+  const code = parsed.searchParams.get('session_token_code') || parsed.searchParams.get('de') || hashParams.get('session_token_code') || hashParams.get('de')
+  if (!code || returnedState !== nintendoAuthState.state) throw new Error('Invalid Nintendo callback')
+  await nintendoExchangeSessionCode(code, nintendoAuthState.verifier)
+  nintendoPlayHistory = null
+  mainWindow?.webContents.send('nintendo:authComplete', { connected: true })
+  if (nintendoAuthWindow && !nintendoAuthWindow.isDestroyed()) nintendoAuthWindow.close()
+  return { connected: true }
+}
+
+ipcMain.handle('nintendo:openAuth', async () => {
+  if (nintendoAuthWindow && !nintendoAuthWindow.isDestroyed()) {
+    nintendoAuthWindow.focus()
+    return { action: 'already_open' }
+  }
+  const verifier = crypto.randomBytes(32).toString('base64url')
+  const state = crypto.randomBytes(16).toString('hex')
+  nintendoAuthState = { verifier, state }
+  const authUrl = `https://accounts.nintendo.com/connect/1.0.0/authorize?${new URLSearchParams({ client_id: NINTENDO_CLIENT_ID, redirect_uri: NINTENDO_REDIRECT_URI, response_type: 'session_token_code', scope: NINTENDO_SCOPE, state, session_token_code_challenge: nintendoPkceChallenge(verifier), session_token_code_challenge_method: 'S256', theme: 'login_form' }).toString()}`
+  nintendoAuthWindow = new BrowserWindow({
+    width: 460,
+    height: 760,
+    minWidth: 420,
+    minHeight: 620,
+    title: 'Connect Nintendo Account — PRGLauncher',
+    autoHideMenuBar: true,
+    backgroundColor: '#10131c',
+    webPreferences: {
+      contextIsolation: true,
+      sandbox: true,
+      nodeIntegration: false,
+    }
+  })
+  const handleCallback = async (_event, url) => {
+    if (!url.startsWith(NINTENDO_REDIRECT_URI) || !nintendoAuthState) return
+    _event.preventDefault()
+    try { await completeNintendoCallback(url) } catch (error) { mainWindow?.webContents.send('nintendo:authComplete', { connected: false, error: error.message }) }
+  }
+  nintendoAuthWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith(NINTENDO_REDIRECT_URI)) { handleCallback({ preventDefault() {} }, url); return { action: 'deny' } }
+    return { action: 'allow' }
+  })
+  nintendoAuthWindow.webContents.on('will-redirect', handleCallback)
+  nintendoAuthWindow.webContents.on('will-navigate', handleCallback)
+  nintendoAuthWindow.webContents.on('will-frame-navigate', handleCallback)
+  nintendoAuthWindow.on('closed', () => { nintendoAuthWindow = null })
+  await nintendoAuthWindow.loadURL(authUrl)
+  return { action: 'opened' }
+})
+
+ipcMain.handle('nintendo:closeAuth', () => {
+  if (nintendoAuthWindow && !nintendoAuthWindow.isDestroyed()) nintendoAuthWindow.close()
+  nintendoAuthWindow = null
+  return { action: 'closed' }
+})
+
+ipcMain.handle('nintendo:authStatus', async () => {
+  return { connected: Boolean(loadNintendoSession()) }
+})
+ipcMain.handle('nintendo:disconnect', () => {
+  try { fs.unlinkSync(NINTENDO_TOKEN_FILE()) } catch {}
+  nintendoAuthState = null; nintendoPlayHistory = null
+  if (nintendoAuthWindow && !nintendoAuthWindow.isDestroyed()) nintendoAuthWindow.close()
+  return { connected: false }
+})
+ipcMain.handle('nintendo:completeAuth', async (_, callbackUrl) => {
+  try { return await completeNintendoCallback(callbackUrl) } catch (error) { return { connected: false, error: error.message } }
+})
+
+ipcMain.handle('nintendo:fetchHistory', async () => {
+  try { nintendoPlayHistory = await nintendoFetchPlayHistory(); return { ok: true, data: nintendoPlayHistory } }
+  catch (error) { return { ok: false, error: error.message } }
+})
+
+ipcMain.handle('app:minimize', () => {
+  if (mainWindow) mainWindow.minimize()
+})
+
+ipcMain.handle('app:hide', () => {
+  if (mainWindow) mainWindow.hide()
+})
+
+ipcMain.handle('app:maximize', () => {
+  if (!mainWindow) return
+  if (mainWindow.isMaximized()) mainWindow.unmaximize()
+  else mainWindow.maximize()
+})
+
+ipcMain.handle('app:isMaximized', () => {
+  return mainWindow?.isMaximized() ?? false
+})
+
+ipcMain.handle('app:exportBackup', async (_, payload) => {
+  if (!payload || !Array.isArray(payload.games)) return { ok: false, error: 'Invalid backup data' }
+  const result = await dialog.showSaveDialog(mainWindow, { title: 'Export PRGLauncher backup', defaultPath: `PRGLauncher-backup-${new Date().toISOString().slice(0,10)}.json`, filters: [{ name: 'JSON backup', extensions: ['json'] }] })
+  if (result.canceled || !result.filePath) return { ok: false, canceled: true }
+  try { fs.writeFileSync(result.filePath, JSON.stringify(payload, null, 2), 'utf8'); return { ok: true, filePath: result.filePath } } catch (error) { return { ok: false, error: error.message } }
+})
+
+ipcMain.handle('app:importBackup', async () => {
+  const result = await dialog.showOpenDialog(mainWindow, { title: 'Import PRGLauncher backup', properties: ['openFile'], filters: [{ name: 'JSON backup', extensions: ['json'] }] })
+  if (result.canceled || !result.filePaths[0]) return { ok: false, canceled: true }
+  try {
+    const data = JSON.parse(fs.readFileSync(result.filePaths[0], 'utf8'))
+    if (!data || !Array.isArray(data.games)) throw new Error('Це не backup PRGLauncher')
+    return { ok: true, data }
+  } catch (error) { return { ok: false, error: error.message } }
+})
+
+ipcMain.handle('app:setSize', (_, w, h) => {
+  if (mainWindow) mainWindow.setSize(w, h, true)
+})
+
+function sendMiniState(state) {
+  if (miniBar && !miniBar.isDestroyed()) miniBar.webContents.send('mini:state', state)
+}
+
+function createMiniBar() {
+  if (miniBar && !miniBar.isDestroyed()) return miniBar
+
+  miniBar = new BrowserWindow({
+    width: 360,
+    height: 58,
+    minWidth: 260,
+    minHeight: 58,
+    maxHeight: 58,
+    frame: false,
+    transparent: true,
+    resizable: true,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    show: false,
+    movable: true,
+    backgroundColor: '#00000000',
+    webPreferences: {
+      preload: path.join(__dirname, '..', 'preload', 'index.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+    },
+  })
+  miniBar.setAlwaysOnTop(true, 'floating')
+  const workArea = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea
+  const margin = 16
+  miniBar.setPosition(workArea.x + workArea.width - 360 - margin, workArea.y + margin)
+  miniBar.loadFile(path.join(__dirname, '..', 'renderer', 'mini-bar.html'))
+  miniBar.on('closed', () => { miniBar = null })
+  return miniBar
+}
+
+ipcMain.handle('mini:show', (_, state) => {
+  const bar = createMiniBar()
+  miniBarStandby = !state?.active
+  const show = () => {
+    sendMiniState(state)
+    bar.showInactive()
+  }
+  if (bar.webContents.isLoading()) bar.webContents.once('did-finish-load', show)
+  else show()
+  mainWindow?.hide()
+})
+
+ipcMain.handle('mini:update', (_, state) => {
+  if (!state?.active && !miniBarStandby && miniBar && !miniBar.isDestroyed() && miniBar.isVisible()) {
+    miniBar.hide()
+    mainWindow?.show()
+    mainWindow?.focus()
+    return
+  }
+  if (state?.active) miniBarStandby = false
+  sendMiniState(state)
+})
+
+ipcMain.handle('mini:restore', () => {
+  miniBar?.hide()
+  mainWindow?.show()
+  mainWindow?.focus()
+})
+
+ipcMain.handle('mini:togglePin', () => {
+  if (!miniBar || miniBar.isDestroyed()) return false
+  const pinned = !miniBar.isAlwaysOnTop()
+  miniBar.setAlwaysOnTop(pinned, pinned ? 'floating' : 'normal')
+  return pinned
+})
+
+ipcMain.on('mini:pause', () => {
+  mainWindow?.webContents.send('mini:pause')
+})
+
+ipcMain.handle('app:quit', () => {
+  miniBar?.destroy()
+  mainWindow?.destroy()
+  app.quit()
+})
+
+// ── WINDOW ─────────────────────────────────────────────────────────────────
+function createWindow() {
+  mainWindow = new BrowserWindow({
+    width:  1280,
+    height: 800,
+    minWidth: 900,
+    minHeight: 600,
+    frame: false,
+    titleBarStyle: 'hidden',
+    backgroundColor: '#08080f',
+    webPreferences: {
+      preload: path.join(__dirname, '..', 'preload', 'index.js'),
+      contextIsolation: true,
+      nodeIntegration:  false,
+    },
+    show: false,
+    skipTaskbar: false,
+    icon: path.join(__dirname, '..', '..', 'assets', 'icon.ico'),
+  })
+
+  mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'))
+
+  mainWindow.once('ready-to-show', () => {
+    if (!launchedAtLogin) mainWindow.show()
+  })
+
+  mainWindow.on('close', (e) => {
+    e.preventDefault()
+    mainWindow.hide()      // minimize to tray instead of closing
+  })
+}
+
+// ── TRAY ──────────────────────────────────────────────────────────────────
+function createTray() {
+  const iconPath = path.join(__dirname, '..', '..', 'assets', 'icon.png')
+  const icon = fs.existsSync(iconPath) ? nativeImage.createFromPath(iconPath) : nativeImage.createEmpty()
+  tray = new Tray(icon)
+  tray.setToolTip('PRGLauncher')
+
+  const menu = Menu.buildFromTemplate([
+    { label: 'Show', click: () => { mainWindow?.show(); mainWindow?.focus() } },
+    { type: 'separator' },
+    { label: 'Quit', click: () => { mainWindow?.destroy(); app.quit() } },
+  ])
+  tray.setContextMenu(menu)
+  tray.on('double-click', () => { mainWindow?.show(); mainWindow?.focus() })
+}
+
+// ── APP LIFECYCLE ─────────────────────────────────────────────────────────
+app.whenReady().then(() => {
+  steamPath = findSteamPath()
+  console.log('[Steam] Path:', steamPath || 'not found')
+
+  // Start Steam silently in background
+  startSteamSilent()
+  startSteamMonitor()
+  startSteamCollectionMonitor()
+
+  // Packaged builds start with Windows and stay unobtrusive in the tray. Dev
+  // runs never modify the user's login settings.
+  if (process.platform === 'win32' && app.isPackaged) {
+    app.setLoginItemSettings({ openAtLogin: true, path: process.execPath, args: ['--hidden'] })
+  }
+
+  createWindow()
+  createTray()
+})
+
+app.on('window-all-closed', (e) => {
+  e.preventDefault() // keep running in tray
+})
+
+app.on('activate', () => {
+  mainWindow?.show()
+})
+
+// Prevent multiple instances
+const gotLock = app.requestSingleInstanceLock()
+if (!gotLock) {
+  app.quit()
+} else {
+  app.on('second-instance', () => {
+    if (mainWindow) {
+      mainWindow.show()
+      mainWindow.focus()
+    }
+  })
+}

@@ -1,0 +1,5 @@
+[build]
+  publish = "web-dashboard"
+
+# The launcher itself is an Electron app. Netlify should publish only its
+# browser companion, which deliberately contains no launcher controls.
