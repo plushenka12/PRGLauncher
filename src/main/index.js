@@ -1,18 +1,26 @@
 const { app, BrowserWindow, ipcMain, shell, Tray, Menu, nativeImage, screen, safeStorage, dialog } = require('electron')
 const { autoUpdater } = require('electron-updater')
 const path = require('path')
+const os = require('os')
 const fs = require('fs')
 const https = require('https')
 const { execSync, execFile, spawn } = require('child_process')
 const crypto = require('crypto')
 
+// Keep the Windows app identity and packaged process name discoverable.
+if (process.platform === 'win32') app.setAppUserModelId('com.prgtracker.launcher')
+
 // ── CONFIG ────────────────────────────────────────────────────────────────
-const STEAM_PATHS = [
-  'C:\\Program Files (x86)\\Steam',
-  'C:\\Program Files\\Steam',
-  process.env.PROGRAMFILES + '\\Steam',
-  process.env['PROGRAMFILES(X86)'] + '\\Steam',
-]
+const STEAM_PATHS = process.platform === 'win32'
+  ? [
+      'C:\\Program Files (x86)\\Steam',
+      'C:\\Program Files\\Steam',
+      process.env.PROGRAMFILES + '\\Steam',
+      process.env['PROGRAMFILES(X86)'] + '\\Steam',
+    ]
+  : process.platform === 'darwin'
+    ? [path.join(os.homedir(), 'Library', 'Application Support', 'Steam')]
+    : []
 
 // ── STATE ─────────────────────────────────────────────────────────────────
 let mainWindow = null
@@ -21,6 +29,7 @@ let nintendoAuthWindow = null
 let nintendoAuthState = null
 let nintendoPlayHistory = null
 let updateState = { status: 'idle', version: null, error: null }
+let automaticUpdateCheck = false
 let miniBarStandby = false
 let tray       = null
 let steamPath  = null
@@ -32,15 +41,40 @@ let steamCollectionTimer = null
 let lastBacklogSignature = null
 const steamStoreCache = new Map()
 const launchedAtLogin = process.argv.includes('--hidden')
+const opacityAnimations = new Map()
+
+function animateWindowOpacity(window, from, to, duration, done) {
+  if (!window || window.isDestroyed()) return
+  const animationKey = window.id
+  const previous = opacityAnimations.get(animationKey)
+  if (previous) clearInterval(previous)
+  const startedAt = Date.now()
+  const tick = () => {
+    if (window.isDestroyed()) return clearInterval(opacityAnimations.get(animationKey))
+    const progress = Math.min(1, (Date.now() - startedAt) / duration)
+    const eased = 1 - Math.pow(1 - progress, 3)
+    window.setOpacity(from + (to - from) * eased)
+    if (progress < 1) return
+    clearInterval(opacityAnimations.get(animationKey))
+    opacityAnimations.delete(animationKey)
+    done?.()
+  }
+  const timer = setInterval(tick, 16)
+  opacityAnimations.set(animationKey, timer)
+  tick()
+}
 
 // ── STEAM DETECTION ───────────────────────────────────────────────────────
 function findSteamPath() {
-  // Try registry first
-  try {
-    const reg = execSync('reg query "HKCU\\Software\\Valve\\Steam" /v SteamPath', { encoding: 'utf8' })
-    const match = reg.match(/SteamPath\s+REG_SZ\s+(.+)/)
-    if (match) return match[1].trim().replace(/\//g, '\\')
-  } catch {}
+  // On Windows Steam keeps its root in the registry. macOS stores the same
+  // steamapps/userdata tree under the user's Application Support directory.
+  if (process.platform === 'win32') {
+    try {
+      const reg = execSync('reg query "HKCU\\Software\\Valve\\Steam" /v SteamPath', { encoding: 'utf8' })
+      const match = reg.match(/SteamPath\s+REG_SZ\s+(.+)/)
+      if (match) return match[1].trim().replace(/\//g, '\\')
+    } catch {}
+  }
 
   // Fallback to known paths
   for (const p of STEAM_PATHS) {
@@ -124,7 +158,11 @@ function getInstallProgress(appId) {
 }
 
 function isGameInLibrary(appId) {
-  // Check Steam registry for owned games
+  // Windows exposes installed/owned app records in the registry. macOS does
+  // not; imported profile games are treated as library entries and Steam still
+  // makes the final ownership decision when the steam:// link is opened.
+  if (process.platform === 'darwin') return Boolean(steamPath)
+  if (process.platform !== 'win32') return false
   try {
     execSync(`reg query "HKCU\\Software\\Valve\\Steam\\Apps\\${appId}"`, { encoding: 'utf8' })
     return true
@@ -135,15 +173,36 @@ function isGameInLibrary(appId) {
 
 function isSteamRunning() {
   try {
-    const result = execSync('tasklist /fi "imagename eq steam.exe" /fo csv /nh', { encoding: 'utf8' })
-    return result.toLowerCase().includes('steam.exe')
+    if (process.platform === 'win32') {
+      const result = execSync('tasklist /fi "imagename eq steam.exe" /fo csv /nh', { encoding: 'utf8' })
+      return result.toLowerCase().includes('steam.exe')
+    }
+    if (process.platform === 'darwin') {
+      execSync('pgrep -x steam_osx', { stdio: 'ignore' })
+      return true
+    }
+    return false
   } catch { return false }
 }
 
+function getSteamExecutable() {
+  if (process.platform === 'win32') {
+    const executable = steamPath && path.join(steamPath, 'steam.exe')
+    return executable && fs.existsSync(executable) ? executable : null
+  }
+  if (process.platform === 'darwin') {
+    const candidates = [
+      '/Applications/Steam.app/Contents/MacOS/steam_osx',
+      path.join(os.homedir(), 'Applications', 'Steam.app', 'Contents', 'MacOS', 'steam_osx'),
+    ]
+    return candidates.find(candidate => fs.existsSync(candidate)) || null
+  }
+  return null
+}
+
 function startSteamSilent() {
-  if (!steamPath) return
-  const steamExe = path.join(steamPath, 'steam.exe')
-  if (!fs.existsSync(steamExe)) return
+  const steamExe = getSteamExecutable()
+  if (!steamExe) return
   // Only launch if not already running
   if (isSteamRunning()) {
     console.log('[Steam] Already running')
@@ -160,6 +219,10 @@ function startSteamSilent() {
 }
 
 function hideSteamWindow() {
+  // macOS needs Accessibility permission for controlling another app's window.
+  // Do not request that intrusive permission just to hide Steam; launching via
+  // steam:// stays supported and the user remains in control of Steam's UI.
+  if (process.platform !== 'win32') return
   // Steam has no Electron API. Hide only its top-level window; the client and
   // downloads keep running in its tray process.
   const script = `Add-Type @'
@@ -190,6 +253,11 @@ function pollSteamStatus() {
 }
 
 function getRunningSteamAppId() {
+  // Windows reports the active app through the Steam registry. There is no
+  // equivalent stable, permission-free API on macOS, so manual sessions and
+  // Steam profile import still work while automatic local game detection is
+  // intentionally disabled there.
+  if (process.platform !== 'win32') return null
   try {
     const result = execSync('reg query "HKCU\\Software\\Valve\\Steam\\Apps" /s /v Running', { encoding: 'utf8' })
     let currentAppId = null
@@ -565,6 +633,20 @@ ipcMain.handle('app:checkForUpdates', async () => {
 ipcMain.handle('app:downloadUpdate', async () => { try { await autoUpdater.downloadUpdate(); return { ok: true } } catch (error) { return { ok: false, error: error.message } } })
 ipcMain.handle('app:installUpdate', () => { if (updateState.status === 'downloaded') autoUpdater.quitAndInstall(); return { ok: updateState.status === 'downloaded' } })
 
+function checkForUpdatesAfterLaunch() {
+  if (!app.isPackaged) return
+  setTimeout(async () => {
+    automaticUpdateCheck = true
+    try {
+      await autoUpdater.checkForUpdates()
+    } catch (error) {
+      console.warn('[Update] Automatic check failed:', error.message)
+    } finally {
+      automaticUpdateCheck = false
+    }
+  }, 3000)
+}
+
 ipcMain.handle('app:setSize', (_, w, h) => {
   if (mainWindow) mainWindow.setSize(w, h, true)
 })
@@ -601,27 +683,59 @@ function createMiniBar() {
   const margin = 16
   miniBar.setPosition(workArea.x + workArea.width - 360 - margin, workArea.y + margin)
   miniBar.loadFile(path.join(__dirname, '..', 'renderer', 'mini-bar.html'))
-  miniBar.on('closed', () => { miniBar = null })
+  miniBar.on('closed', () => { const timer=opacityAnimations.get(miniBar?.id); if(timer)clearInterval(timer); opacityAnimations.delete(miniBar?.id); miniBar = null })
   return miniBar
+}
+
+function transitionToMiniBar(bar, state) {
+  sendMiniState(state)
+  bar.setOpacity(0)
+  bar.showInactive()
+  bar.webContents.send('mini:transition', 'in')
+  animateWindowOpacity(bar, 0, 1, 180)
+
+  if (mainWindow && !mainWindow.isDestroyed() && mainWindow.isVisible()) {
+    mainWindow.webContents.send('app:miniTransition', 'out')
+    animateWindowOpacity(mainWindow, mainWindow.getOpacity(), 0, 150, () => {
+      if (!mainWindow?.isDestroyed()) {
+        mainWindow.hide()
+        mainWindow.setOpacity(1)
+      }
+    })
+  } else {
+    mainWindow?.hide()
+  }
+}
+
+function transitionToMainWindow() {
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    mainWindow.setOpacity(0)
+    mainWindow.show()
+    mainWindow.webContents.send('app:miniTransition', 'in')
+    animateWindowOpacity(mainWindow, 0, 1, 190, () => mainWindow?.focus())
+  }
+  if (miniBar && !miniBar.isDestroyed() && miniBar.isVisible()) {
+    miniBar.webContents.send('mini:transition', 'out')
+    animateWindowOpacity(miniBar, miniBar.getOpacity(), 0, 150, () => {
+      if (!miniBar?.isDestroyed()) {
+        miniBar.hide()
+        miniBar.setOpacity(1)
+      }
+    })
+  }
 }
 
 ipcMain.handle('mini:show', (_, state) => {
   const bar = createMiniBar()
   miniBarStandby = !state?.active
-  const show = () => {
-    sendMiniState(state)
-    bar.showInactive()
-  }
+  const show = () => transitionToMiniBar(bar, state)
   if (bar.webContents.isLoading()) bar.webContents.once('did-finish-load', show)
   else show()
-  mainWindow?.hide()
 })
 
 ipcMain.handle('mini:update', (_, state) => {
   if (!state?.active && !miniBarStandby && miniBar && !miniBar.isDestroyed() && miniBar.isVisible()) {
-    miniBar.hide()
-    mainWindow?.show()
-    mainWindow?.focus()
+    transitionToMainWindow()
     return
   }
   if (state?.active) miniBarStandby = false
@@ -629,9 +743,7 @@ ipcMain.handle('mini:update', (_, state) => {
 })
 
 ipcMain.handle('mini:restore', () => {
-  miniBar?.hide()
-  mainWindow?.show()
-  mainWindow?.focus()
+  transitionToMainWindow()
 })
 
 ipcMain.handle('mini:togglePin', () => {
@@ -658,8 +770,10 @@ function createWindow() {
     height: 800,
     minWidth: 900,
     minHeight: 600,
-    frame: false,
-    titleBarStyle: 'hidden',
+    // macOS keeps its familiar traffic-light controls. Windows continues to
+    // use the custom frameless header already present in the launcher.
+    frame: process.platform !== 'darwin',
+    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : 'hidden',
     backgroundColor: '#08080f',
     webPreferences: {
       preload: path.join(__dirname, '..', 'preload', 'index.js'),
@@ -668,7 +782,7 @@ function createWindow() {
     },
     show: false,
     skipTaskbar: false,
-    icon: path.join(__dirname, '..', '..', 'assets', 'icon.ico'),
+    icon: path.join(__dirname, '..', '..', 'assets', process.platform === 'darwin' ? 'icon.icns' : 'icon.ico'),
   })
 
   mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'))
@@ -709,10 +823,15 @@ app.whenReady().then(() => {
   startSteamMonitor()
   startSteamCollectionMonitor()
 
-  // Packaged builds start with Windows and stay unobtrusive in the tray. Dev
-  // runs never modify the user's login settings.
-  if (process.platform === 'win32' && app.isPackaged) {
-    app.setLoginItemSettings({ openAtLogin: true, path: process.execPath, args: ['--hidden'] })
+  // Packaged Windows/macOS builds start in the background. Dev runs never
+  // modify the user's login settings.
+  if (['win32', 'darwin'].includes(process.platform) && app.isPackaged) {
+    app.setLoginItemSettings({
+      openAtLogin: true,
+      openAsHidden: process.platform === 'darwin',
+      path: process.execPath,
+      args: ['--hidden'],
+    })
   }
 
   autoUpdater.autoDownload = false
@@ -721,10 +840,15 @@ app.whenReady().then(() => {
   autoUpdater.on('update-not-available', info => { updateState = { status: 'latest', version: info.version, error: null }; mainWindow?.webContents.send('app:updateStatus', updateState) })
   autoUpdater.on('download-progress', progress => { updateState = { status: 'downloading', version: updateState.version, percent: Math.round(progress.percent), error: null }; mainWindow?.webContents.send('app:updateStatus', updateState) })
   autoUpdater.on('update-downloaded', info => { updateState = { status: 'downloaded', version: info.version, error: null }; mainWindow?.webContents.send('app:updateStatus', updateState) })
-  autoUpdater.on('error', error => { updateState = { status: 'error', version: null, error: error.message }; mainWindow?.webContents.send('app:updateStatus', updateState) })
+  autoUpdater.on('error', error => {
+    updateState = { status: 'error', version: null, error: error.message }
+    if (automaticUpdateCheck) console.warn('[Update] Automatic check error:', error.message)
+    else mainWindow?.webContents.send('app:updateStatus', updateState)
+  })
 
   createWindow()
   createTray()
+  checkForUpdatesAfterLaunch()
 })
 
 app.on('window-all-closed', (e) => {

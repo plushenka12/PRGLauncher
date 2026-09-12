@@ -11,23 +11,24 @@
 :root{
   --bg:#08080f;--bg2:#0d0d1a;--bg3:#121226;--bg4:#1a1a35;
   --border:rgba(0,255,65,.08);--border2:rgba(0,255,65,.18);
-  --text:#e8ffe8;--text2:#7ab87a;--text3:#3a5a3a;
+  --text:#f2fff2;--text2:#b5e8b5;--text3:#82bd82;
   --accent:#7b2fff;--accent2:#5a00ff;
   --green:#00ff41;--amber:#39ff14;--coral:#ff3366;--blue:#00c8ff;
   --playing:#7b2fff;--backlog:#00c8ff;--completed:#00ff41;
   --fh:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--fm:'DM Mono',monospace;
   --r:12px;--rs:8px;
 }
-html[data-theme="ocean"]{--bg:#07111a;--bg2:#0b1b2a;--bg3:#10253a;--bg4:#17334d;--border:rgba(34,211,238,.12);--border2:rgba(34,211,238,.28);--text:#e4f7ff;--text2:#8ec5d8;--text3:#4f7c91;--accent:#38bdf8;--accent2:#0284c7;--green:#22d3ee;--amber:#facc15;--coral:#fb7185;--blue:#60a5fa;--playing:#38bdf8;--backlog:#a78bfa;--completed:#22d3ee}
-html[data-theme="ember"]{--bg:#180b08;--bg2:#25100b;--bg3:#35170e;--bg4:#4a2114;--border:rgba(251,146,60,.12);--border2:rgba(251,146,60,.3);--text:#fff1e7;--text2:#d6aa8d;--text3:#8e5c45;--accent:#fb923c;--accent2:#c2410c;--green:#fbbf24;--amber:#fde047;--coral:#fb7185;--blue:#fb923c;--playing:#fb923c;--backlog:#fbbf24;--completed:#86efac}
-html[data-theme="rose"]{--bg:#180914;--bg2:#260d20;--bg3:#35122d;--bg4:#4a1b3d;--border:rgba(244,114,182,.12);--border2:rgba(244,114,182,.3);--text:#fff0fa;--text2:#d9a0c8;--text3:#8d537a;--accent:#f472b6;--accent2:#be185d;--green:#f0abfc;--amber:#fda4af;--coral:#fb7185;--blue:#c084fc;--playing:#f472b6;--backlog:#c084fc;--completed:#a7f3d0}
-html[data-theme="slate"]{--bg:#101216;--bg2:#181b21;--bg3:#22262e;--bg4:#303640;--border:rgba(203,213,225,.1);--border2:rgba(203,213,225,.25);--text:#f1f5f9;--text2:#a8b2c1;--text3:#697586;--accent:#e2e8f0;--accent2:#64748b;--green:#cbd5e1;--amber:#fbbf24;--coral:#fb7185;--blue:#94a3b8;--playing:#e2e8f0;--backlog:#94a3b8;--completed:#cbd5e1}
+html[data-theme="ocean"]{--bg:#07111a;--bg2:#0b1b2a;--bg3:#10253a;--bg4:#17334d;--border:rgba(34,211,238,.12);--border2:rgba(34,211,238,.28);--text:#f0fbff;--text2:#b9e5f3;--text3:#85b8c9;--accent:#38bdf8;--accent2:#0284c7;--green:#22d3ee;--amber:#facc15;--coral:#fb7185;--blue:#60a5fa;--playing:#38bdf8;--backlog:#a78bfa;--completed:#22d3ee}
+html[data-theme="ember"]{--bg:#180b08;--bg2:#25100b;--bg3:#35170e;--bg4:#4a2114;--border:rgba(251,146,60,.12);--border2:rgba(251,146,60,.3);--text:#fff6f0;--text2:#f0c4a7;--text3:#c28f70;--accent:#fb923c;--accent2:#c2410c;--green:#fbbf24;--amber:#fde047;--coral:#fb7185;--blue:#fb923c;--playing:#fb923c;--backlog:#fbbf24;--completed:#86efac}
+html[data-theme="rose"]{--bg:#180914;--bg2:#260d20;--bg3:#35122d;--bg4:#4a1b3d;--border:rgba(244,114,182,.12);--border2:rgba(244,114,182,.3);--text:#fff5fc;--text2:#efbfdd;--text3:#bd90ab;--accent:#f472b6;--accent2:#be185d;--green:#f0abfc;--amber:#fda4af;--coral:#fb7185;--blue:#c084fc;--playing:#f472b6;--backlog:#c084fc;--completed:#a7f3d0}
+html[data-theme="slate"]{--bg:#101216;--bg2:#181b21;--bg3:#22262e;--bg4:#303640;--border:rgba(203,213,225,.1);--border2:rgba(203,213,225,.25);--text:#f8fafc;--text2:#c9d4e2;--text3:#9aaabd;--accent:#e2e8f0;--accent2:#64748b;--green:#cbd5e1;--amber:#fbbf24;--coral:#fb7185;--blue:#94a3b8;--playing:#e2e8f0;--backlog:#94a3b8;--completed:#cbd5e1}
 html{background:var(--bg);color:var(--text);font-family:var(--fb);font-size:15px;line-height:1.5}
 /* EVA-01 subtle scanlines */
 html::after{content:'';position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,65,.015) 2px,rgba(0,255,65,.015) 4px);z-index:9999}
-body{min-height:100vh;display:flex;flex-direction:column}
+body{min-height:100vh;display:flex;flex-direction:column;font-weight:500;text-rendering:optimizeLegibility}
+body.mini-transition-out{animation:mainToMini .16s cubic-bezier(.3,.8,.3,1)}body.mini-transition-in{animation:miniToMain .2s cubic-bezier(.2,.8,.2,1)}@keyframes mainToMini{to{transform:scale(.985) translateY(-5px);filter:blur(.8px)}}@keyframes miniToMain{from{transform:scale(.985) translateY(-5px);filter:blur(.8px)}to{transform:scale(1) translateY(0);filter:blur(0)}}
 
-#session-bar{position:sticky;top:0;z-index:100;background:var(--bg2);border-bottom:1px solid var(--border);padding:0 2rem;height:52px;display:flex;align-items:center;justify-content:space-between;gap:1rem;-webkit-app-region:drag}
+#session-bar{position:sticky;top:0;z-index:100;background:var(--bg2);border-bottom:1px solid var(--border);padding:0 2rem;height:52px;display:flex;align-items:center;justify-content:flex-start;gap:10px;-webkit-app-region:drag}
 .logo{font-family:var(--fh);font-size:18px;font-weight:800;letter-spacing:-.5px;flex-shrink:0}
 .logo span{color:var(--green)}
 .logo{-webkit-app-region:no-drag}
@@ -43,7 +44,8 @@ body{min-height:100vh;display:flex;flex-direction:column}
 .pulse{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 1.4s infinite;flex-shrink:0;box-shadow:0 0 8px var(--green)}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
 #sess-timer{font-family:var(--fm);font-size:13px;color:var(--accent);font-weight:500}
-.bar-right{display:flex;align-items:center;gap:8px}
+.bar-right{display:flex;align-items:center;gap:8px;margin-left:auto}.win-controls{margin-left:4px}
+.macos .logo{margin-left:76px}.macos #win-min,.macos #win-max,.macos #win-close{display:none}
 .sync-badge{font-size:11px;padding:3px 8px;border-radius:20px;font-weight:600;flex-shrink:0}
 .sync-badge.ok{background:rgba(52,211,153,.15);color:var(--green);border:1px solid rgba(52,211,153,.25)}
 .sync-badge.off{background:rgba(90,90,112,.15);color:var(--text3);border:1px solid var(--border)}
@@ -57,8 +59,8 @@ body{min-height:100vh;display:flex;flex-direction:column}
 main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 .page{display:none}.page.active{display:block;animation:pageIn .22s ease both}@keyframes pageIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 .download-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}.download-card{appearance:none;width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:16px;cursor:pointer;transition:border-color .15s,transform .15s;color:var(--text);font-family:var(--fb);text-align:left}.download-card:hover{border-color:var(--border2);transform:translateY(-2px)}.download-card-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.download-card-title{font-family:var(--fh);font-weight:700;font-size:16px;color:var(--text)}.download-card-state{font-size:11px;color:var(--green);font-family:var(--fm);white-space:nowrap}.download-card .steam-setup-detail{color:var(--text3)}.download-empty{padding:4rem 1rem;text-align:center;color:var(--text3);background:var(--bg3);border:1px dashed var(--border2);border-radius:var(--r);grid-column:1/-1}.download-empty-icon,.empty-state-icon{display:block;font-size:30px;opacity:.72;margin-bottom:10px}.download-empty strong,.empty-state strong{display:block;color:var(--text2);font-family:var(--fh);font-size:17px;margin-bottom:4px}.download-empty small,.empty-state small{color:var(--text3)}
-.theme-wrap{position:relative;-webkit-app-region:no-drag}.theme-toggle{width:32px;height:32px;border:0;border-radius:5px;background:transparent;color:var(--text3);cursor:pointer;font-size:16px}.theme-toggle:hover{background:rgba(255,255,255,.08);color:var(--text)}.theme-menu{display:none;position:absolute;right:0;top:38px;width:190px;padding:8px;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;box-shadow:0 12px 30px rgba(0,0,0,.35);z-index:500}.theme-menu.open{display:block}.theme-menu-title{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);padding:4px 6px 7px}.theme-choice{width:100%;display:flex;align-items:center;gap:8px;border:0;border-radius:6px;background:transparent;color:var(--text2);padding:7px 6px;cursor:pointer;text-align:left;font-family:var(--fb);font-size:12px}.theme-choice:hover,.theme-choice.active{background:var(--bg4);color:var(--text)}.theme-dot{width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,var(--dot-a),var(--dot-b));flex:none}
-.backlog-import-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-height:440px;overflow:auto;padding:2px}.backlog-import-row{position:relative;display:flex;flex-direction:column;align-items:stretch;gap:8px;padding:0 0 10px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:border-color .15s,transform .15s}.backlog-import-row:hover{border-color:var(--border2);transform:translateY(-2px)}.backlog-import-row:has(input:checked){border-color:var(--accent)}.backlog-import-row.already-added{opacity:.58;background:transparent}.backlog-import-cover{width:100%;height:92px;object-fit:cover;background:var(--bg4);display:block}.backlog-import-check{position:absolute;top:8px;right:8px;width:20px;height:20px;accent-color:var(--accent);filter:drop-shadow(0 1px 3px #000)}.backlog-import-info{padding:0 10px;min-width:0}.backlog-import-name{font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.backlog-import-id{font-family:var(--fm);font-size:9px;color:var(--text3);margin-top:2px}.backlog-import-existing{font-size:10px;color:var(--green);margin-top:3px}.backlog-import-row .form-select{margin:0 10px;width:calc(100% - 20px);padding:6px 8px;font-size:11px}
+.settings-trigger{width:36px;height:32px;border:1px solid var(--border2);border-radius:7px;background:color-mix(in srgb,var(--bg3) 70%,var(--accent) 30%);color:var(--text);cursor:pointer;font-size:17px;box-shadow:0 3px 12px rgba(0,0,0,.2);transition:transform .15s,filter .15s}.settings-trigger:hover{transform:translateY(-1px);filter:brightness(1.14)}.settings-trigger:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.backlog-import-toolbar{display:flex;gap:8px;align-items:center;margin:-.25rem 0 12px;flex-wrap:wrap}.backlog-import-search{flex:1;min-width:190px}.backlog-import-toolbar .btn{padding:7px 10px;font-size:11px}.backlog-import-match{font:10px var(--fm);color:var(--text3);margin-left:auto}.backlog-import-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-height:440px;overflow:auto;padding:2px}.backlog-import-row{position:relative;display:flex;flex-direction:column;align-items:stretch;gap:8px;padding:0 0 10px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:border-color .15s,transform .15s}.backlog-import-row:hover{border-color:var(--border2);transform:translateY(-2px)}.backlog-import-row:has(input:checked){border-color:var(--accent)}.backlog-import-row.filtered-out{display:none}.backlog-import-row.already-added{opacity:.58;background:transparent}.backlog-import-cover{width:100%;height:92px;object-fit:cover;background:var(--bg4);display:block}.backlog-import-check{position:absolute;top:8px;right:8px;width:20px;height:20px;accent-color:var(--accent);filter:drop-shadow(0 1px 3px #000)}.backlog-import-info{padding:0 10px;min-width:0}.backlog-import-name{font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.backlog-import-id{font-family:var(--fm);font-size:9px;color:var(--text3);margin-top:2px}.backlog-import-existing{font-size:10px;color:var(--green);margin-top:3px}.backlog-import-row .form-select{margin:0 10px;width:calc(100% - 20px);padding:6px 8px;font-size:11px}
 .steam-setup{max-width:620px;margin:4rem auto;background:var(--bg3);border:1px solid var(--border2);border-radius:16px;padding:2rem;text-align:center}.steam-setup-icon{font-size:38px;margin-bottom:12px}.steam-setup h2{font-family:var(--fh);font-size:24px;margin-bottom:8px}.steam-setup-game{color:var(--accent);font-weight:600;margin-bottom:20px}.steam-progress-track{height:10px;background:var(--bg4);border-radius:999px;overflow:hidden;margin:18px 0 10px}.steam-progress-fill{width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--accent2),var(--green));transition:width .35s ease}.steam-setup-status{min-height:24px;color:var(--text2);font-size:14px}.steam-setup-detail{min-height:20px;color:var(--text3);font-family:var(--fm);font-size:12px;margin-top:4px}.steam-setup-actions{display:flex;justify-content:center;gap:10px;margin-top:24px;flex-wrap:wrap}.steam-setup-note{margin-top:18px;color:var(--text3);font-size:12px;line-height:1.5}
 
 .toolbar{display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;flex-wrap:wrap}.toolbar .btn{min-height:36px}
@@ -87,6 +89,7 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.5rem}.stats-row .stat-card{background:linear-gradient(145deg,var(--bg3),color-mix(in srgb,var(--bg3) 72%,var(--accent) 28%));transition:transform .18s,border-color .18s}.stats-row .stat-card:hover{transform:translateY(-2px);border-color:var(--border2)}
 .stat-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.25rem}
+.stat-filter{font:inherit;text-align:left;color:var(--text);cursor:pointer}.stat-filter:focus-visible{outline:2px solid var(--accent);outline-offset:3px}.stat-filter[aria-pressed="true"]{border-color:var(--accent)}
 .stat-label{font-size:12px;color:var(--text3);font-weight:500;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px}
 .stat-value{font-family:var(--fh);font-size:26px;font-weight:800;color:var(--text);line-height:1}
 .stat-value span{font-size:13px;font-weight:500;color:var(--text2);margin-left:4px}
@@ -99,10 +102,12 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 .card-cover img{width:100%;height:100%;object-fit:cover;display:block}
 .cover-fallback{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
 .cover-fb-text{font-family:var(--fh);font-size:36px;font-weight:800;color:var(--border2);user-select:none}
-.card-status-badge{position:absolute;top:8px;left:8px;font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px}
-.badge-playing{background:rgba(123,47,255,.2);color:#a78bfa;border:1px solid rgba(123,47,255,.5)}
-.badge-backlog{background:rgba(0,200,255,.1);color:#00c8ff;border:1px solid rgba(0,200,255,.3)}
-.badge-completed{background:rgba(0,255,65,.1);color:#00ff41;border:1px solid rgba(0,255,65,.3)}
+.card-status-badge{position:absolute;top:8px;left:8px;font-size:11px;font-weight:700;padding:4px 9px;border-radius:20px;border:1px solid transparent;letter-spacing:.01em}
+.status-control{font:inherit;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.35);transition:transform .15s,filter .15s}.status-control:hover{transform:translateY(-1px);filter:brightness(1.12)}.status-control:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.badge-playing{background:#5b21b6;color:#f5f3ff;border-color:#8b5cf6}
+.badge-backlog{background:#075985;color:#e0f2fe;border-color:#38bdf8}
+.badge-completed{background:#065f46;color:#d1fae5;border-color:#34d399}
+.quick-status-menu{position:fixed;z-index:1000;display:grid;gap:4px;min-width:145px;padding:6px;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;box-shadow:0 14px 36px rgba(0,0,0,.45)}.quick-status-menu button{border:1px solid transparent;border-radius:7px;background:transparent;color:var(--text);padding:8px 10px;text-align:left;font:600 12px var(--fb);cursor:pointer}.quick-status-menu button:hover,.quick-status-menu button.active{background:var(--bg4);border-color:var(--border2)}
 .card-timer-badge{position:absolute;top:8px;right:8px;background:rgba(14,15,20,.85);border:1px solid rgba(167,139,250,.4);border-radius:6px;font-family:var(--fm);font-size:12px;color:var(--accent);padding:3px 8px}
 .card-platform-badge{position:absolute;bottom:8px;right:8px;background:rgba(14,15,20,.85);border:1px solid var(--border2);border-radius:6px;font-size:11px;font-weight:600;color:var(--text2);padding:2px 7px}
 .card-year-badge{position:absolute;bottom:8px;left:8px;background:rgba(14,15,20,.85);border:1px solid var(--border);border-radius:6px;font-family:var(--fm);font-size:10px;color:var(--text3);padding:2px 6px}
@@ -116,12 +121,12 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 .d-rating-stars{font-size:22px;font-family:var(--fm);font-weight:800;color:var(--amber)}
 .d-rating-label{font-size:13px;color:var(--text3)}
 .card-body{padding:12px;flex:1;display:flex;flex-direction:column}
-.card-title{font-family:var(--fh);font-size:14px;font-weight:700;color:var(--text);line-height:1.3;margin-bottom:4px}
-.card-meta{font-size:12px;color:var(--text3);margin-bottom:8px;display:flex;gap:10px;flex-wrap:wrap}
+.card-title{font-family:var(--fh);font-size:14px;font-weight:800;color:color-mix(in srgb,var(--text) 94%,#fff 6%);line-height:1.3;margin-bottom:4px;text-shadow:0 1px 8px rgba(0,0,0,.18)}
+.card-meta{font-size:12px;color:var(--text2);font-weight:500;margin-bottom:8px;display:flex;gap:10px;flex-wrap:wrap}
 .card-tags{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px}
-.tag{font-size:10px;font-weight:600;padding:2px 6px;border-radius:4px;background:var(--bg4);color:var(--text3);border:1px solid var(--border)}
+.tag{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:color-mix(in srgb,var(--bg4) 84%,var(--accent) 16%);color:var(--text2);border:1px solid var(--border2)}
 .card-actions{display:flex;gap:6px;margin-top:auto}
-.card-btn{font-family:var(--fb);font-size:12px;font-weight:500;padding:6px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg4);color:var(--text2);cursor:pointer;transition:all .15s;flex:1;text-align:center}
+.card-btn{font-family:var(--fb);font-size:12px;font-weight:700;padding:6px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--bg4);color:var(--text);cursor:pointer;transition:all .15s;flex:1;text-align:center}
 .card-btn:hover{color:var(--text);border-color:var(--border2)}
 .card-btn-play{background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.25);color:var(--accent)}
 .card-btn-play:hover{background:rgba(167,139,250,.2)}
@@ -131,7 +136,7 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 .empty-state p{font-family:var(--fh);font-size:18px;font-weight:700;color:var(--text2);margin-bottom:8px}
 
 /* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;overflow-y:auto}
 .modal-overlay.hidden{display:none}
 .modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;width:100%;max-width:520px;padding:2rem;animation:modalIn .2s cubic-bezier(.2,.8,.2,1);max-height:92vh;overflow-y:auto;box-shadow:0 24px 70px rgba(0,0,0,.35)}
 @keyframes modalIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
@@ -251,8 +256,10 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 .top-game-cover img{width:100%;height:100%;object-fit:cover;display:block}
 .top-game-info{flex:1;min-width:0;overflow:hidden}
 .top-game-name{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.top-game-sub{font-size:12px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.top-game-time{font-family:var(--fm);font-size:13px;color:var(--text2);flex-shrink:0;min-width:36px;text-align:right}
+.top-game-sub{font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.top-game-time{font-family:var(--fm);font-size:13px;color:var(--text);font-weight:600;flex-shrink:0;min-width:36px;text-align:right}
+.platform-stat-name{color:var(--text)!important;font-weight:600}.platform-stat-count{color:var(--text2)!important}
+[data-tooltip]{position:relative}[data-tooltip]::after{content:attr(data-tooltip);position:absolute;z-index:1200;right:0;top:calc(100% + 8px);width:max-content;max-width:230px;padding:7px 9px;border-radius:7px;background:var(--bg2);border:1px solid var(--border2);color:var(--text);font:500 11px/1.35 var(--fb);box-shadow:0 10px 24px rgba(0,0,0,.4);opacity:0;visibility:hidden;transform:translateY(-3px);pointer-events:none;transition:opacity .14s,transform .14s;white-space:normal;text-align:left}[data-tooltip]:hover::after,[data-tooltip]:focus-visible::after{opacity:1;visibility:visible;transform:translateY(0)}
 .platform-stat-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
 .platform-stat-row:last-child{border-bottom:none}
 .platform-stat-icon{font-size:16px;width:24px;text-align:center;flex-shrink:0}
@@ -269,7 +276,7 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 .nintendo-manual-title{font-size:12px;color:var(--text2);font-weight:700;margin-bottom:5px}
 .nintendo-manual-help{font-size:11px;color:var(--text3);line-height:1.45;margin-bottom:8px}
 .nintendo-manual-auth .form-input{width:100%;margin-bottom:8px;font-family:var(--fm);font-size:11px}
-.settings-trigger{font-size:18px;margin-right:4px}.settings-modal{max-width:760px}.settings-heading{display:flex;align-items:center;justify-content:space-between}.settings-heading .modal-title{margin-bottom:0}.settings-section-title{font-size:14px;font-weight:800;color:var(--text);margin:22px 0 4px}.settings-section-title .tab-beta{font-size:9px}
+.settings-modal{max-width:760px}.settings-heading{display:flex;align-items:center;justify-content:space-between}.settings-heading .modal-title{margin-bottom:0}.settings-tabs{display:flex;gap:5px;border-bottom:1px solid var(--border);margin:18px 0 4px;overflow-x:auto}.settings-tab{flex:1;min-width:max-content;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--text3);font:700 12px var(--fb);padding:10px 12px;cursor:pointer}.settings-tab:hover{color:var(--text2)}.settings-tab.active{color:var(--green);border-bottom-color:var(--green)}.settings-pane{display:none;padding-top:12px}.settings-pane.active{display:block;animation:pageIn .18s ease both}.settings-section-title{font-size:14px;font-weight:800;color:var(--text);margin:14px 0 8px}.settings-section-title .tab-beta{font-size:9px}.settings-theme-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.settings-theme-grid .theme-choice{width:100%;display:flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:8px;background:var(--bg3);color:var(--text2);padding:10px;cursor:pointer;text-align:left;font:600 12px var(--fb)}.settings-theme-grid .theme-choice:hover,.settings-theme-grid .theme-choice.active{border-color:var(--accent);background:var(--bg4);color:var(--text)}.theme-dot{width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,var(--dot-a),var(--dot-b));flex:none}.settings-scale-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.settings-scale-row .filter-select{min-width:145px}.settings-description{margin:0 0 13px;color:var(--text2);font-size:13px;line-height:1.5}
 .settings-modal .nintendo-sync-card{max-width:none;margin:0;padding:1rem 0 0;border:0;background:transparent}.settings-modal .nintendo-sync-icon{display:none}.settings-modal .nintendo-sync-copy{margin:8px 0 14px;max-width:none}.settings-modal .nintendo-sync-note{margin-top:12px}.nintendo-last-sync{font-size:11px;color:var(--text3);margin-top:12px}
 .settings-data-row{display:flex;align-items:center;justify-content:space-between;gap:16px;border:1px solid var(--border);border-radius:10px;padding:13px 14px}.settings-data-title{font-size:13px;color:var(--text);font-weight:700}.settings-data-actions{display:flex;gap:8px;flex-shrink:0}
 .settings-sync-options{display:flex;gap:18px;align-items:center;justify-content:center;margin-top:12px;font-size:11px;color:var(--text2)}.settings-sync-options label{display:flex;align-items:center;gap:6px}.settings-sync-options input{accent-color:var(--accent)}.settings-sync-options .filter-select{font-size:11px;padding:4px 7px}
@@ -291,6 +298,21 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 .year-mini-card{background:var(--bg4);border-radius:var(--rs);padding:10px 12px}
 .year-mini-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
 .year-mini-value{font-family:var(--fm);font-size:16px;font-weight:500;color:var(--text)}
+
+/* READABILITY PASS: keep secondary copy visible without flattening the hierarchy */
+.main-tab,.filter-tab,.btn,.form-label,.time-unit label,.detail-stat-label,.detail-section-label,
+.year-mini-label,.stat-label,.card-meta,.steam-setup-detail,.steam-setup-note,
+.nintendo-sync-note,.nintendo-manual-help,.backlog-import-id,.sr-year,.session-date,
+.bar-val,.pie-legend-val,.year-section-sub{font-weight:600;color:var(--text2)}
+.main-tab{font-weight:600}
+.stat-label,.detail-stat-label,.detail-section-label,.year-mini-label{letter-spacing:.55px}
+.download-empty,.empty-state{color:var(--text2)}
+.download-empty small,.empty-state small{color:var(--text2)}
+.download-card .steam-setup-detail{color:var(--text2)}
+.backlog-import-row.already-added{opacity:.8}
+.genre-tag span[style*="opacity"]{opacity:.82!important;color:var(--text2)}
+.detail-cover-info [style*="color"]{color:var(--text2)!important}
+.form-input,.form-select,.form-textarea{font-weight:500}
 
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
 @media(max-width:980px){main{padding:1.5rem}.game-grid{grid-template-columns:repeat(3,1fr)}.stats-row{grid-template-columns:repeat(2,1fr)}}
@@ -331,23 +353,6 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 .btn-login { background: var(--accent); color: white; }
 .btn-guest { background: var(--bg4); color: var(--text2); }
 
-/* ПОВНЕ ПРИХОВУВАННЯ ДЛЯ ГОСТЯ */
-body.guest-mode #addGameTrigger,
-body.guest-mode .add-game-btn, 
-body.guest-mode .edit-btn, 
-body.guest-mode .delete-btn,
-body.guest-mode .actions-menu,
-body.guest-mode .header-actions button {
-    display: none !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-}
-
-/* Заморозка карток, щоб не можна було відкрити меню */
-body.guest-mode .game-card {
-    pointer-events: none !important;
-    cursor: default;
-}
 /* --- БЛОК АВТОРИЗАЦІЇ --- */
 #login-overlay {
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -378,24 +383,7 @@ body.guest-mode .game-card {
 .btn-login { background: var(--accent); color: white; }
 .btn-guest { background: var(--bg4); color: var(--text2); }
 
-/* ПОВНИЙ ЗАХИСТ ВІД ВЗАЄМОДІЇ ДЛЯ ГОСТЯ */
-body.guest-mode .game-card, 
-body.guest-mode .grid-container, 
-body.guest-mode .stats-grid,
-body.guest-mode .add-game-btn,
-body.guest-mode #addGameTrigger {
-    pointer-events: none !important;
-    cursor: default;
-}
-
-body.guest-mode .add-game-btn, 
-body.guest-mode .edit-btn, 
-body.guest-mode .delete-btn,
-body.guest-mode #addGameTrigger,
-body.guest-mode .actions-menu {
-    display: none !important;
-}
-.login-kicker{font:700 10px var(--fm);letter-spacing:.15em;color:var(--green);margin-bottom:9px}.login-copy{font-size:13px;line-height:1.5;color:var(--text2);margin:-12px 0 22px}.login-box input+input{margin-top:-10px}.login-google,.login-local{width:100%;padding:11px;border-radius:10px;font:600 13px var(--fb);cursor:pointer;transition:.15s}.login-google{margin-top:11px;border:1px solid var(--border2);background:var(--bg3);color:var(--text)}.login-google:hover{border-color:var(--accent);background:var(--bg4)}.login-local{margin-top:5px;border:0;background:transparent;color:var(--text3)}.login-local:hover{color:var(--text2)}
+.login-kicker{font:700 10px var(--fm);letter-spacing:.15em;color:var(--green);margin-bottom:9px}.login-copy{font-size:13px;line-height:1.5;color:var(--text2);margin:-12px 0 22px}.login-box input+input{margin-top:-10px}.login-google,.login-reset{width:100%;padding:11px;border-radius:10px;font:600 13px var(--fb);cursor:pointer;transition:.15s}.login-google{margin-top:11px;border:1px solid var(--border2);background:var(--bg3);color:var(--text)}.login-google:hover{border-color:var(--accent);background:var(--bg4)}.login-reset{margin-top:5px;border:0;background:transparent;color:var(--text3)}.login-reset:hover{color:var(--text2)}
 .steam-onboarding{max-width:560px;text-align:center}.steam-onboarding-icon{font-size:42px;margin-bottom:8px}.steam-onboarding-copy{color:var(--text2);font-size:13px;line-height:1.55;margin:-8px 0 20px}.steam-onboarding-actions{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}.steam-onboarding-skip{border:0;background:transparent;color:var(--text3);font:12px var(--fb);cursor:pointer}.steam-onboarding-skip:hover{color:var(--text2)}
 </style>
 </head>
@@ -412,34 +400,22 @@ body.guest-mode .actions-menu {
             <button class="btn-guest" id="auth-mode-btn">Створити акаунт</button>
         </div>
         <button class="login-google" id="auth-google-btn">G&nbsp;&nbsp; Продовжити з Google</button>
-        <button class="login-local" id="auth-reset-btn">Забув пароль?</button>
-        <button class="login-local" id="auth-local-btn">Продовжити локально</button>
+        <button class="login-reset" id="auth-reset-btn">Забув пароль?</button>
         <p id="login-error" style="color: var(--coral); display: none; margin-top: 15px; font-size: 14px;"></p>
     </div>
 </div>
 
 <div id="session-bar">
   <div class="logo">PRG<span>Launcher</span></div>
-  <div class="win-controls">
-    <button class="win-btn" id="compact-toggle" title="Floating mini-bar">▲</button>
-    <button class="win-btn" id="win-min" title="Minimize">─</button>
-    <button class="win-btn" id="win-max" title="Maximize">□</button>
-    <button class="win-btn close" id="win-close" title="Hide to tray">✕</button>
-  </div>
   <div class="bar-right">
-    <button class="theme-toggle settings-trigger" id="settings-btn" title="Налаштування">⚙</button>
+    <button class="settings-trigger" id="settings-btn" title="Налаштування" aria-label="Відкрити налаштування" data-tooltip="Відкрити налаштування">⚙</button>
     <span class="sync-badge off" id="sync-badge">Offline</span>
-    <div class="theme-wrap">
-      <button class="theme-toggle" id="theme-toggle" title="Змінити тему">◐</button>
-      <div class="theme-menu" id="theme-menu">
-        <div class="theme-menu-title">Тема оформлення</div>
-        <button class="theme-choice" data-theme-choice="neon" style="--dot-a:#7b2fff;--dot-b:#00ff41"><span class="theme-dot"></span>Neon Violet</button>
-        <button class="theme-choice" data-theme-choice="ocean" style="--dot-a:#0284c7;--dot-b:#22d3ee"><span class="theme-dot"></span>Ocean</button>
-        <button class="theme-choice" data-theme-choice="ember" style="--dot-a:#c2410c;--dot-b:#fbbf24"><span class="theme-dot"></span>Ember</button>
-        <button class="theme-choice" data-theme-choice="rose" style="--dot-a:#be185d;--dot-b:#f0abfc"><span class="theme-dot"></span>Rose</button>
-        <button class="theme-choice" data-theme-choice="slate" style="--dot-a:#475569;--dot-b:#e2e8f0"><span class="theme-dot"></span>Slate</button>
-      </div>
-    </div>
+  </div>
+  <div class="win-controls">
+    <button class="win-btn" id="compact-toggle" title="Floating mini-bar" aria-label="Відкрити міні-бар" data-tooltip="Міні-режим: показує компактну панель поверх вікон">▲</button>
+    <button class="win-btn" id="win-min" title="Minimize" aria-label="Згорнути вікно" data-tooltip="Згорнути застосунок">─</button>
+    <button class="win-btn" id="win-max" title="Maximize" aria-label="Розгорнути вікно" data-tooltip="Розгорнути або відновити розмір вікна">□</button>
+    <button class="win-btn close" id="win-close" title="Hide to tray" aria-label="Сховати в трей" data-tooltip="Сховати PRGLauncher у системний трей">✕</button>
   </div>
 </div>
 
@@ -470,7 +446,6 @@ body.guest-mode .actions-menu {
         <button class="filter-tab" data-filter="Backlog">Backlog</button>
         <button class="filter-tab" data-filter="Completed">Completed</button>
       </div>
-      <button class="btn btn-ghost" id="refetch-tags-btn" title="Оновити всі теги англійською">🔄 Refresh Tags</button>
       <button class="btn btn-primary" id="add-game-btn">+ Add Game</button>
     </div>
     <div class="filter-bar">
@@ -501,9 +476,9 @@ body.guest-mode .actions-menu {
     </div>
     <div class="stats-row">
       <div class="stat-card"><div class="stat-label">Total Games</div><div class="stat-value" id="stat-total">0</div></div>
-      <div class="stat-card"><div class="stat-label">Playing</div><div class="stat-value" id="stat-playing" style="color:var(--playing)">0</div></div>
+      <button type="button" class="stat-card stat-filter" data-status="Playing" aria-pressed="false" title="Показати ігри зі статусом Playing"><div class="stat-label">Playing</div><div class="stat-value" id="stat-playing" style="color:var(--playing)">0</div></button>
       <div class="stat-card"><div class="stat-label">Total Playtime</div><div class="stat-value" id="stat-playtime">0<span>h</span></div></div>
-      <div class="stat-card"><div class="stat-label">Completed</div><div class="stat-value" id="stat-completed" style="color:var(--completed)">0</div></div>
+      <button type="button" class="stat-card stat-filter" data-status="Completed" aria-pressed="false" title="Показати завершені ігри"><div class="stat-label">Completed</div><div class="stat-value" id="stat-completed" style="color:var(--completed)">0</div></button>
     </div>
     <div class="game-grid" id="game-grid"></div>
   </div>
@@ -550,11 +525,36 @@ body.guest-mode .actions-menu {
 </div>
 
 <div class="modal-overlay hidden" id="settings-modal">
-    <div class="modal settings-modal">
-      <div class="settings-heading"><div class="modal-title">Налаштування</div><button class="win-btn close" id="settings-close">✕</button></div>
+    <div class="modal settings-modal" role="dialog" aria-modal="true" aria-labelledby="settings-title" tabindex="-1">
+      <div class="settings-heading"><div class="modal-title" id="settings-title">Налаштування</div><button class="win-btn close" id="settings-close" title="Закрити" aria-label="Закрити налаштування" data-tooltip="Закрити налаштування">✕</button></div>
+      <div class="settings-tabs" role="tablist" aria-label="Розділи налаштувань">
+        <button class="settings-tab active" type="button" role="tab" data-settings-tab="general">Загальні</button>
+        <button class="settings-tab" type="button" role="tab" data-settings-tab="appearance">Вигляд</button>
+        <button class="settings-tab" type="button" role="tab" data-settings-tab="integrations">Інтеграції</button>
+        <button class="settings-tab" type="button" role="tab" data-settings-tab="data">Дані</button>
+      </div>
+      <section class="settings-pane active" data-settings-pane="general">
       <div class="settings-section-title">PRG Account</div>
-      <div class="settings-data-row"><div><div class="settings-data-title" id="profile-email-label">Локальний профіль</div><div class="nintendo-manual-help" id="profile-link">Увійди, щоб створити персональне посилання</div></div><div class="settings-data-actions"><button class="btn btn-ghost btn-sm" id="copy-profile-link-btn">Копіювати сайт</button><button class="btn btn-danger btn-sm" id="sign-out-btn">Вийти</button></div></div>
+      <div class="settings-data-row"><div><div class="settings-data-title" id="profile-email-label">PRG Account не підключено</div><div class="nintendo-manual-help" id="profile-link">Увійди, щоб створити персональне посилання</div></div><div class="settings-data-actions"><button class="btn btn-ghost btn-sm" id="copy-profile-link-btn">Копіювати сайт</button><button class="btn btn-danger btn-sm" id="sign-out-btn">Вийти</button></div></div>
+      <div class="settings-section-title">Мова</div>
+      <div class="settings-scale-row"><select id="language-select" class="filter-select" aria-label="Мова інтерфейсу"><option value="uk">Українська</option><option value="en">English</option></select><span class="nintendo-manual-help">Застосовується одразу та зберігається для наступних запусків.</span></div>
+      </section>
+      <section class="settings-pane" data-settings-pane="appearance">
+        <div class="settings-section-title">Тема оформлення</div>
+        <p class="settings-description">Тема застосовується одразу та зберігається для наступних запусків.</p>
+        <div class="settings-theme-grid">
+          <button class="theme-choice" data-theme-choice="neon" style="--dot-a:#7b2fff;--dot-b:#00ff41"><span class="theme-dot"></span>Neon Violet</button>
+          <button class="theme-choice" data-theme-choice="ocean" style="--dot-a:#0284c7;--dot-b:#22d3ee"><span class="theme-dot"></span>Ocean</button>
+          <button class="theme-choice" data-theme-choice="ember" style="--dot-a:#c2410c;--dot-b:#fbbf24"><span class="theme-dot"></span>Ember</button>
+          <button class="theme-choice" data-theme-choice="rose" style="--dot-a:#be185d;--dot-b:#f0abfc"><span class="theme-dot"></span>Rose</button>
+          <button class="theme-choice" data-theme-choice="slate" style="--dot-a:#475569;--dot-b:#e2e8f0"><span class="theme-dot"></span>Slate</button>
+        </div>
+        <div class="settings-section-title">Масштаб інтерфейсу</div>
+        <div class="settings-scale-row"><select id="ui-scale-select" class="filter-select" aria-label="Масштаб інтерфейсу"><option value="0.9">90% · компактний</option><option value="1">100% · стандартний</option><option value="1.1">110% · більший</option><option value="1.2">120% · великий</option></select><span class="nintendo-manual-help">Збільшує текст і всі елементи інтерфейсу.</span></div>
+      </section>
+      <section class="settings-pane" data-settings-pane="integrations">
       <div class="settings-section-title">Steam</div>
+      <div class="settings-data-row" id="steam-account-row"><div><div class="settings-data-title" id="steam-account-label">Steam-профіль не підключено</div><div class="nintendo-manual-help" id="steam-account-status">Профіль використовується для імпорту бібліотеки.</div></div><div class="settings-data-actions"><button class="btn btn-danger btn-sm" id="steam-disconnect-btn" disabled>Від’єднати Steam</button></div></div>
       <label class="form-label" for="steam-profile-url">Посилання на Steam-профіль</label>
       <input class="form-input" id="steam-profile-url" placeholder="https://steamcommunity.com/id/твій-профіль" autocomplete="off">
       <p class="nintendo-manual-help">Профіль і «Деталі ігор» мають бути публічними. Завантажимо доступну онлайн-бібліотеку, включно з невстановленими іграми. Вибери, що додати.</p>
@@ -583,10 +583,15 @@ body.guest-mode .actions-menu {
       </div>
       <div class="nintendo-sync-note">Після входу ми перевіримо доступність історії ігор та часу. Дані не імпортуються автоматично без твого підтвердження.</div>
     </section>
+    </section>
+    <section class="settings-pane" data-settings-pane="data">
     <div class="settings-section-title">Дані</div>
     <div class="settings-data-row"><div><div class="settings-data-title">Резервна копія</div><div class="nintendo-manual-help">Зберігає каталог, сесії, тему та списки ігнорування.</div></div><div class="settings-data-actions"><button class="btn btn-ghost btn-sm" id="export-backup-btn">Export JSON</button><button class="btn btn-ghost btn-sm" id="import-backup-btn">Import JSON</button></div></div>
     <div class="settings-section-title">Оновлення</div>
     <div class="settings-data-row"><div><div class="settings-data-title">PRGLauncher <span id="app-version-label"></span></div><div class="nintendo-manual-help" id="update-status-label">Перевірка доступна для встановленої версії.</div></div><div class="settings-data-actions"><button class="btn btn-ghost btn-sm" id="check-update-btn">Перевірити оновлення</button><button class="btn btn-primary btn-sm" id="download-update-btn" style="display:none">Завантажити</button><button class="btn btn-primary btn-sm" id="install-update-btn" style="display:none">Встановити</button></div></div>
+    <div class="settings-section-title">Обслуговування бібліотеки</div>
+    <div class="settings-data-row"><div><div class="settings-data-title">Оновити теги</div><div class="nintendo-manual-help">Знаходить жанри й теги для ігор, де їх ще немає.</div></div><div class="settings-data-actions"><button class="btn btn-ghost btn-sm" id="refetch-tags-btn" title="Оновити всі теги англійською">🔄 Refresh Tags</button></div></div>
+    </section>
     </div>
   </div>
 
@@ -611,6 +616,12 @@ body.guest-mode .actions-menu {
   <div class="modal" style="max-width:620px">
     <div class="modal-title" id="backlog-import-title">Нові ігри у BACKLOG</div>
     <p style="font-size:13px;color:var(--text2);margin:-.7rem 0 1rem">Обери ігри та статус для імпорту в PRGLauncher.</p>
+    <div class="backlog-import-toolbar">
+      <input class="form-input backlog-import-search" id="backlog-import-search" type="search" placeholder="Пошук ігор у списку" autocomplete="off">
+      <button class="btn btn-ghost btn-sm" type="button" id="backlog-import-select-all">Обрати всі</button>
+      <button class="btn btn-ghost btn-sm" type="button" id="backlog-import-clear-all">Зняти вибір</button>
+      <span class="backlog-import-match" id="backlog-import-match"></span>
+    </div>
     <div class="backlog-import-list" id="backlog-import-list"><div class="sr-msg">Завантаження даних Steam…</div></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" id="backlog-import-skip">Не зараз</button>
@@ -830,7 +841,7 @@ const FB_DOC_ID = 'gamevault-data';
 
 document.documentElement.dataset.theme=localStorage.getItem('gv-theme')||'neon';
 
-let games = JSON.parse(localStorage.getItem('gv-games') || '[]');
+let games = [];
 let activeGameId = localStorage.getItem('gv-active') || null;
 let activeStart = localStorage.getItem('gv-start') ? parseInt(localStorage.getItem('gv-start')) : null;
 let activeSource = localStorage.getItem('gv-active-source') || 'manual';
@@ -849,11 +860,12 @@ let libraryQuery = '';
 let librarySort = localStorage.getItem('gv-library-sort-v1') || 'recent';
 let editingId = null;
 let detailId = null;
+let editReturnToDetailId = null;
 let timeEditId = null;
 let selectedPlatform = 'PC';
 let selectedRating = 0;
 let searchTimeout = null;
-let fbApp=null,fbDb=null,fbAuth=null,fbUnsub=null,syncActive=false,statsPublishTimer=null,currentUser=null,authMode='signin',localOnly=false;
+let fbApp=null,fbDb=null,fbAuth=null,fbUnsub=null,syncActive=false,statsPublishTimer=null,currentUser=null,authMode='signin';
 const FB_HARDCODED = {
   apiKey: 'AIzaSyBL-IHjUiSlmJ2N_caWx_MWAI8v2RL4Rpw',
   authDomain: 'gametracker-30c93.firebaseapp.com',
@@ -862,6 +874,43 @@ const FB_HARDCODED = {
   appId: '1:982157495201:web:950a69a05274c04f1899e0'
 };
 let fbConfig = FB_HARDCODED;
+
+const UI_COPY=[
+  ['Твій ігровий простір','Your game space'],['Увійди','Sign in'],['Створити акаунт','Create account'],['Продовжити з Google','Continue with Google'],['Забув пароль?','Forgot password?'],['PRG Account не підключено','PRG Account is not connected'],
+  ['Плаваючий мінібар','Floating mini-bar'],['Згорнути','Minimize'],['Розгорнути','Maximize'],['Сховати в трей','Hide to tray'],['Налаштування','Settings'],['Відкрити налаштування','Open settings'],['Закрити налаштування','Close settings'],['Міні-режим: показує компактну панель поверх вікон','Mini mode: shows a compact panel above windows'],['Згорнути застосунок','Minimize app'],['Розгорнути або відновити розмір вікна','Maximize or restore window'],['Сховати PRGLauncher у системний трей','Hide PRGLauncher in the system tray'],['Закрити налаштування','Close settings'],['Офлайн','Offline'],['Пауза','Pause'],
+  ['Бібліотека','Library'],['Завантаження','Downloads'],['Статистика','Statistics'],['Усі','All'],['Граю','Playing'],['Беклог','Backlog'],['Пройдено','Completed'],['+ Додати гру','+ Add Game'],
+  ['Усі роки','All years'],['Усі оцінки','All ratings'],['Тільки з оцінкою','Rated only'],['Без оцінки','Unrated'],['Усі платформи','All platforms'],['Пошук у бібліотеці…','Search library…'],['Остання сесія','Last session'],['Найбільше часу','Most playtime'],['Назва A–Я','Title A–Z'],['Нещодавно додані','Recently added'],
+  ['Загальні','General'],['Вигляд','Appearance'],['Інтеграції','Integrations'],['Дані','Data'],['Мова','Language'],['Мова інтерфейсу','Interface language'],['Застосовується одразу та зберігається для наступних запусків.','Applies immediately and is saved for future launches.'],
+  ['Тема оформлення','Theme'],['Неоновий фіолетовий','Neon Violet'],['Океан','Ocean'],['Жар','Ember'],['Рожева','Rose'],['Графіт','Slate'],['Масштаб інтерфейсу','Interface scale'],['90% · компактний','90% · compact'],['100% · стандартний','100% · standard'],['110% · більший','110% · large'],['120% · великий','120% · extra large'],['Збільшує текст і всі елементи інтерфейсу.','Scales text and all interface elements.'],
+  ['Посилання на Steam-профіль','Steam profile link'],['Завантажити бібліотеку Steam','Load Steam library'],['Імпорт встановлених ігор','Import installed games'],['Імпорт BACKLOG','Import BACKLOG'],['Steam-профіль підключено','Steam profile connected'],['Steam-профіль не підключено','No Steam profile connected'],['Профіль використовується для імпорту бібліотеки.','This profile is used for library imports.'],['Встав посилання нижче, щоб підключити профіль для імпорту.','Paste a link below to connect a profile for importing.'],['Від’єднати Steam','Disconnect Steam'],['Від’єднати Steam-профіль','Disconnect Steam profile'],['Немає підключеного Steam-профілю','No Steam profile connected'],['Від’єднати Steam-профіль? Ігри вже додані до лаунчера залишаться.','Disconnect Steam profile? Games already added to the launcher will remain.'],['Підключення Nintendo Account','Connect Nintendo Account'],['Не підключено','Not connected'],['Підключити Nintendo Account','Connect Nintendo Account'],['Запросити весь список','Request full list'],['Синхронізувати зараз','Sync now'],['Від’єднати Nintendo Account','Disconnect Nintendo Account'],['Підтягнути обкладинки для Nintendo-ігор','Fetch Nintendo game covers'],
+  ['Резервна копія','Backup'],['Оновлення','Updates'],['Обслуговування бібліотеки','Library maintenance'],['Оновити теги','Refresh tags'],['Копіювати сайт','Copy website'],['Вийти','Sign out'],['Перевірити оновлення','Check for updates'],['Завантажити','Download'],['Встановити','Install'],
+  ['Підготовка гри','Preparing game'],['Гра ще не готова','Game is not ready yet'],['До бібліотеки','Back to library'],['Нові ігри у BACKLOG','New BACKLOG games'],['Обери ігри та статус для імпорту в PRGLauncher.','Choose games and a status to import into PRGLauncher.'],['Пошук ігор у списку','Search games in the list'],['Обрати всі','Select all'],['Зняти вибір','Clear selection'],['Не зараз','Not now'],['Додати вибрані','Add selected'],
+  ['Оновити теги (EN)','Refresh tags (EN)'],['Скасувати','Cancel'],['Почати','Start'],['Додати гру','Add Game'],['Редагувати гру','Edit Game'],['Пошук у RAWG','Search on RAWG'],['Назва *','Title *'],['Статус','Status'],['Пріоритет беклогу','Backlog priority'],['Рік додавання','Year added'],['Платформа','Platform'],['Обкладинка URL','Cover URL'],['Нотатки','Notes'],['Зберегти','Save'],['Зберегти нотатки','Save notes'],['Закрити','Close'],['Видалити','Delete'],['Видалити сесію','Delete session'],['Редагувати час','Edit time'],['Журнал сесій','Session log'],['Оцінка','Rating'],['Скинути','Clear'],['Змінити час','Edit time'],['Загальний час гри','Total playtime'],['Сесії','Sessions'],['Додати сесію вручну','Add session manually'],['Дата','Date'],['Год','Hour'],['Хв','Min'],['Зберегти зміни','Save changes'],
+  ['Усього ігор','Total Games'],['Загальний час','Total Playtime'],['Найпопулярніші ігри за часом','Top Games by Playtime'],['Розподіл за статусом','Status Breakdown'],['Платформи','Platform Distribution'],['Найкращі жанри','Top Genres'],['Активність (останні 26 тижнів)','Activity (last 26 weeks)'],['Статистика сесій','Session Stats'],['Найкраще оцінені ігри','Top Rated Games'],['Розподіл оцінок','Rating Distribution'],
+  ['Інформація','Info'],['Грати в Steam','Play in Steam'],['Почати таймер','Start timer'],['Зараз граю','Now playing'],['Очікування','Stand By'],['Змінити статус','Change status'],['Змінити статус гри: ','Change game status: '],['Ще немає даних','No data yet'],['Немає сесій','No sessions'],['Ще немає сесій','No sessions yet'],['Редагувати','Edit'],['сесія','session'],['сесій','sessions'],['ігри','games'],['гра','game'],
+  ['PRG ОБЛІКОВИЙ ЗАПИС','PRG ACCOUNT'],['Синхронізовано','Synced'],['Помилка синхронізації','Sync error'],['Немає результатів','No results'],['Пошук…','Searching…'],['Завантаження даних Steam…','Loading Steam data…'],['Читаємо Steam…','Reading Steam…'],['Показано','Showing'],['з','of'],['Вже є у лаунчері','Already in launcher'],['Ігор не знайдено. Перевір Steam на цьому ПК або обери інше джерело імпорту.','No games found. Check Steam on this PC or choose another import source.'],
+  ['Гра готова до запуску','Game is ready to launch'],['Steam знайшов установлену гру','Steam found the installed game'],['Запустити гру і таймер','Launch game and timer'],['Steam готує завантаження…','Steam is preparing the download…'],['Завантаження скасовано в Steam','Download cancelled in Steam'],['Steam прибрав гру з черги','Steam removed the game from the queue'],['Спробувати завантажити ще раз','Try downloading again'],['Steam не знайдено','Steam was not found'],['Встановіть Steam або запустіть його хоча б один раз','Install Steam or start it at least once'],['Очікуємо, поки Steam почне встановлення…','Waiting for Steam to start installing…'],['Запит на встановлення надіслано Steam','Install request sent to Steam'],['Перевіряємо Steam…','Checking Steam…'],
+  ['У цьому фільтрі поки порожньо','This filter is empty'],['Спробуй змінити фільтри або додай нову гру до бібліотеки.','Try changing filters or adding a game to your library.'],['Ще немає сесій','No sessions yet'],['Створи PRG-акаунт — твоя бібліотека та сайт будуть тільки твоїми.','Create a PRG Account — your library and website will be yours alone.'],['У мене вже є акаунт','I already have an account'],['Увійди, щоб синхронізувати бібліотеку та отримати власну сторінку статистики.','Sign in to sync your library and get your own statistics page.'],['Посилання скопійовано','Link copied']
+];
+const UK_TEXT=new Map(UI_COPY.map(([uk,en])=>[en,uk]));
+const EN_TEXT=new Map(UI_COPY.map(([uk,en])=>[uk,en]));
+let currentLanguage=localStorage.getItem('gv-language')==='en'?'en':'uk';
+const staticTextSources=new WeakMap(),staticAttributeSources=new WeakMap();
+function t(value){if(value===null||value===undefined)return value;return (currentLanguage==='uk'?UK_TEXT:EN_TEXT).get(String(value))||String(value);}
+function translateDom(root=document.body){
+  if(!root)return;
+  const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode(node){const tag=node.parentElement?.tagName;return ['SCRIPT','STYLE'].includes(tag)||!node.nodeValue.trim()?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT;}});
+  const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
+  nodes.forEach(node=>{const source=staticTextSources.get(node)||node.nodeValue;staticTextSources.set(node,source);const prefix=source.match(/^\s*/)?.[0]||'',suffix=source.match(/\s*$/)?.[0]||'',translated=t(source.trim());node.nodeValue=prefix+translated+suffix;});
+  root.querySelectorAll?.('[title],[placeholder],[aria-label],[data-tooltip]').forEach(element=>{let attrs=staticAttributeSources.get(element);if(!attrs){attrs={};staticAttributeSources.set(element,attrs);}['title','placeholder','aria-label','data-tooltip'].forEach(attribute=>{if(!element.hasAttribute(attribute))return;const source=attrs[attribute]||element.getAttribute(attribute);attrs[attribute]=source;element.setAttribute(attribute,t(source));});});
+}
+function applyLanguage(language){
+  currentLanguage=language==='en'?'en':'uk';localStorage.setItem('gv-language',currentLanguage);document.documentElement.lang=currentLanguage;
+  const select=document.getElementById('language-select');if(select)select.value=currentLanguage;
+  translateDom();
+  if(typeof buildFilterBar==='function'){buildFilterBar();renderGrid();updateStats();if(document.getElementById('page-stats')?.classList.contains('active'))renderStatsPage();}
+  translateDom();
+}
 
 const profileStorageKey=key=>currentUser?`${key}:${currentUser.uid}`:key;
 const loadProfileGames=()=>{try{return JSON.parse(localStorage.getItem(profileStorageKey('gv-games'))||'[]');}catch{return [];}};
@@ -876,7 +925,8 @@ function fmtTime(ms) {
   return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
 }
 function fmtHours(ms){const h=ms/3600000;return h<1?Math.round(ms/60000)+'m':h.toFixed(1)+'h'}
-function fmtDate(ts){if(!ts)return'—';return new Date(ts).toLocaleDateString('uk-UA',{day:'2-digit',month:'short',year:'numeric'})}
+function fmtDate(ts){if(!ts)return'—';return new Date(ts).toLocaleDateString(currentLanguage==='en'?'en-US':'uk-UA',{day:'2-digit',month:'short',year:'numeric'})}
+function sessionCountText(count){if(currentLanguage==='en')return `${count} ${count===1?'session':'sessions'}`;const mod10=count%10,mod100=count%100;return `${count} ${mod10===1&&mod100!==11?'сесія':mod10>=2&&mod10<=4&&(mod100<12||mod100>14)?'сесії':'сесій'}`;}
 function getGameYear(g){return new Date(g.added||Date.now()).getFullYear()}
 
 // YEAR HELPERS
@@ -941,12 +991,20 @@ function initFb(cfg) {
       if(currentUser?.uid!==user?.uid)return;
       nintendoProfileReady=Boolean(user&&status);
       if(status?.connected){setNintendoSyncStatus('Nintendo Account авторизовано',true);nintendoConnectBtn.textContent='Завантажити play activity';nintendoConnectBtn.dataset.checking='2';startNintendoAutoSync();}
-      updateProfileUI();if(user){localOnly=false;await startUserSync(user);hideLogin();}else if(!localOnly){setSyncBadge('off');showLogin();}
+      updateProfileUI();if(user){await startUserSync(user);hideLogin();}else{setSyncBadge('off');showLogin();}
     });
   } catch(e){setSyncBadge('err');}
 }
 function userLibraryRef(){return currentUser?window._fbImports.doc(fbDb,'users',currentUser.uid,'profile','library'):null;}
-function updateProfileUI(){const email=currentUser?.email||'Локальний профіль';const label=document.getElementById('profile-email-label'),link=document.getElementById('profile-link');if(label)label.textContent=email;if(link)link.textContent=currentUser?`prgtracker.netlify.app/?u=${currentUser.uid}`:'Увійди, щоб створити персональне посилання';}
+function updateSteamProfileUI(){
+  const input=document.getElementById('steam-profile-url'),label=document.getElementById('steam-account-label'),status=document.getElementById('steam-account-status'),disconnect=document.getElementById('steam-disconnect-btn');
+  const profile=currentUser?localStorage.getItem(profileStorageKey('gv-steam-profile-url'))||'':'';
+  if(input)input.value=profile;
+  if(label)label.textContent=t(profile?'Steam-профіль підключено':'Steam-профіль не підключено');
+  if(status)status.textContent=t(profile?'Профіль використовується для імпорту бібліотеки.':'Встав посилання нижче, щоб підключити профіль для імпорту.');
+  if(disconnect){disconnect.disabled=!profile;disconnect.title=t(profile?'Від’єднати Steam-профіль':'Немає підключеного Steam-профілю');}
+}
+function updateProfileUI(){const email=currentUser?.email||t('PRG Account не підключено');const label=document.getElementById('profile-email-label'),link=document.getElementById('profile-link');if(label)label.textContent=email;if(link)link.textContent=currentUser?`prgtracker.netlify.app/?u=${currentUser.uid}`:'Увійди, щоб створити персональне посилання';updateSteamProfileUI();}
 async function startUserSync(user){
   if(fbUnsub)fbUnsub();const ref=userLibraryRef();const {getDoc,onSnapshot,setDoc}=window._fbImports;
   let newProfile=false;
@@ -977,7 +1035,7 @@ async function pushToFb(){
   if(!fbDb||!syncActive||!currentUser)return;
   try{const{setDoc}=window._fbImports;const ref=userLibraryRef();const ts=Date.now();localStorage.setItem(profileStorageKey('gv-local-ts'),String(ts));await Promise.all([setDoc(ref,{games,ts,ownerUid:currentUser.uid,statsDashboard:makeStatsDashboard(ts)},{merge:true}),publishStatsDashboard(ts)]);}catch(e){console.error('[Stats] Could not publish dashboard:',e);}
 }
-function setSyncBadge(s){const b=document.getElementById('sync-badge');b.className='sync-badge '+s;b.textContent=s==='ok'?'Synced':s==='err'?'Sync Error':'Offline';}
+function setSyncBadge(s){const b=document.getElementById('sync-badge');b.className='sync-badge '+s;b.textContent=t(s==='ok'?'Synced':s==='err'?'Sync error':'Offline');}
 
 // Public web dashboard payload. Keep this one-way and intentionally free from
 // notes, Steam IDs and the full game catalogue: the launcher remains the source
@@ -1057,14 +1115,19 @@ function showCoverPreview(url){const img=document.getElementById('cover-preview'
 
 // TIMER
 function startTimer(gameId,source='manual'){
+  const game=getGame(gameId);if(!game)return;
   if(activeGameId&&activeGameId!==gameId)stopTimer(true);
   if(activeGameId===gameId)return;
   activeGameId=gameId; activeStart=Date.now();activeSource=source;
   localStorage.setItem('gv-active',activeGameId); localStorage.setItem('gv-start',String(activeStart));localStorage.setItem('gv-active-source',activeSource);
   const idx=games.findIndex(g=>g.id===gameId);
-  if(idx>0){const[g]=games.splice(idx,1);games.unshift(g);save();}
+  if(idx>0){const[g]=games.splice(idx,1);games.unshift(g);}
+  const changedStatus=game.status==='Backlog';
+  if(changedStatus)game.status='Playing';
+  save();
+  if(changedStatus)pushToFb().catch(error=>console.warn('[Sync] Status update failed',error));
   clearInterval(timerInterval); timerInterval=setInterval(tickTimer,500);
-  updateSessionBar(); renderGrid();
+  updateSessionBar(); renderGrid();updateStats();
 }
 async function launchAndTrack(gameId){
   const game=getGame(gameId);
@@ -1137,6 +1200,27 @@ async function getSteamStoreGames(appIds){
   }
   return result;
 }
+function getBacklogImportRows(){return [...document.querySelectorAll('#backlog-import-list .backlog-import-row')];}
+function updateBacklogImportButton(){
+  const add=document.getElementById('backlog-import-add');
+  const selected=getBacklogImportRows().filter(row=>row.querySelector('.backlog-import-check:not(:disabled)')?.checked).length;
+  add.disabled=!selected;add.textContent=`Додати вибрані (${selected})`;
+}
+function filterBacklogImport(){
+  const query=document.getElementById('backlog-import-search').value.trim().toLocaleLowerCase();
+  const rows=getBacklogImportRows();let shown=0;
+  rows.forEach(row=>{const match=!query||row.dataset.search.includes(query);row.classList.toggle('filtered-out',!match);if(match)shown++;});
+  document.getElementById('backlog-import-match').textContent=rows.length?`Показано ${shown} з ${rows.length}`:'';
+}
+function setBacklogImportSelection(checked,onlyVisible=false){
+  getBacklogImportRows().forEach(row=>{if(onlyVisible&&row.classList.contains('filtered-out'))return;const input=row.querySelector('.backlog-import-check');if(input&&!input.disabled)input.checked=checked;});
+  updateBacklogImportButton();
+}
+function prepareBacklogImportControls(){
+  const search=document.getElementById('backlog-import-search');search.value='';
+  getBacklogImportRows().forEach(row=>{row.dataset.search=[row.querySelector('.backlog-import-name')?.textContent,row.querySelector('.backlog-import-id')?.textContent].filter(Boolean).join(' ').toLocaleLowerCase();row.querySelector('.backlog-import-check')?.addEventListener('change',updateBacklogImportButton);});
+  filterBacklogImport();updateBacklogImportButton();
+}
 async function showBacklogImport(appIds,alreadyAdded=new Set(),newGameIds=new Set(appIds),providedGames=null){
   const owner=currentUser?.uid;
   const modal=document.getElementById('backlog-import-modal'),list=document.getElementById('backlog-import-list');
@@ -1154,8 +1238,7 @@ async function showBacklogImport(appIds,alreadyAdded=new Set(),newGameIds=new Se
   const existingCount=backlogImportGames.filter(game=>alreadyAdded.has(Number(game.appId))).length;
   const newCount=backlogImportGames.filter(game=>newGameIds.has(Number(game.appId))&&!alreadyAdded.has(Number(game.appId))).length;
   document.getElementById('backlog-import-title').textContent=`У BACKLOG додалося ${newCount} нових ігор${existingCount?` · ${existingCount} уже є у лаунчері`:''}`;
-  document.getElementById('backlog-import-add').disabled=!backlogImportGames.some(game=>!alreadyAdded.has(Number(game.appId)));
-  document.getElementById('backlog-import-add').textContent='Додати вибрані';
+  prepareBacklogImportControls();
 }
 async function syncSteamBacklog(collection){
   if(!currentUser || !syncActive)return;
@@ -1274,17 +1357,38 @@ function getFilteredGames(){
   else list.sort((a,b)=>(b.lastPlayed||0)-(a.lastPlayed||0));
   return list;
 }
+const GAME_STATUSES=['Backlog','Playing','Completed'];
+function closeQuickStatusMenu(){document.getElementById('quick-status-menu')?.remove();}
+function setGameStatus(gameId,status){
+  const game=getGame(gameId);if(!game||!GAME_STATUSES.includes(status)||game.status===status)return;
+  game.status=status;save();pushToFb().catch(error=>console.warn('[Sync] Status update failed',error));
+  buildFilterBar();renderGrid();updateStats();
+  if(detailId===gameId&&document.getElementById('detail-modal').classList.contains('hidden')===false)openDetail(gameId);
+}
+function openQuickStatusMenu(gameId,anchor){
+  closeQuickStatusMenu();
+  const game=getGame(gameId);if(!game)return;
+  const menu=document.createElement('div');menu.id='quick-status-menu';menu.className='quick-status-menu';menu.setAttribute('role','menu');
+  GAME_STATUSES.forEach(status=>{const button=document.createElement('button');button.type='button';button.textContent=t(status);button.classList.toggle('active',status===game.status);button.onclick=event=>{event.stopPropagation();setGameStatus(gameId,status);closeQuickStatusMenu();};menu.appendChild(button);});
+  document.body.appendChild(menu);
+  const rect=anchor.getBoundingClientRect();const top=Math.min(window.innerHeight-menu.offsetHeight-10,rect.bottom+6);const left=Math.min(window.innerWidth-menu.offsetWidth-10,Math.max(10,rect.left));menu.style.top=`${Math.max(10,top)}px`;menu.style.left=`${left}px`;
+}
+function createStatusButton(game,detail=false){
+  const badge=document.createElement('button');badge.type='button';badge.className=`card-status-badge status-control badge-${game.status.toLowerCase()}`;badge.textContent=t(game.status);badge.title=t('Змінити статус');badge.dataset.tooltip=t('Змінити статус гри: ')+t(game.status);badge.setAttribute('aria-label',t('Змінити статус гри: ')+t(game.status));
+  if(detail)badge.style.position='static';
+  badge.onclick=event=>{event.stopPropagation();if(!guestBlock())openQuickStatusMenu(game.id,badge);};return badge;
+}
 
 function renderGrid(){
   const grid=document.getElementById('game-grid');
   const list=getFilteredGames();
-  if(!list.length){grid.innerHTML='<div class="empty-state"><span class="empty-state-icon">✦</span><strong>У цьому фільтрі поки порожньо</strong><small>Спробуй змінити фільтри або додай нову гру до бібліотеки.</small></div>';return;}
+  if(!list.length){grid.innerHTML='<div class="empty-state"><span class="empty-state-icon">✦</span><strong>У цьому фільтрі поки порожньо</strong><small>Спробуй змінити фільтри або додай нову гру до бібліотеки.</small></div>';translateDom(grid);return;}
   grid.innerHTML='';
   list.forEach(game=>{
     const isActive=activeGameId===game.id,elapsed=isActive?Date.now()-activeStart:0,totalMs=(game.playtime||0)+elapsed;
     const card=document.createElement('div');card.className='game-card'+(isActive?' is-playing':'');card.dataset.id=game.id;
     const coverDiv=document.createElement('div');coverDiv.className='card-cover';coverDiv.appendChild(coverEl(game));
-    const badge=document.createElement('span');badge.className=`card-status-badge badge-${game.status.toLowerCase()}`;badge.textContent=game.status;coverDiv.appendChild(badge);
+    coverDiv.appendChild(createStatusButton(game));
     if(totalMs>0||isActive){const tb=document.createElement('span');tb.className='card-timer-badge';tb.textContent=fmtTime(totalMs);coverDiv.appendChild(tb);}
     if(game.platform){const pb=document.createElement('span');pb.className='card-platform-badge';pb.textContent=(PLATFORM_ICONS[game.platform]||'')+' '+game.platform;coverDiv.appendChild(pb);}
     const yr=getGameYear(game);
@@ -1297,21 +1401,22 @@ function renderGrid(){
     if(game.rating){const rEl=document.createElement('span');rEl.style.cssText='font-family:var(--fm);font-size:11px;font-weight:600;color:var(--amber);flex-shrink:0;white-space:nowrap';rEl.textContent=game.rating+'/10';titleRow.appendChild(rEl);}
     body.appendChild(titleRow);
     const meta=document.createElement('div');meta.className='card-meta';const s=(game.sessions||[]).length;
-    meta.innerHTML=`<span>${s} session${s!==1?'s':''}</span><span>${fmtHours(game.playtime||0)}</span>`;body.appendChild(meta);
+    meta.innerHTML=`<span>${sessionCountText(s)}</span><span>${fmtHours(game.playtime||0)}</span>`;body.appendChild(meta);
     if((game.genres||[]).length){const tags=document.createElement('div');tags.className='card-tags';game.genres.slice(0,3).forEach(g=>{const t=document.createElement('span');t.className='tag';t.textContent=g;tags.appendChild(t);});body.appendChild(tags);}
     const actions=document.createElement('div');actions.className='card-actions';
-    if(isActive){const pb=document.createElement('button');pb.className='card-btn card-btn-pause';pb.textContent='Pause';pb.onclick=e=>{e.stopPropagation();stopTimer(false);};actions.appendChild(pb);}
-    else{const pb=document.createElement('button');pb.className='card-btn card-btn-play';pb.textContent=game.steamAppId?'Play in Steam':'Start timer';pb.onclick=e=>{e.stopPropagation();if(!guestBlock())launchAndTrack(game.id);};actions.appendChild(pb);}
-    const ib=document.createElement('button');ib.className='card-btn';ib.textContent='Info';ib.onclick=e=>{e.stopPropagation();openDetail(game.id);};actions.appendChild(ib);
+    if(isActive){const pb=document.createElement('button');pb.className='card-btn card-btn-pause';pb.textContent=t('Pause');pb.onclick=e=>{e.stopPropagation();stopTimer(false);};actions.appendChild(pb);}
+    else{const pb=document.createElement('button');pb.className='card-btn card-btn-play';pb.textContent=t(game.steamAppId?'Play in Steam':'Start timer');pb.onclick=e=>{e.stopPropagation();if(!guestBlock())launchAndTrack(game.id);};actions.appendChild(pb);}
+    const ib=document.createElement('button');ib.className='card-btn';ib.textContent=t('Info');ib.onclick=e=>{e.stopPropagation();openDetail(game.id);};actions.appendChild(ib);
     body.appendChild(actions);card.appendChild(body);grid.appendChild(card);
   });
+  translateDom(grid);
 }
 
 function updateSessionBar(){
   const banner=document.getElementById('session-banner');
   if(activeGameId){
     const g=getGame(activeGameId);
-    document.getElementById('sb-title').textContent='Now Playing: '+(g?.title||'');
+    document.getElementById('sb-title').textContent=t('Now playing')+': '+(g?.title||'');
     banner.style.display='block';
   } else {
     banner.style.display='none';
@@ -1331,8 +1436,8 @@ function updateStats(){
 
 // ADD/EDIT MODAL
 function openAddModal(){
-  editingId=null;selectedPlatform='PC';
-  document.getElementById('modal-title').textContent='Add Game';
+  editingId=null;editReturnToDetailId=null;selectedPlatform='PC';
+  document.getElementById('modal-title').textContent=t('Add Game');
   ['f-search','f-title','f-cover','f-notes'].forEach(id=>document.getElementById(id).value='');
   selectedRating=0;
   document.getElementById('rawg-chips').dataset.steamAppId='';
@@ -1348,10 +1453,10 @@ function openAddModal(){
   document.getElementById('game-modal').classList.remove('hidden');
   document.getElementById('f-search').focus();
 }
-function openEditModal(id){
+function openEditModal(id,returnToDetail=false){
   const game=getGame(id);if(!game)return;
-  editingId=id;selectedPlatform=game.platform||'PC';
-  document.getElementById('modal-title').textContent='Edit Game';
+  editingId=id;editReturnToDetailId=returnToDetail?id:null;selectedPlatform=game.platform||'PC';
+  document.getElementById('modal-title').textContent=t('Edit Game');
   document.getElementById('f-search').value=game.title;
   document.getElementById('f-title').value=game.title;
   document.getElementById('f-status').value=game.status;
@@ -1380,7 +1485,7 @@ function setRatingUI(val){
     btn.classList.toggle('active', bv>0 && bv===val);
   });
 }
-function closeModal(){document.getElementById('game-modal').classList.add('hidden');document.getElementById('search-results').classList.add('hidden');}
+function closeModal(){editReturnToDetailId=null;document.getElementById('game-modal').classList.add('hidden');document.getElementById('search-results').classList.add('hidden');}
 function saveModal(){
   const title=document.getElementById('f-title').value.trim();
   if(!title){document.getElementById('f-title').focus();return;}
@@ -1402,7 +1507,9 @@ function saveModal(){
     savedGameId=uid();
     games.unshift({id:savedGameId,...d,playtime:0,sessions:[],lastPlayed:null,added:new Date(yr,0,1).getTime()});
   }
+  const reopenDetailId=editReturnToDetailId===savedGameId?savedGameId:null;
   save();pushToFb();closeModal();buildFilterBar();renderGrid();updateStats();
+  if(reopenDetailId)openDetail(reopenDetailId);
 }
 
 // DETAIL
@@ -1418,7 +1525,7 @@ function openDetail(id){
   else{const fb=document.createElement('div');fb.className='detail-cover-banner-fallback';fb.textContent=game.title.slice(0,2).toUpperCase();banner.insertBefore(fb,banner.firstChild);}
   // Info
   document.getElementById('d-title').textContent=game.title;
-  document.getElementById('d-badge').innerHTML=`<span class="card-status-badge badge-${game.status.toLowerCase()}" style="position:static;display:inline-block">${game.status}</span>`;
+  const detailBadge=document.getElementById('d-badge');detailBadge.replaceChildren(createStatusButton(game,true));
   document.getElementById('d-platform').textContent=game.platform?(PLATFORM_ICONS[game.platform]||'')+' '+game.platform:'';
   // Tags (genres + tags combined)
   const allTags=[...(game.genres||[]),...(game.tags||[])];
@@ -1435,7 +1542,7 @@ function openDetail(id){
   document.getElementById('d-last').textContent=fmtDate(game.lastPlayed);
   // Session log
   const log=document.getElementById('d-log');
-  log.innerHTML=!sessions.length?'<div style="color:var(--text3);font-size:13px;padding:8px 0">No sessions yet</div>'
+  log.innerHTML=!sessions.length?`<div style="color:var(--text3);font-size:13px;padding:8px 0">${t('No sessions yet')}</div>`
     :[...sessions].reverse().map(s=>`<div class="session-row"><span class="session-date">${fmtDate(s.start)}</span><span class="session-dur">${fmtTime(s.dur)}</span></div>`).join('');
   document.getElementById('detail-modal').classList.remove('hidden');
 }
@@ -1444,7 +1551,7 @@ function closeDetail(){document.getElementById('detail-modal').classList.add('hi
 // TIME EDITOR
 function openTimeEditor(id){
   timeEditId=id;const game=getGame(id);if(!game)return;
-  document.getElementById('time-modal-title').textContent='Edit Time — '+game.title;
+  document.getElementById('time-modal-title').textContent=t('Edit time')+' — '+game.title;
   const ms=game.playtime||0;
   const s=Math.floor(ms/1000),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;
   document.getElementById('te-hours').value=h;
@@ -1460,16 +1567,16 @@ function openTimeEditor(id){
 
 function renderTimeEditorSessions(game){
   const sessions=game.sessions||[];
-  document.getElementById('te-sess-count').textContent=`${sessions.length} session${sessions!==1?'s':''}`;
+  document.getElementById('te-sess-count').textContent=sessionCountText(sessions.length);
   const list=document.getElementById('te-sessions-list');
-  if(!sessions.length){list.innerHTML='<div style="color:var(--text3);font-size:13px;padding:8px 0">No sessions</div>';return;}
+  if(!sessions.length){list.innerHTML=`<div style="color:var(--text3);font-size:13px;padding:8px 0">${t('No sessions')}</div>`;return;}
   list.innerHTML=[...sessions].reverse().map((s,revIdx)=>{
     const realIdx=sessions.length-1-revIdx;
     return `<div class="session-edit-row">
       <span class="session-edit-date">${fmtDate(s.start)}</span>
       <span class="session-edit-dur">${fmtTime(s.dur)}</span>
-      <button class="session-edit-btn" onclick="editSessionDur(${realIdx})">edit</button>
-      <button class="session-del-btn" onclick="deleteSession(${realIdx})">✕</button>
+      <button class="session-edit-btn" onclick="editSessionDur(${realIdx})">${t('Edit')}</button>
+      <button class="session-del-btn" title="${t('Видалити сесію')}" aria-label="${t('Видалити сесію')}" data-tooltip="${t('Видалити сесію')}" onclick="deleteSession(${realIdx})">✕</button>
     </div>`;
   }).join('');
 }
@@ -1645,6 +1752,7 @@ function renderStatsPage(){
       </div>`;
     sectionsEl.appendChild(sec);
   });
+  translateDom(document.getElementById('page-stats'));
 }
 
 // REFETCH TAGS
@@ -1725,7 +1833,7 @@ document.getElementById('d-save-notes').onclick=()=>{
   btn.textContent='Saved!';btn.style.background='rgba(52,211,153,.2)';btn.style.color='var(--green)';
   setTimeout(()=>{btn.textContent='Save Notes';btn.style.background='';btn.style.color='';},1500);
 };
-document.getElementById('d-edit').onclick=()=>{if(!guestBlock()&&detailId)openEditModal(detailId);};
+document.getElementById('d-edit').onclick=()=>{if(!guestBlock()&&detailId)openEditModal(detailId,true);};
 document.getElementById('d-edit-time').onclick=()=>{if(!guestBlock()&&detailId){closeDetail();openTimeEditor(detailId);}};
 document.getElementById('d-delete').onclick=()=>{
   if(guestBlock()||!detailId)return;
@@ -1763,13 +1871,22 @@ document.getElementById('f-search').addEventListener('input',e=>{
   searchTimeout=setTimeout(async()=>{const d=await searchRAWG(q);showSearchResults(d);},400);
 });
 document.addEventListener('click',e=>{const modal=document.getElementById('game-modal');if(!modal.classList.contains('hidden')&&!document.querySelector('.search-wrap').contains(e.target))document.getElementById('search-results').classList.add('hidden');});
-document.querySelectorAll('.filter-tab').forEach(btn=>{btn.onclick=()=>{document.querySelectorAll('.filter-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');filter=btn.dataset.filter;renderGrid();updateStats();};});
+document.addEventListener('click',event=>{if(!event.target.closest('.quick-status-menu,.status-control'))closeQuickStatusMenu();});
+function setStatusFilter(status){
+  filter=status;
+  document.querySelectorAll('.filter-tab').forEach(btn=>btn.classList.toggle('active',btn.dataset.filter===status));
+  document.querySelectorAll('.stat-filter').forEach(btn=>btn.setAttribute('aria-pressed',String(btn.dataset.status===status)));
+  renderGrid();updateStats();
+}
+document.querySelectorAll('.filter-tab').forEach(btn=>{btn.onclick=()=>setStatusFilter(btn.dataset.filter);});
+document.querySelectorAll('.stat-filter').forEach(btn=>{btn.onclick=()=>{setMainPage('library');setStatusFilter(btn.dataset.status);};});
 function setMainPage(page){
   document.querySelectorAll('.main-tab').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
   if(page==='stats')renderStatsPage();
   if(page==='downloads')renderDownloadsPage();
+  translateDom(document.getElementById('page-'+page));
 }
 const nintendoSyncStatus=document.getElementById('nintendo-sync-status');
 const nintendoConnectBtn=document.getElementById('nintendo-connect-btn');
@@ -1928,8 +2045,21 @@ Promise.resolve(null).then(status=>{
   if(status?.connected){setNintendoSyncStatus('Nintendo Account авторизовано',true);nintendoConnectBtn.textContent='Завантажити play activity';nintendoConnectBtn.dataset.checking='2';startNintendoAutoSync();}
 }).catch(()=>{});
 document.querySelectorAll('.main-tab').forEach(btn=>{btn.onclick=()=>setMainPage(btn.dataset.page);});
-document.getElementById('settings-btn').onclick=()=>document.getElementById('settings-modal').classList.remove('hidden');
+function setSettingsTab(tab){
+  const selected=['general','appearance','integrations','data'].includes(tab)?tab:'general';
+  document.querySelectorAll('.settings-tab').forEach(button=>{const active=button.dataset.settingsTab===selected;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active));});
+  document.querySelectorAll('.settings-pane').forEach(pane=>pane.classList.toggle('active',pane.dataset.settingsPane===selected));
+  localStorage.setItem('gv-settings-tab',selected);
+}
+function openSettings(){
+  setSettingsTab(localStorage.getItem('gv-settings-tab')||'general');
+  const overlay=document.getElementById('settings-modal'),dialog=overlay.querySelector('.settings-modal');
+  overlay.classList.remove('hidden');overlay.scrollTop=0;dialog.scrollTop=0;
+  requestAnimationFrame(()=>{overlay.scrollTop=0;dialog.scrollTop=0;dialog.focus({preventScroll:true});});
+}
+document.getElementById('settings-btn').onclick=openSettings;
 document.getElementById('settings-close').onclick=()=>document.getElementById('settings-modal').classList.add('hidden');
+document.querySelectorAll('.settings-tab').forEach(button=>button.onclick=()=>setSettingsTab(button.dataset.settingsTab));
 async function openSteamImport(source){
   const owner=currentUser?.uid;
   document.getElementById('settings-modal').classList.add('hidden');
@@ -1943,7 +2073,7 @@ async function openSteamImport(source){
       const token=await currentUser.getIdToken();
       const result=await window.launcher.getSteamProfileLibrary(profile,token);if(owner!==currentUser?.uid)return;
       if(result.error){const messages={INVALID_PROFILE:'Встав повне https-посилання steamcommunity.com/id/… або /profiles/…',LOGIN_REQUIRED:'Увійди знову в PRG Account.',SERVER_NOT_CONFIGURED:'Сервер імпорту ще не налаштовано: потрібен Steam API-ключ у Netlify.',SERVER_NOT_DEPLOYED:'Сервер імпорту ще не опубліковано на Netlify.',PROFILE_NOT_FOUND:'Steam-профіль не знайдено.',LIBRARY_PRIVATE:'Бібліотека недоступна. Відкрий профіль і «Деталі ігор» у налаштуваннях Steam.',INCOMPLETE_LIBRARY:'Steam повернув неповний список. Спробуй ще раз.',STEAM_UNAVAILABLE:'Steam тимчасово недоступний. Спробуй ще раз.'};throw new Error(messages[result.error]||'Не вдалося завантажити Steam.');}
-      localStorage.setItem(profileStorageKey('gv-steam-profile-url'),profile);
+      localStorage.setItem(profileStorageKey('gv-steam-profile-url'),profile);updateSteamProfileUI();
       await showBacklogImport(result.games.map(g=>g.appId),existing,new Set(),result.games);
     }else if(source==='installed'){
       const result=await window.launcher.getSteamImportGames();if(owner!==currentUser?.uid)return;
@@ -1954,29 +2084,42 @@ async function openSteamImport(source){
     }
     if(owner!==currentUser?.uid)return;
     document.getElementById('backlog-import-title').textContent=source==='profile'?`Бібліотека Steam · ${backlogImportGames.length} ігор`:source==='installed'?'Встановлені Steam-ігри на цьому ПК':'Ігри з колекції BACKLOG';
-    const checks=[...list.querySelectorAll('input[type="checkbox"]:not(:disabled)')];
-    checks.forEach(input=>{input.checked=false;input.onchange=()=>{const count=checks.filter(c=>c.checked).length;add.disabled=!count;add.textContent=`Додати вибрані (${count})`;};});
-    add.disabled=true;add.textContent='Додати вибрані (0)';
+    setBacklogImportSelection(false);
     if(!backlogImportGames.length)list.textContent='Ігор не знайдено. Перевір Steam на цьому ПК або обери інше джерело імпорту.';
   }catch(error){if(owner===currentUser?.uid){list.textContent=error.message||'Не вдалося прочитати Steam.';add.disabled=true;}}
 }
 function showSteamOnboarding(){if(!currentUser||!syncActive)return;document.getElementById('steam-onboarding-modal').classList.remove('hidden');document.getElementById('steam-onboarding-url').focus();}
-document.getElementById('steam-onboarding-import').onclick=async()=>{const input=document.getElementById('steam-onboarding-url'),error=document.getElementById('steam-onboarding-error'),value=input.value.trim();if(!value){error.textContent='Встав посилання на Steam-профіль.';return;}document.getElementById('steam-profile-url').value=value;localStorage.setItem(profileStorageKey('gv-steam-profile-url'),value);localStorage.setItem(profileStorageKey('gv-steam-onboarding-done-v1'),'1');document.getElementById('steam-onboarding-modal').classList.add('hidden');await openSteamImport('profile');};
+document.getElementById('steam-onboarding-import').onclick=async()=>{const input=document.getElementById('steam-onboarding-url'),error=document.getElementById('steam-onboarding-error'),value=input.value.trim();if(!value){error.textContent='Встав посилання на Steam-профіль.';return;}document.getElementById('steam-profile-url').value=value;localStorage.setItem(profileStorageKey('gv-steam-profile-url'),value);updateSteamProfileUI();localStorage.setItem(profileStorageKey('gv-steam-onboarding-done-v1'),'1');document.getElementById('steam-onboarding-modal').classList.add('hidden');await openSteamImport('profile');};
 document.getElementById('steam-onboarding-skip').onclick=()=>{localStorage.setItem(profileStorageKey('gv-steam-onboarding-done-v1'),'1');document.getElementById('steam-onboarding-modal').classList.add('hidden');};
 document.getElementById('steam-onboarding-url').addEventListener('keydown',event=>{if(event.key==='Enter')document.getElementById('steam-onboarding-import').click();});
 document.getElementById('steam-import-profile').onclick=()=>openSteamImport('profile');
 document.getElementById('steam-import-installed').onclick=()=>openSteamImport('installed');
 document.getElementById('steam-import-backlog').onclick=()=>openSteamImport('backlog');
+document.getElementById('steam-disconnect-btn').onclick=()=>{
+  const profile=currentUser&&localStorage.getItem(profileStorageKey('gv-steam-profile-url'));
+  if(!profile)return;
+  if(!confirm(t('Від’єднати Steam-профіль? Ігри вже додані до лаунчера залишаться.')))return;
+  localStorage.removeItem(profileStorageKey('gv-steam-profile-url'));
+  updateSteamProfileUI();
+};
 function applyTheme(theme){
   document.documentElement.dataset.theme=theme;
   localStorage.setItem('gv-theme',theme);
   document.querySelectorAll('.theme-choice').forEach(btn=>btn.classList.toggle('active',btn.dataset.themeChoice===theme));
 }
-const themeToggle=document.getElementById('theme-toggle'),themeMenu=document.getElementById('theme-menu');
-themeToggle.onclick=e=>{e.stopPropagation();themeMenu.classList.toggle('open');};
-document.querySelectorAll('.theme-choice').forEach(btn=>btn.onclick=()=>{applyTheme(btn.dataset.themeChoice);themeMenu.classList.remove('open');});
-document.addEventListener('click',e=>{if(!document.querySelector('.theme-wrap')?.contains(e.target))themeMenu.classList.remove('open');});
+function applyUiScale(value){
+  const scale=['0.9','1','1.1','1.2'].includes(String(value))?String(value):'1';
+  document.documentElement.style.zoom=scale;localStorage.setItem('gv-ui-scale',scale);
+  const select=document.getElementById('ui-scale-select');if(select)select.value=scale;
+}
+document.querySelectorAll('.theme-choice').forEach(btn=>btn.onclick=()=>applyTheme(btn.dataset.themeChoice));
+document.getElementById('ui-scale-select').addEventListener('change',event=>applyUiScale(event.target.value));
+document.getElementById('language-select').addEventListener('change',event=>applyLanguage(event.target.value));
 applyTheme(localStorage.getItem('gv-theme')||'neon');
+applyUiScale(localStorage.getItem('gv-ui-scale')||'1');
+applyLanguage(currentLanguage);
+const languageObserver=new MutationObserver(records=>{records.forEach(record=>record.addedNodes.forEach(node=>{if(node.nodeType===Node.ELEMENT_NODE)translateDom(node);else if(node.nodeType===Node.TEXT_NODE)translateDom(node.parentElement);}));});
+languageObserver.observe(document.body,{childList:true,subtree:true});
 window.launcher?.onSteamStatus?.(status=>{
   steamStatusCache.set(String(status.appId),status);
   if(document.getElementById('page-downloads')?.classList.contains('active'))renderDownloadsPage();
@@ -1990,6 +2133,9 @@ window.launcher?.onSteamCollection?.(collection=>syncSteamBacklog(collection));
 window.launcher?.getSteamCollection?.('BACKLOG').then(syncSteamBacklog);
 document.getElementById('steam-setup-back').onclick=closeSteamSetup;
 document.getElementById('steam-launch-btn').onclick=async e=>{const game=getGame(steamSetupGameId);if(!game)return;try{if(e.currentTarget.dataset.action==='retry'){steamSetupSawDownload=false;steamSetupSteamHidden=false;e.currentTarget.disabled=true;e.currentTarget.dataset.action='';e.currentTarget.textContent='Очікуємо Steam…';await window.launcher.requestInstall(game.steamAppId);steamSetupInterval=setInterval(refreshSteamSetup,2000);await refreshSteamSetup();return;}const result=await window.launcher.launchGame(game.steamAppId);if(result?.action==='requested'){closeSteamSetup();}else alert(result?.message||'Не вдалося запустити гру через Steam.');}catch(error){console.error('[Steam] Launch failed:',error);alert('Не вдалося виконати дію через Steam.');}};
+document.getElementById('backlog-import-search').addEventListener('input',filterBacklogImport);
+document.getElementById('backlog-import-select-all').onclick=()=>setBacklogImportSelection(true,true);
+document.getElementById('backlog-import-clear-all').onclick=()=>setBacklogImportSelection(false,true);
 document.getElementById('backlog-import-skip').onclick=()=>document.getElementById('backlog-import-modal').classList.add('hidden');
 document.getElementById('backlog-import-add').onclick=()=>{const rows=[...document.querySelectorAll('#backlog-import-list .backlog-import-row')];let added=0;rows.forEach(row=>{const checkbox=row.querySelector('input[type="checkbox"]');if(!checkbox?.checked)return;const appId=Number(checkbox.dataset.appid);if(games.some(game=>Number(game.steamAppId)===appId))return;const source=backlogImportGames.find(game=>game.appId===appId);games.unshift({id:uid(),title:source?.title||`Steam game #${appId}`,status:row.querySelector('select').value,platform:'PC',cover:source?.cover||null,notes:null,genres:[],tags:['Steam Import'],rating:null,steamAppId:appId,playtime:Math.max(0,Number(source?.minutes)||0)*60000,sessions:[],lastPlayed:null,added:Date.now()});added++;});if(added){save();pushToFb();buildFilterBar();renderGrid();updateStats();}document.getElementById('backlog-import-modal').classList.add('hidden');};
 ['game-modal','detail-modal','time-modal','refetch-modal','backlog-import-modal','settings-modal','steam-onboarding-modal'].forEach(id=>{document.getElementById(id).addEventListener('click',e=>{if(e.target===e.currentTarget)document.getElementById(id).classList.add('hidden');});});
@@ -2006,16 +2152,14 @@ buildFilterBar(); updateSessionBar(); updateStats(); renderGrid();
 function showLogin(){const overlay=document.getElementById('login-overlay');overlay.style.display='flex';requestAnimationFrame(()=>overlay.style.opacity='1');}
 function hideLogin(){const overlay=document.getElementById('login-overlay');overlay.style.opacity='0';setTimeout(()=>overlay.style.display='none',300);}
 function showAuthError(message){const el=document.getElementById('login-error');el.textContent=message;el.style.display='block';}
-function setAuthMode(mode){authMode=mode;const create=mode==='signup';document.getElementById('auth-submit-btn').textContent=create?'Створити акаунт':'Увійти';document.getElementById('auth-mode-btn').textContent=create?'У мене вже є акаунт':'Створити акаунт';document.getElementById('login-copy').textContent=create?'Створи PRG-акаунт — твоя бібліотека та сайт будуть тільки твоїми.':'Увійди, щоб синхронізувати бібліотеку та отримати власну сторінку статистики.';document.getElementById('auth-password').autocomplete=create?'new-password':'current-password';document.getElementById('login-error').style.display='none';}
+function setAuthMode(mode){authMode=mode;const create=mode==='signup';document.getElementById('auth-submit-btn').textContent=t(create?'Створити акаунт':'Увійти');document.getElementById('auth-mode-btn').textContent=t(create?'У мене вже є акаунт':'Створити акаунт');document.getElementById('login-copy').textContent=t(create?'Створи PRG-акаунт — твоя бібліотека та сайт будуть тільки твоїми.':'Увійди, щоб синхронізувати бібліотеку та отримати власну сторінку статистики.');document.getElementById('auth-password').autocomplete=create?'new-password':'current-password';document.getElementById('login-error').style.display='none';}
 async function submitAuth(){const email=document.getElementById('auth-email').value.trim(),password=document.getElementById('auth-password').value,button=document.getElementById('auth-submit-btn');if(!fbAuth){showAuthError('Firebase ще завантажується. Зачекай кілька секунд і спробуй ще раз.');return;}if(!email||!password){showAuthError('Введи email і пароль.');return;}button.disabled=true;try{const api=window._fbImports;if(authMode==='signup')await api.createUserWithEmailAndPassword(fbAuth,email,password);else await api.signInWithEmailAndPassword(fbAuth,email,password);}catch(error){const messages={'auth/email-already-in-use':'Цей email уже має акаунт. Спробуй увійти.','auth/invalid-credential':'Невірний email або пароль.','auth/weak-password':'Пароль має містити щонайменше 6 символів.','auth/invalid-email':'Перевір email.','auth/network-request-failed':'Немає з’єднання з Firebase.','auth/too-many-requests':'Забагато спроб. Зачекай трохи.','auth/operation-not-allowed':'Цей спосіб входу не увімкнено у Firebase Console.'};showAuthError(messages[error.code]||`Помилка входу (${error.code||'unknown'}).`);console.error('[Auth]',error);}finally{button.disabled=false;}}
 async function loginWithGoogle(){try{await window._fbImports.signInWithPopup(fbAuth,new window._fbImports.GoogleAuthProvider());}catch(error){console.error('[Auth] Google login',error);showAuthError('Google-вхід не відкрився. Спробуй Email/Password у лаунчері.');}}
 async function resetAuthPassword(){const email=document.getElementById('auth-email').value.trim();if(!fbAuth){showAuthError('Firebase ще завантажується.');return;}if(!email){showAuthError('Спочатку введи email, потім натисни «Забув пароль?».');return;}try{await window._fbImports.sendPasswordResetEmail(fbAuth,email);showAuthError('Лист для скидання пароля надіслано. Перевір пошту.');}catch(error){const message=error.code==='auth/user-not-found'?'Акаунт з таким email не знайдено.':error.code==='auth/invalid-email'?'Перевір email.':'Не вдалося надіслати лист для скидання.';showAuthError(message);}}
-function continueLocal(){games=loadProfileGames();renderGrid();updateStats();localOnly=true;setSyncBadge('off');updateProfileUI();hideLogin();}
 document.getElementById('auth-submit-btn').onclick=submitAuth;
 document.getElementById('auth-mode-btn').onclick=()=>setAuthMode(authMode==='signin'?'signup':'signin');
 document.getElementById('auth-google-btn').onclick=loginWithGoogle;
 document.getElementById('auth-reset-btn').onclick=resetAuthPassword;
-document.getElementById('auth-local-btn').onclick=continueLocal;
 ['auth-email','auth-password'].forEach(id=>document.getElementById(id).addEventListener('keydown',event=>{if(event.key==='Enter')submitAuth();}));
 document.getElementById('copy-profile-link-btn').onclick=async()=>{if(!currentUser){showAuthError('Увійди в PRG Account, щоб отримати персональне посилання.');showLogin();return;}const url=`https://prgtracker.netlify.app/?u=${currentUser.uid}`;try{await navigator.clipboard.writeText(url);document.getElementById('profile-link').textContent='Посилання скопійовано';}catch{document.getElementById('profile-link').textContent=url;}};
 document.getElementById('sign-out-btn').onclick=async()=>{if(!currentUser)return;if(!confirm('Вийти з PRG Account на цьому ПК? Локальна копія бібліотеки залишиться.'))return;clearInterval(statsPublishTimer);if(fbUnsub)fbUnsub();syncActive=false;await window._fbImports.signOut(fbAuth);};
@@ -2027,6 +2171,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // ── WINDOW CONTROLS (Electron) ──
   const isElectron = !!window.launcher?.isElectron;
+  const isMac = window.launcher?.platform === 'darwin';
+  document.body.classList.toggle('macos', isMac);
 
   const winMin   = document.getElementById('win-min');
   const winMax   = document.getElementById('win-max');
@@ -2049,6 +2195,13 @@ window.addEventListener('DOMContentLoaded', () => {
     window.launcher?.showMiniBar?.(miniBarState());
   });
 
+  window.launcher?.onMainTransition?.(phase => {
+    document.body.classList.remove('mini-transition-out','mini-transition-in');
+    void document.body.offsetWidth;
+    const transitionClass=phase==='out'?'mini-transition-out':'mini-transition-in';
+    document.body.classList.add(transitionClass);
+    document.body.addEventListener('animationend',()=>document.body.classList.remove(transitionClass),{once:true});
+  });
   window.launcher?.onMiniPause?.(() => stopTimer(false));
 
 });

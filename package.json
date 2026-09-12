@@ -6,12 +6,14 @@
   "scripts": {
     "start": "electron . --enable-logging",
     "dev": "electron . --enable-logging",
-    "build": "electron-builder --win --x64"
+    "build": "electron-builder --win --x64",
+    "build:mac": "electron-builder --mac --universal"
   },
   "build": {
     "appId": "com.prgtracker.launcher",
     "productName": "PRGLauncher",
     "artifactName": "PRGLauncher-Setup-${version}.${ext}",
+    "executableName": "PRGLauncher",
     "directories": {
       "output": "release"
     },
@@ -21,6 +23,14 @@
       ],
       "icon": "assets/icon-256.png",
       "signAndEditExecutable": false
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "icon": "assets/icon.icns",
+      "category": "public.app-category.entertainment",
+      "artifactName": "PRGLauncher-${version}-${arch}.${ext}"
     },
     "nsis": {
       "oneClick": false,
