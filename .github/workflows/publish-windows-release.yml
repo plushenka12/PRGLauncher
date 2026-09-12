@@ -1,0 +1,96 @@
+name: Publish Windows release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag to build and publish
+        required: true
+        default: '1.2.0'
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-publish:
+    name: Build installer and publish release
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out the release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Windows installer
+        run: npm run build -- --publish never
+
+      - name: Create or update GitHub Release
+        uses: actions/github-script@v7
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const { owner, repo } = context.repo;
+            const tag = process.env.RELEASE_TAG;
+            const title = `PRGLauncher ${tag} — великий UI та акаунт-апдейт`;
+            const body = [
+              `## PRGLauncher ${tag}`,
+              '',
+              'Велике оновлення інтерфейсу, Steam-імпорту та PRG Account.',
+              '',
+              '### Головне',
+              '- Повна українська й англійська локалізація, п’ять тем і масштаб інтерфейсу 90–120%.',
+              '- Контрастніші картки, клікабельні статуси Backlog / Playing / Completed та швидка зміна статусу.',
+              '- Steam-імпорт із пошуком, картками-обкладинками, масовим вибором і можливістю від’єднати або замінити Steam-профіль.',
+              '- PRG Account замість локального режиму: окремі бібліотека, синхронізація та статистична сторінка для кожного користувача.',
+              '- Mini-bar із плавним переходом, Stand By, закріпленням поверх вікон і підказками на іконках.',
+              '- Автоматична перевірка оновлень при старті та новий брендинг із клевером.',
+              '',
+              '### Встановлення',
+              `Завантаж **PRGLauncher-Setup-${tag}.exe**, запусти інсталятор і залиш стандартні опції. Надалі PRGLauncher зможе запропонувати оновлення сам.`,
+            ].join('\\n');
+
+            let release;
+            try {
+              ({ data: release } = await github.rest.repos.getReleaseByTag({ owner, repo, tag }));
+              ({ data: release } = await github.rest.repos.updateRelease({
+                owner, repo, release_id: release.id, name: title, body,
+                draft: false, prerelease: false, make_latest: 'true',
+              }));
+            } catch (error) {
+              if (error.status !== 404) throw error;
+              ({ data: release } = await github.rest.repos.createRelease({
+                owner, repo, tag_name: tag, name: title, body,
+                draft: false, prerelease: false, make_latest: 'true',
+              }));
+            }
+
+            const files = [
+              `PRGLauncher-Setup-${tag}.exe`,
+              `PRGLauncher-Setup-${tag}.exe.blockmap`,
+              'latest.yml',
+            ];
+            const existing = new Map(release.assets.map(asset => [asset.name, asset]));
+            for (const name of files) {
+              const asset = existing.get(name);
+              if (asset) await github.rest.repos.deleteReleaseAsset({ owner, repo, asset_id: asset.id });
+              const filePath = path.join(process.cwd(), 'release', name);
+              const data = fs.readFileSync(filePath);
+              await github.rest.repos.uploadReleaseAsset({
+                owner, repo, release_id: release.id, name, data,
+                headers: { 'content-type': 'application/octet-stream', 'content-length': data.length },
+              });
+            }
