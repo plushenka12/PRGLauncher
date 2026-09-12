@@ -5,7 +5,8 @@
 <title>PRGLauncher session</title>
 <style>
   *{box-sizing:border-box} html,body{margin:0;width:100%;height:100%;overflow:hidden;background:transparent!important;font-family:Segoe UI,Arial,sans-serif}
-  #bar{height:58px;display:flex;align-items:center;gap:10px;padding:0 10px;border:1px solid rgba(167,139,250,.48);border-radius:12px;background:rgba(17,18,26,.98);box-shadow:0 10px 28px rgba(0,0,0,.38);color:#e8e7ef;-webkit-app-region:drag}
+  #bar{height:58px;display:flex;align-items:center;gap:10px;padding:0 10px;border:1px solid rgba(167,139,250,.48);border-radius:12px;background:rgba(17,18,26,.98);box-shadow:0 10px 28px rgba(0,0,0,.38);color:#e8e7ef;-webkit-app-region:drag;transform-origin:top right;transition:opacity .18s cubic-bezier(.2,.8,.2,1),transform .18s cubic-bezier(.2,.8,.2,1)}
+  body.entering #bar{opacity:0;transform:translateY(-9px) scale(.94)}body.entering.entered #bar{opacity:1;transform:translateY(0) scale(1)}body.leaving #bar{opacity:0;transform:translateY(-7px) scale(.96)}@media(prefers-reduced-motion:reduce){#bar{transition:none!important}}
   .dot{width:8px;height:8px;border-radius:50%;background:#00e676;box-shadow:0 0 9px #00e676;flex:none}.info{min-width:0;flex:1}.label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#9693a7}.title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:600;margin-top:2px}.timer{font:600 15px Consolas,monospace;color:#a78bfa;white-space:nowrap}
   button{width:28px;height:28px;border:0;border-radius:7px;background:transparent;color:#bbb7cb;cursor:pointer;font-size:14px;-webkit-app-region:no-drag}button:hover{background:rgba(167,139,250,.18);color:#fff}button.active{color:#fbbf24;background:rgba(251,191,36,.13)}#pause:hover{color:#fb7185}
 </style>
@@ -14,14 +15,15 @@
 <div id="bar">
   <span class="dot" id="dot"></span><div class="info"><div class="label" id="label">Now playing</div><div class="title" id="title">Loading…</div></div>
   <div class="timer" id="timer">00:00:00</div>
-  <button id="pause" title="Завершити сесію">■</button><button id="pin" class="active" title="Закріпити поверх вікон">⌖</button><button id="restore" title="Відкрити PRGLauncher">↗</button>
+  <button id="pause" title="Завершити сесію" aria-label="Завершити сесію">■</button><button id="pin" class="active" title="Відкріпити від усіх вікон" aria-label="Відкріпити від усіх вікон">⌖</button><button id="restore" title="Відкрити PRGLauncher" aria-label="Відкрити PRGLauncher">↗</button>
 </div>
 <script>
   const fmt=ms=>{const s=Math.max(0,Math.floor(ms/1000)),h=String(Math.floor(s/3600)).padStart(2,'0'),m=String(Math.floor(s%3600/60)).padStart(2,'0'),x=String(s%60).padStart(2,'0');return `${h}:${m}:${x}`};
   window.launcher?.onMiniState?.(state=>{document.getElementById('title').textContent=state.title;document.getElementById('timer').textContent=fmt(state.elapsed);document.getElementById('label').textContent=state.active?'Now playing':'Stand By';document.getElementById('dot').style.visibility=state.active?'visible':'hidden';document.getElementById('pause').disabled=!state.active});
+  window.launcher?.onMiniTransition?.(phase=>{document.body.classList.remove('entering','entered','leaving');if(phase==='in'){document.body.classList.add('entering');requestAnimationFrame(()=>document.body.classList.add('entered'));}else document.body.classList.add('leaving');});
   document.getElementById('pause').onclick=()=>window.launcher?.pauseMiniSession?.();
   document.getElementById('restore').onclick=()=>window.launcher?.restoreMain?.();
-  document.getElementById('pin').onclick=async e=>e.currentTarget.classList.toggle('active',await window.launcher?.toggleMiniPin?.());
+  document.getElementById('pin').onclick=async e=>{const pinned=await window.launcher?.toggleMiniPin?.();e.currentTarget.classList.toggle('active',pinned);const label=pinned?'Відкріпити від усіх вікон':'Закріпити поверх вікон';e.currentTarget.title=label;e.currentTarget.setAttribute('aria-label',label);};
 </script>
 </body>
 </html>

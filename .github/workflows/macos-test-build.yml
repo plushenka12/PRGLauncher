@@ -1,0 +1,40 @@
+name: Build macOS test package
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-macos:
+    name: Build universal macOS DMG
+    runs-on: macos-latest
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build unsigned universal DMG
+        run: npm run build:mac -- --publish never
+        env:
+          # This is a tester build. Public release signing/notarization is
+          # deliberately configured later through Apple Developer secrets.
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+
+      - name: Upload macOS tester build
+        uses: actions/upload-artifact@v4
+        with:
+          name: PRGLauncher-macOS-universal-test
+          path: release/PRGLauncher-*.dmg
+          if-no-files-found: error
+          retention-days: 14

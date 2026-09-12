@@ -48,6 +48,8 @@ contextBridge.exposeInMainWorld('launcher', {
   toggleMiniPin:() => ipcRenderer.invoke('mini:togglePin'),
   pauseMiniSession: () => ipcRenderer.send('mini:pause'),
   onMiniState:  (callback) => ipcRenderer.on('mini:state', (_, state) => callback(state)),
+  onMiniTransition: (callback) => ipcRenderer.on('mini:transition', (_, phase) => callback(phase)),
+  onMainTransition: (callback) => ipcRenderer.on('app:miniTransition', (_, phase) => callback(phase)),
   onMiniPause:  (callback) => ipcRenderer.on('mini:pause', callback),
 
   // Platform
