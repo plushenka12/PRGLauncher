@@ -42,6 +42,8 @@ let lastBacklogSignature = null
 const steamStoreCache = new Map()
 let hltbSearchInFlight = null
 let hltbLastRequestAt = 0
+let hltbCredentials = null
+let hltbCredentialsExpiry = 0
 const launchedAtLogin = process.argv.includes('--hidden')
 const opacityAnimations = new Map()
 
@@ -359,6 +361,7 @@ function getSteamStoreGame(appId) {
 const HLTB_ORIGIN = 'https://howlongtobeat.com'
 const HLTB_MIN_REQUEST_GAP = 1200
 const HLTB_SEARCH_TIMEOUT = 18000
+const HLTB_CREDENTIAL_CACHE_MS = 30 * 60 * 1000
 
 function hltbMinutes(value) {
   const seconds = Number(value)
@@ -398,6 +401,109 @@ function normalizeHltbResults(payload) {
 
 function wait(ms) { return new Promise(resolve => setTimeout(resolve, ms)) }
 
+function hltbHeader(headers, name) {
+  const wanted = name.toLowerCase()
+  const key = Object.keys(headers || {}).find(header => header.toLowerCase() === wanted)
+  return key ? headers[key] : null
+}
+
+function createHltbPayload(query, credentials) {
+  return {
+    searchType: 'games',
+    searchTerms: query.toLowerCase().split(/\s+/),
+    searchPage: 1,
+    size: 20,
+    searchOptions: {
+      games: { userId: 0, platform: '', sortCategory: 'popular', rangeCategory: 'main', rangeTime: { min: null, max: null }, gameplay: { perspective: '', flow: '', genre: '', difficulty: '' }, rangeYear: { min: '', max: '' }, modifier: '' },
+      users: { sortCategory: 'postcount' }, lists: { sortCategory: 'follows' }, filter: '', sort: 0, randomizer: 0
+    },
+    useCache: true,
+    [credentials.hpKey]: credentials.hpValue
+  }
+}
+
+function captureHltbCredentials() {
+  if (hltbCredentials && Date.now() < hltbCredentialsExpiry) return Promise.resolve(hltbCredentials)
+  return new Promise(resolve => {
+    let lookupWindow = null
+    let lookupSession = null
+    let settled = false
+    const finish = credentials => {
+      if (settled) return
+      settled = true
+      clearTimeout(timeout)
+      try { lookupSession?.webRequest.onBeforeSendHeaders(null) } catch {}
+      if (lookupWindow && !lookupWindow.isDestroyed()) lookupWindow.destroy()
+      if (credentials) {
+        hltbCredentials = credentials
+        hltbCredentialsExpiry = Date.now() + HLTB_CREDENTIAL_CACHE_MS
+      }
+      resolve(credentials || null)
+    }
+    const timeout = setTimeout(() => finish(null), HLTB_SEARCH_TIMEOUT)
+    try {
+      // A fresh, private partition guarantees that no HLTB cookies or tokens
+      // bleed into PRGLauncher, while the site can still create the one
+      // short-lived request that contains its current credentials.
+      const partition = `hltb-${process.pid}-${Date.now()}-${Math.random().toString(36).slice(2)}`
+      lookupWindow = new BrowserWindow({
+        show: false,
+        skipTaskbar: true,
+        webPreferences: { partition, contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: false }
+      })
+      lookupSession = lookupWindow.webContents.session
+      lookupSession.webRequest.onBeforeSendHeaders({ urls: [`${HLTB_ORIGIN}/api/search/site*`] }, (details, callback) => {
+        callback({ cancel: false, requestHeaders: details.requestHeaders })
+        if (details.method !== 'POST') return
+        const authToken = hltbHeader(details.requestHeaders, 'x-auth-token')
+        const hpKey = hltbHeader(details.requestHeaders, 'x-hp-key')
+        const hpValue = hltbHeader(details.requestHeaders, 'x-hp-val')
+        if (!authToken || !hpKey || !hpValue) return
+        finish({ authToken, hpKey, hpValue, userAgent: hltbHeader(details.requestHeaders, 'user-agent') || '' })
+      })
+      lookupWindow.webContents.on('did-fail-load', (_event, code, _description, _url, isMainFrame) => {
+        if (isMainFrame && code !== -3) finish(null)
+      })
+      // `?q=` makes HLTB's own page issue one normal search. We do not submit
+      // a fabricated request from the renderer or persist any credentials.
+      lookupWindow.loadURL(`${HLTB_ORIGIN}/?q=zelda`).catch(() => finish(null))
+    } catch { finish(null) }
+  })
+}
+
+function postHltbSearch(query, credentials) {
+  return new Promise(resolve => {
+    const body = JSON.stringify(createHltbPayload(query, credentials))
+    const request = https.request(`${HLTB_ORIGIN}/api/search/site`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Accept-Encoding': 'identity',
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(body),
+        Origin: HLTB_ORIGIN,
+        Referer: `${HLTB_ORIGIN}/`,
+        'User-Agent': credentials.userAgent,
+        'x-auth-token': credentials.authToken,
+        'x-hp-key': credentials.hpKey,
+        'x-hp-val': credentials.hpValue
+      }
+    }, response => {
+      let text = ''
+      response.setEncoding('utf8')
+      response.on('data', chunk => { text += chunk; if (text.length > 2_000_000) request.destroy() })
+      response.on('end', () => {
+        let payload = null
+        try { payload = text ? JSON.parse(text) : null } catch {}
+        resolve({ status: response.statusCode || 0, payload })
+      })
+    })
+    request.setTimeout(15000, () => request.destroy())
+    request.on('error', () => resolve({ status: 0, payload: null }))
+    request.end(body)
+  })
+}
+
 async function searchHltb(query) {
   const normalizedQuery = String(query || '').trim().replace(/\s+/g, ' ')
   if (!normalizedQuery || normalizedQuery.length > 160) return { ok: false, error: 'INVALID_QUERY', results: [] }
@@ -408,76 +514,18 @@ async function searchHltb(query) {
     if (remainingGap > 0) await wait(remainingGap)
     hltbLastRequestAt = Date.now()
 
-    return new Promise(resolve => {
-      let settled = false
-      let lookupWindow = null
-      let searchStarted = false
-      const finish = result => {
-        if (settled) return
-        settled = true
-        clearTimeout(timeout)
-        if (lookupWindow && !lookupWindow.isDestroyed()) lookupWindow.destroy()
-        resolve(result)
-      }
-      const timeout = setTimeout(() => finish({ ok: false, error: 'TIMEOUT', results: [] }), HLTB_SEARCH_TIMEOUT)
-
-      try {
-        lookupWindow = new BrowserWindow({
-          show: false,
-          skipTaskbar: true,
-          webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: false }
-        })
-        lookupWindow.webContents.on('did-fail-load', (_event, code, description, validatedURL, isMainFrame) => {
-          if (isMainFrame && code !== -3) finish({ ok: false, error: 'NETWORK', results: [] })
-        })
-        lookupWindow.webContents.on('did-finish-load', async () => {
-          if (searchStarted) return
-          searchStarted = true
-          try {
-            // Trigger the site's own search UI and observe its response. This
-            // preserves HLTB's rotating request headers without storing or
-            // manufacturing a token in PRGLauncher.
-            const data = await lookupWindow.webContents.executeJavaScript(`
-              (async () => {
-                const query = ${JSON.stringify(normalizedQuery)};
-                const originalFetch = window.fetch.bind(window);
-                const result = new Promise(resolve => {
-                  const observer = setTimeout(() => resolve({ __hltbError: 'NO_SEARCH_RESPONSE' }), 12000);
-                  window.fetch = async (...args) => {
-                    const response = await originalFetch(...args);
-                    const target = String(args[0]?.url || args[0] || '');
-                    if (/\\/api\\/(?:search|find)\\//i.test(target)) {
-                      response.clone().json().then(payload => { clearTimeout(observer); resolve(payload); }).catch(() => {});
-                    }
-                    return response;
-                  };
-                });
-                const input = [...document.querySelectorAll('input')].find(element =>
-                  element.type === 'search' || /search/i.test(String(element.placeholder || '') + ' ' + String(element.getAttribute('aria-label') || ''))
-                );
-                if (!input) return { __hltbError: 'SEARCH_UI_NOT_FOUND' };
-                const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
-                setter ? setter.call(input, query) : (input.value = query);
-                input.dispatchEvent(new Event('input', { bubbles: true }));
-                input.dispatchEvent(new Event('change', { bubbles: true }));
-                const form = input.closest('form');
-                if (form?.requestSubmit) form.requestSubmit();
-                else input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', bubbles: true }));
-                return result;
-              })()
-            `, true)
-            const results = normalizeHltbResults(data)
-            if (results.length) finish({ ok: true, results })
-            else finish({ ok: false, error: data?.__hltbError ? 'HLTB_REJECTED' : 'NO_RESULTS', results: [] })
-          } catch {
-            finish({ ok: false, error: 'HLTB_UNAVAILABLE', results: [] })
-          }
-        })
-        lookupWindow.loadURL(HLTB_ORIGIN).catch(() => finish({ ok: false, error: 'NETWORK', results: [] }))
-      } catch {
-        finish({ ok: false, error: 'HLTB_UNAVAILABLE', results: [] })
-      }
-    })
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const credentials = await captureHltbCredentials()
+      if (!credentials) return { ok: false, error: 'HLTB_UNAVAILABLE', results: [] }
+      const response = await postHltbSearch(normalizedQuery, credentials)
+      const results = normalizeHltbResults(response.payload)
+      if (response.status >= 200 && response.status < 300) return results.length ? { ok: true, results } : { ok: false, error: 'NO_RESULTS', results: [] }
+      // HLTB uses these status codes when its short-lived credentials rotated.
+      if (![401, 403, 404].includes(response.status) || attempt === 1) return { ok: false, error: 'HLTB_UNAVAILABLE', results: [] }
+      hltbCredentials = null
+      hltbCredentialsExpiry = 0
+    }
+    return { ok: false, error: 'HLTB_UNAVAILABLE', results: [] }
   })()
 
   try { return await hltbSearchInFlight }
