@@ -123,8 +123,6 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 .card-body{padding:12px;flex:1;display:flex;flex-direction:column}
 .card-title{font-family:var(--fh);font-size:14px;font-weight:800;color:color-mix(in srgb,var(--text) 94%,#fff 6%);line-height:1.3;margin-bottom:4px;text-shadow:0 1px 8px rgba(0,0,0,.18)}
 .card-meta{font-size:12px;color:var(--text2);font-weight:500;margin-bottom:8px;display:flex;gap:10px;flex-wrap:wrap}
-.card-tags{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px}
-.tag{font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;background:color-mix(in srgb,var(--bg4) 84%,var(--accent) 16%);color:var(--text2);border:1px solid var(--border2)}
 .card-actions{display:flex;gap:6px;margin-top:auto}
 .card-btn{font-family:var(--fb);font-size:12px;font-weight:700;padding:6px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--bg4);color:var(--text);cursor:pointer;transition:all .15s;flex:1;text-align:center}
 .card-btn:hover{color:var(--text);border-color:var(--border2)}
@@ -204,8 +202,6 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 .detail-title{font-family:var(--fh);font-size:22px;font-weight:800;color:#fff;margin-bottom:8px;line-height:1.2}
 .detail-meta-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .detail-body{padding:1.25rem 1.5rem;overflow-y:auto;flex:1}
-.detail-tags-row{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:1.25rem}
-.detail-tag{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:var(--bg4);color:var(--text2);border:1px solid var(--border)}
 .detail-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.25rem}
 .detail-stat{background:var(--bg3);border-radius:var(--rs);padding:10px 12px}
 .detail-stat-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);font-weight:500;margin-bottom:4px}
@@ -748,8 +744,6 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
     </div>
     <!-- BODY -->
     <div class="detail-body">
-      <!-- TAGS -->
-      <div class="detail-tags-row" id="d-tags"></div>
       <!-- STATS -->
       <div class="detail-stats-grid">
         <div class="detail-stat"><div class="detail-stat-label">Playtime</div><div class="detail-stat-value" id="d-playtime">—</div></div>
@@ -1147,7 +1141,7 @@ function showSearchResults(data){
       if(g.background_image){document.getElementById('f-cover').value=g.background_image;showCoverPreview(g.background_image);}
       const chips=document.getElementById('rawg-chips');
       const all=[...(g.genres||[]).map(x=>x.name),...(g.tags||[]).slice(0,6).map(x=>x.name)];
-      if(all.length){chips.style.display='flex';chips.innerHTML=all.map(t=>`<span class="rawg-chip">${t}</span>`).join('');chips.dataset.genres=JSON.stringify((g.genres||[]).map(x=>x.name));chips.dataset.tags=JSON.stringify((g.tags||[]).slice(0,10).map(x=>x.name));}
+      if(all.length){chips.style.display='none';chips.innerHTML='';chips.dataset.genres=JSON.stringify((g.genres||[]).map(x=>x.name));chips.dataset.tags=JSON.stringify((g.tags||[]).slice(0,10).map(x=>x.name));}
       chips.dataset.steamAppId='';
 
       box.classList.add('hidden');
@@ -1463,7 +1457,6 @@ function renderGrid(){
     body.appendChild(titleRow);
     const meta=document.createElement('div');meta.className='card-meta';const s=(game.sessions||[]).length;
     meta.innerHTML=`<span>${sessionCountText(s)}</span><span>${fmtHours(game.playtime||0)}</span>`;body.appendChild(meta);
-    if((game.genres||[]).length){const tags=document.createElement('div');tags.className='card-tags';game.genres.slice(0,3).forEach(g=>{const t=document.createElement('span');t.className='tag';t.textContent=g;tags.appendChild(t);});body.appendChild(tags);}
     const actions=document.createElement('div');actions.className='card-actions';
     if(isActive){const pb=document.createElement('button');pb.className='card-btn card-btn-pause';pb.textContent=t('Pause');pb.onclick=e=>{e.stopPropagation();stopTimer(false);};actions.appendChild(pb);}
     else{const pb=document.createElement('button');pb.className='card-btn card-btn-play';pb.textContent=t(game.steamAppId?'Play in Steam':'Start timer');pb.onclick=e=>{e.stopPropagation();if(!guestBlock())launchAndTrack(game.id);};actions.appendChild(pb);}
@@ -1529,9 +1522,7 @@ function openEditModal(id,returnToDetail=false){
   chips.dataset.tags=JSON.stringify(game.tags||[]);
   chips.dataset.steamAppId=game.steamAppId||'';
   const sai=document.getElementById('f-steam-appid');if(sai)sai.value=game.steamAppId||'';
-  const all=[...(game.genres||[]),...(game.tags||[]).slice(0,4)];
-  if(all.length){chips.style.display='flex';chips.innerHTML=all.map(t=>`<span class="rawg-chip">${t}</span>`).join('');}
-  else chips.style.display='none';
+  chips.style.display='none';chips.innerHTML='';
   showCoverPreview(game.cover||''); setPlatformUI(game.platform||'PC'); setRatingUI(game.rating||0);
   populateYearSelect(getGameYear(game));
   document.getElementById('search-results').classList.add('hidden');
@@ -1665,11 +1656,8 @@ function openDetail(id){
   document.getElementById('d-title').textContent=game.title;
   const detailBadge=document.getElementById('d-badge');detailBadge.replaceChildren(createStatusButton(game,true));
   document.getElementById('d-platform').textContent=game.platform?(PLATFORM_ICONS[game.platform]||'')+' '+game.platform:'';
-  // Tags (genres + tags combined)
-  const allTags=[...(game.genres||[]),...(game.tags||[])];
   // Rating picker init
   setRatingUI(game.rating||0);
-  document.getElementById('d-tags').innerHTML=allTags.length?allTags.map(t=>`<span class="detail-tag">${t}</span>`).join(''):''
   // Notes
   document.getElementById('d-notes-input').value=game.notes||'';
   // Stats
