@@ -1573,7 +1573,13 @@ const HLTB_FAILURE_CACHE_MS=10*60*1000;
 const hltbCandidates=new Map();
 const hltbLoadingIds=new Set();
 function escapeHltbHtml(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));}
-function hltbTitleKey(title){return String(title||'').toLocaleLowerCase().replace(/\([^)]*\)|\[[^\]]*\]/g,' ').replace(/[^\p{L}\p{N}]+/gu,' ').replace(/\b(edition|deluxe|complete|remastered|remake|game of the year|goty)\b/gu,' ').replace(/\s+/g,' ').trim();}
+// Storefronts often append a platform/edition suffix which HLTB does not use
+// (for example "— Nintendo Switch 2 Edition"). Strip only known terminal
+// descriptors: words in the actual game title remain untouched.
+function hltbSearchTitle(title){const original=String(title||'').trim();const clean=original.replace(/\s*(?:[-–—:]\s*)?(?:nintendo\s+switch\s*2?\s+edition|switch\s*2?\s+edition|playstation\s*[45]\s+edition|ps\s*[45]\s+edition|xbox\s+(?:one|series\s+[xs](?:\|s)?)\s+edition|pc\s+edition|steam\s+edition)\s*$/iu,'').trim();return clean||original;}
+function hltbTitleKey(title){return hltbSearchTitle(title).toLocaleLowerCase().replace(/\([^)]*\)|\[[^\]]*\]/g,' ').replace(/[^\p{L}\p{N}]+/gu,' ').replace(/\b(edition|deluxe|complete|remastered|remake|game of the year|goty)\b/gu,' ').replace(/\s+/g,' ').trim();}
+function hltbMatchScore(game,candidate){const gameWords=new Set(hltbTitleKey(game.title).split(' ').filter(Boolean));const candidateWords=new Set(hltbTitleKey(candidate.title).split(' ').filter(Boolean));if(!gameWords.size||!candidateWords.size)return 0;if([...gameWords].every(word=>candidateWords.has(word))&&gameWords.size===candidateWords.size)return 1000;const overlap=[...gameWords].filter(word=>candidateWords.has(word)).length;return Math.round(overlap/gameWords.size*100)-(candidateWords.size-overlap)*3;}
+function rankHltbCandidates(game,candidates){return [...candidates].sort((a,b)=>hltbMatchScore(game,b)-hltbMatchScore(game,a)||a.title.localeCompare(b.title));}
 function hltbDuration(minutes){if(!Number.isFinite(Number(minutes))||Number(minutes)<=0)return t('No data');const total=Math.round(Number(minutes));return `${Math.floor(total/60)}h ${total%60}m`;}
 function hltbPersist(game){save();pushToFb();renderGrid();if(detailId===game.id)renderHltbPanel(game);}
 function hltbApplyMatch(game,candidate){
@@ -1622,15 +1628,15 @@ function bindHltbPanelActions(game){
   });
 }
 async function lookupHltb(id,query,alwaysPick){
-  const game=getGame(id);const cleanQuery=String(query||'').trim();if(!game||!cleanQuery||hltbLoadingIds.has(id))return;
+  const game=getGame(id);const requestedQuery=String(query||'').trim();const cleanQuery=hltbSearchTitle(requestedQuery);if(!game||!cleanQuery||hltbLoadingIds.has(id))return;
   if(!window.launcher?.searchHltb){game.hltb={...(game.hltb||{}),error:'unavailable',checkedAt:Date.now()};hltbPersist(game);return;}
   hltbCandidates.delete(id);hltbLoadingIds.add(id);renderHltbPanel(game);
   try{
     const response=await window.launcher.searchHltb(cleanQuery);
-    const candidates=Array.isArray(response?.results)?response.results:[];
+    const candidates=Array.isArray(response?.results)?rankHltbCandidates(game,response.results):[];
     if(!response?.ok||!candidates.length){game.hltb={...(game.hltb||{}),error:response?.error==='NO_RESULTS'?'not-found':'unavailable',checkedAt:Date.now(),hidden:false};hltbPersist(game);return;}
-    const exact=candidates.find(candidate=>hltbTitleKey(candidate.title)===hltbTitleKey(game.title));
-    if(exact&&!alwaysPick)hltbApplyMatch(game,exact);
+    const exact=candidates.filter(candidate=>hltbTitleKey(candidate.title)===hltbTitleKey(game.title));
+    if(exact.length===1&&!alwaysPick)hltbApplyMatch(game,exact[0]);
     else hltbShowPicker(game,candidates,cleanQuery);
   }catch{game.hltb={...(game.hltb||{}),error:'unavailable',checkedAt:Date.now(),hidden:false};hltbPersist(game);}
   finally{hltbLoadingIds.delete(id);if(detailId===id)renderHltbPanel(game);}
