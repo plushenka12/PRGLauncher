@@ -866,6 +866,7 @@ let selectedPlatform = 'PC';
 let selectedRating = 0;
 let searchTimeout = null;
 let fbApp=null,fbDb=null,fbAuth=null,fbUnsub=null,syncActive=false,statsPublishTimer=null,currentUser=null,authMode='signin';
+let syncRetryTimer=null,syncRetryDelay=5000,syncRetryInFlight=false;
 const FB_HARDCODED = {
   apiKey: 'AIzaSyBL-IHjUiSlmJ2N_caWx_MWAI8v2RL4Rpw',
   authDomain: 'gametracker-30c93.firebaseapp.com',
@@ -971,12 +972,40 @@ function populateYearSelect(selectedYear) {
 
 // FIREBASE
 window.addEventListener('fb-ready', () => { initFb(FB_HARDCODED); });
+function clearUserSyncRetry(){
+  if(syncRetryTimer){clearTimeout(syncRetryTimer);syncRetryTimer=null;}
+  syncRetryDelay=5000;
+}
+function restoreCachedLibrary(){
+  const cachedGames=loadProfileGames();
+  if(!cachedGames.length)return;
+  games=cachedGames;buildFilterBar();renderGrid();updateStats();updateSessionBar();
+}
+function scheduleUserSyncRetry(user,reason='network'){
+  if(!user?.uid||currentUser?.uid!==user.uid||syncRetryTimer)return;
+  const delay=navigator.onLine===false?Math.max(syncRetryDelay,10000):syncRetryDelay;
+  console.warn(`[Sync] ${reason}; retrying in ${Math.round(delay/1000)}s`);
+  setSyncBadge(navigator.onLine===false?'off':'err');
+  syncRetryTimer=setTimeout(()=>{
+    syncRetryTimer=null;
+    startUserSync(user).catch(error=>console.error('[Sync] Retry failed',error));
+  },delay);
+  syncRetryDelay=Math.min(Math.max(syncRetryDelay*2,10000),60000);
+}
+function retryUserSyncNow(){
+  if(!currentUser||syncRetryInFlight)return;
+  if(syncRetryTimer){clearTimeout(syncRetryTimer);syncRetryTimer=null;}
+  syncRetryDelay=5000;
+  startUserSync(currentUser).catch(error=>console.error('[Sync] Online retry failed',error));
+}
+window.addEventListener('online',retryUserSyncNow);
+window.addEventListener('offline',()=>{if(currentUser&&!syncActive)setSyncBadge('off');});
 function initFb(cfg) {
   try {
     const {initializeApp,getFirestore,getAuth,onAuthStateChanged}=window._fbImports;
     fbApp=initializeApp(cfg,'gamevault');fbDb=getFirestore(fbApp);fbAuth=getAuth(fbApp);fbConfig=cfg;
     onAuthStateChanged(fbAuth,async user=>{
-      syncActive=false;clearInterval(statsPublishTimer);if(fbUnsub){fbUnsub();fbUnsub=null;}
+      clearUserSyncRetry();syncRetryInFlight=false;syncActive=false;clearInterval(statsPublishTimer);if(fbUnsub){fbUnsub();fbUnsub=null;}
       clearInterval(nintendoSyncTimer);nintendoProfileReady=false;
       if(activeGameId)stopTimer(true);
       currentUser=user||null;games=[];renderGrid();updateStats();updateSessionBar();
@@ -1006,7 +1035,9 @@ function updateSteamProfileUI(){
 }
 function updateProfileUI(){const email=currentUser?.email||t('PRG Account не підключено');const label=document.getElementById('profile-email-label'),link=document.getElementById('profile-link');if(label)label.textContent=email;if(link)link.textContent=currentUser?`prgtracker.netlify.app/?u=${currentUser.uid}`:'Увійди, щоб створити персональне посилання';updateSteamProfileUI();}
 async function startUserSync(user){
-  if(fbUnsub)fbUnsub();const ref=userLibraryRef();const {getDoc,onSnapshot,setDoc}=window._fbImports;
+  if(!user?.uid||currentUser?.uid!==user.uid||syncRetryInFlight)return false;
+  syncRetryInFlight=true;
+  if(fbUnsub){fbUnsub();fbUnsub=null;}const ref=userLibraryRef();const {getDoc,onSnapshot,setDoc}=window._fbImports;
   let newProfile=false;
   try{
     const existing=await getDoc(ref);
@@ -1015,7 +1046,8 @@ async function startUserSync(user){
     if(existing.exists()){
       // Existing accounts always load only their own cloud/local profile.
       localStorage.setItem('gv-account-migrated-v1',migratedUid||user.uid);
-      const remote=existing.data();games=Array.isArray(remote.games)?remote.games:loadProfileGames();newProfile=!remote.onboardingDone&&!games.length;
+      const remote=existing.data(),localGames=loadProfileGames(),remoteTs=Number(remote.ts||0),localTs=Number(localStorage.getItem(profileStorageKey('gv-local-ts'))||0);
+      games=Array.isArray(remote.games)&&(remoteTs>=localTs||!localGames.length)?remote.games:localGames;newProfile=!remote.onboardingDone&&!games.length;
     }else{
       newProfile=true;
       // Legacy local data may be adopted once, by the first PRG account only.
@@ -1026,14 +1058,22 @@ async function startUserSync(user){
     }
     save();buildFilterBar();renderGrid();updateStats();
   }
-  catch(error){console.error('[Auth] Profile migration failed',error);setSyncBadge('err');return;}
-  fbUnsub=onSnapshot(ref,snap=>{const r=snap.data();if(r?.games&&r.ts>(parseInt(localStorage.getItem(profileStorageKey('gv-local-ts'))||'0'))){games=r.games;games.sort((a,b)=>(b.lastPlayed||0)-(a.lastPlayed||0));save();buildFilterBar();renderGrid();updateStats();}},()=>setSyncBadge('err'));
-  syncActive=true;setSyncBadge('ok');updateProfileUI();setTimeout(()=>{pushToFb().catch(()=>{});clearInterval(statsPublishTimer);statsPublishTimer=setInterval(()=>publishStatsDashboard().catch(()=>{}),30000);},750);
+  catch(error){
+    console.error('[Auth] Profile migration failed',error);
+    if(currentUser?.uid===user.uid){restoreCachedLibrary();scheduleUserSyncRetry(user,'cloud profile unavailable');}
+    return false;
+  }finally{syncRetryInFlight=false;}
+  clearUserSyncRetry();
+  fbUnsub=onSnapshot(ref,snap=>{const r=snap.data();if(r?.games&&r.ts>(parseInt(localStorage.getItem(profileStorageKey('gv-local-ts'))||'0'))){games=r.games;games.sort((a,b)=>(b.lastPlayed||0)-(a.lastPlayed||0));save();buildFilterBar();renderGrid();updateStats();}},error=>{console.error('[Sync] Snapshot unavailable',error);syncActive=false;scheduleUserSyncRetry(user,'live sync unavailable');});
+  syncActive=true;setSyncBadge('ok');updateProfileUI();setTimeout(()=>{if(currentUser?.uid!==user.uid||!syncActive)return;pushToFb().catch(()=>{});clearInterval(statsPublishTimer);statsPublishTimer=setInterval(()=>publishStatsDashboard().catch(error=>{console.error('[Stats] Dashboard publish failed',error);scheduleUserSyncRetry(user,'dashboard unavailable');}),30000);},750);
   if(newProfile&&!games.length&&!localStorage.getItem(profileStorageKey('gv-steam-onboarding-done-v1')))setTimeout(showSteamOnboarding,450);
+  return true;
 }
 async function pushToFb(){
-  if(!fbDb||!syncActive||!currentUser)return;
-  try{const{setDoc}=window._fbImports;const ref=userLibraryRef();const ts=Date.now();localStorage.setItem(profileStorageKey('gv-local-ts'),String(ts));await Promise.all([setDoc(ref,{games,ts,ownerUid:currentUser.uid,statsDashboard:makeStatsDashboard(ts)},{merge:true}),publishStatsDashboard(ts)]);}catch(e){console.error('[Stats] Could not publish dashboard:',e);}
+  if(!fbDb||!currentUser)return;
+  const ts=Date.now();localStorage.setItem(profileStorageKey('gv-local-ts'),String(ts));
+  if(!syncActive){scheduleUserSyncRetry(currentUser,'waiting to publish local changes');return;}
+  try{const{setDoc}=window._fbImports;const ref=userLibraryRef();await Promise.all([setDoc(ref,{games,ts,ownerUid:currentUser.uid,statsDashboard:makeStatsDashboard(ts)},{merge:true}),publishStatsDashboard(ts)]);}catch(e){console.error('[Stats] Could not publish dashboard:',e);syncActive=false;scheduleUserSyncRetry(currentUser,'could not publish changes');}
 }
 function setSyncBadge(s){const b=document.getElementById('sync-badge');b.className='sync-badge '+s;b.textContent=t(s==='ok'?'Synced':s==='err'?'Sync error':'Offline');}
 
@@ -2162,7 +2202,7 @@ document.getElementById('auth-google-btn').onclick=loginWithGoogle;
 document.getElementById('auth-reset-btn').onclick=resetAuthPassword;
 ['auth-email','auth-password'].forEach(id=>document.getElementById(id).addEventListener('keydown',event=>{if(event.key==='Enter')submitAuth();}));
 document.getElementById('copy-profile-link-btn').onclick=async()=>{if(!currentUser){showAuthError('Увійди в PRG Account, щоб отримати персональне посилання.');showLogin();return;}const url=`https://prgtracker.netlify.app/?u=${currentUser.uid}`;try{await navigator.clipboard.writeText(url);document.getElementById('profile-link').textContent='Посилання скопійовано';}catch{document.getElementById('profile-link').textContent=url;}};
-document.getElementById('sign-out-btn').onclick=async()=>{if(!currentUser)return;if(!confirm('Вийти з PRG Account на цьому ПК? Локальна копія бібліотеки залишиться.'))return;clearInterval(statsPublishTimer);if(fbUnsub)fbUnsub();syncActive=false;await window._fbImports.signOut(fbAuth);};
+document.getElementById('sign-out-btn').onclick=async()=>{if(!currentUser)return;if(!confirm('Вийти з PRG Account на цьому ПК? Локальна копія бібліотеки залишиться.'))return;clearUserSyncRetry();clearInterval(statsPublishTimer);if(fbUnsub)fbUnsub();syncActive=false;await window._fbImports.signOut(fbAuth);};
 
 </script>
 <script>
