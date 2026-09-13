@@ -40,6 +40,8 @@ let steamRunningAppId = null
 let steamCollectionTimer = null
 let lastBacklogSignature = null
 const steamStoreCache = new Map()
+let hltbSearchInFlight = null
+let hltbLastRequestAt = 0
 const launchedAtLogin = process.argv.includes('--hidden')
 const opacityAnimations = new Map()
 
@@ -349,6 +351,139 @@ function getSteamStoreGame(appId) {
   })
 }
 
+// ── HOWLONGTOBEAT ─────────────────────────────────────────────────────────
+// HLTB intentionally rotates the credentials used by its search endpoint.  A
+// tiny hidden BrowserWindow lets the site make its own search request, then we
+// only consume that response.  It keeps the integration keyless and avoids
+// distributing a hard-coded / expired HLTB token with PRGLauncher.
+const HLTB_ORIGIN = 'https://howlongtobeat.com'
+const HLTB_MIN_REQUEST_GAP = 1200
+const HLTB_SEARCH_TIMEOUT = 18000
+
+function hltbMinutes(value) {
+  const seconds = Number(value)
+  return Number.isFinite(seconds) && seconds > 0 ? Math.round(seconds / 60) : null
+}
+
+function getHltbRows(payload) {
+  if (Array.isArray(payload)) return payload
+  if (Array.isArray(payload?.data)) return payload.data
+  if (Array.isArray(payload?.results)) return payload.results
+  if (Array.isArray(payload?.data?.games)) return payload.data.games
+  if (Array.isArray(payload?.games)) return payload.games
+  return []
+}
+
+function normalizeHltbResults(payload) {
+  const seen = new Set()
+  return getHltbRows(payload).map(row => {
+    const id = Number(row?.game_id ?? row?.id)
+    const title = String(row?.game_name ?? row?.name ?? '').trim()
+    if (!Number.isInteger(id) || id <= 0 || !title || seen.has(id)) return null
+    seen.add(id)
+    const date = String(row?.release_world ?? row?.game_name_date ?? row?.game_release_date ?? '')
+    const yearMatch = date.match(/(?:19|20)\d{2}/)
+    return {
+      id,
+      title: title.slice(0, 240),
+      year: yearMatch ? Number(yearMatch[0]) : null,
+      mainStoryMinutes: hltbMinutes(row?.comp_main),
+      mainExtraMinutes: hltbMinutes(row?.comp_plus),
+      completionistMinutes: hltbMinutes(row?.comp_100),
+      allStylesMinutes: hltbMinutes(row?.comp_all),
+      sourceUrl: `${HLTB_ORIGIN}/game/${id}`
+    }
+  }).filter(Boolean).slice(0, 12)
+}
+
+function wait(ms) { return new Promise(resolve => setTimeout(resolve, ms)) }
+
+async function searchHltb(query) {
+  const normalizedQuery = String(query || '').trim().replace(/\s+/g, ' ')
+  if (!normalizedQuery || normalizedQuery.length > 160) return { ok: false, error: 'INVALID_QUERY', results: [] }
+  if (hltbSearchInFlight) return { ok: false, error: 'BUSY', results: [] }
+
+  hltbSearchInFlight = (async () => {
+    const remainingGap = HLTB_MIN_REQUEST_GAP - (Date.now() - hltbLastRequestAt)
+    if (remainingGap > 0) await wait(remainingGap)
+    hltbLastRequestAt = Date.now()
+
+    return new Promise(resolve => {
+      let settled = false
+      let lookupWindow = null
+      let searchStarted = false
+      const finish = result => {
+        if (settled) return
+        settled = true
+        clearTimeout(timeout)
+        if (lookupWindow && !lookupWindow.isDestroyed()) lookupWindow.destroy()
+        resolve(result)
+      }
+      const timeout = setTimeout(() => finish({ ok: false, error: 'TIMEOUT', results: [] }), HLTB_SEARCH_TIMEOUT)
+
+      try {
+        lookupWindow = new BrowserWindow({
+          show: false,
+          skipTaskbar: true,
+          webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: false }
+        })
+        lookupWindow.webContents.on('did-fail-load', (_event, code, description, validatedURL, isMainFrame) => {
+          if (isMainFrame && code !== -3) finish({ ok: false, error: 'NETWORK', results: [] })
+        })
+        lookupWindow.webContents.on('did-finish-load', async () => {
+          if (searchStarted) return
+          searchStarted = true
+          try {
+            // Trigger the site's own search UI and observe its response. This
+            // preserves HLTB's rotating request headers without storing or
+            // manufacturing a token in PRGLauncher.
+            const data = await lookupWindow.webContents.executeJavaScript(`
+              (async () => {
+                const query = ${JSON.stringify(normalizedQuery)};
+                const originalFetch = window.fetch.bind(window);
+                const result = new Promise(resolve => {
+                  const observer = setTimeout(() => resolve({ __hltbError: 'NO_SEARCH_RESPONSE' }), 12000);
+                  window.fetch = async (...args) => {
+                    const response = await originalFetch(...args);
+                    const target = String(args[0]?.url || args[0] || '');
+                    if (/\\/api\\/(?:search|find)\\//i.test(target)) {
+                      response.clone().json().then(payload => { clearTimeout(observer); resolve(payload); }).catch(() => {});
+                    }
+                    return response;
+                  };
+                });
+                const input = [...document.querySelectorAll('input')].find(element =>
+                  element.type === 'search' || /search/i.test(String(element.placeholder || '') + ' ' + String(element.getAttribute('aria-label') || ''))
+                );
+                if (!input) return { __hltbError: 'SEARCH_UI_NOT_FOUND' };
+                const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set;
+                setter ? setter.call(input, query) : (input.value = query);
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+                const form = input.closest('form');
+                if (form?.requestSubmit) form.requestSubmit();
+                else input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', bubbles: true }));
+                return result;
+              })()
+            `, true)
+            const results = normalizeHltbResults(data)
+            if (results.length) finish({ ok: true, results })
+            else finish({ ok: false, error: data?.__hltbError ? 'HLTB_REJECTED' : 'NO_RESULTS', results: [] })
+          } catch {
+            finish({ ok: false, error: 'HLTB_UNAVAILABLE', results: [] })
+          }
+        })
+        lookupWindow.loadURL(HLTB_ORIGIN).catch(() => finish({ ok: false, error: 'NETWORK', results: [] }))
+      } catch {
+        finish({ ok: false, error: 'HLTB_UNAVAILABLE', results: [] })
+      }
+    })
+  })()
+
+  try { return await hltbSearchInFlight }
+  finally { hltbSearchInFlight = null }
+}
+
 // ── IPC HANDLERS ──────────────────────────────────────────────────────────
 ipcMain.handle('steam:launchGame', async (_, appId) => {
   const normalizedAppId = String(appId || '')
@@ -444,6 +579,16 @@ ipcMain.handle('steam:getStoreGames', async (_, appIds) => {
 
 ipcMain.handle('steam:getRunningAppId', async () => {
   return { appId: getRunningSteamAppId() }
+})
+
+ipcMain.handle('hltb:search', async (_, query) => searchHltb(query))
+ipcMain.handle('hltb:openGame', async (_, url) => {
+  try {
+    const parsed = new URL(String(url || ''))
+    if (parsed.protocol !== 'https:' || parsed.hostname !== 'howlongtobeat.com' || !/^\/game\/\d+\/?$/.test(parsed.pathname)) return { ok: false }
+    await shell.openExternal(parsed.toString())
+    return { ok: true }
+  } catch { return { ok: false } }
 })
 
 const NINTENDO_CLIENT_ID = '5c38e31cd085304b'

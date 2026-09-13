@@ -218,6 +218,24 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 .session-row:last-child{border-bottom:none}
 .session-date{color:var(--text3)}
 .session-dur{font-family:var(--fm);color:var(--text2)}
+.hltb-panel{margin-top:1.25rem;padding:1rem;border:1px solid var(--border);border-radius:var(--rs);background:linear-gradient(135deg,color-mix(in srgb,var(--bg3) 92%,var(--accent) 8%),var(--bg3))}
+.hltb-heading{display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:.75rem}
+.hltb-title{font-family:var(--fh);font-size:13px;font-weight:800;color:var(--text)}
+.hltb-subtitle{font-size:11px;color:var(--text2);margin-top:2px}
+.hltb-times{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:.8rem}
+.hltb-time{padding:8px 9px;border-radius:8px;background:rgba(0,0,0,.14);border:1px solid var(--border)}
+.hltb-time-label{font-size:10px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.35px}
+.hltb-time-value{font-family:var(--fm);font-size:14px;color:var(--text);font-weight:700;margin-top:3px}
+.hltb-actions{display:flex;flex-wrap:wrap;gap:6px}
+.hltb-actions .btn{font-size:11px;padding:6px 9px}
+.hltb-message{font-size:12px;color:var(--text2);line-height:1.45;margin-bottom:.75rem}
+.hltb-match-list{display:grid;gap:6px;margin-top:.65rem;max-height:210px;overflow-y:auto}
+.hltb-match{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;text-align:left;padding:8px 9px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-family:var(--fb);cursor:pointer}
+.hltb-match:hover{border-color:var(--accent2);background:var(--bg4)}
+.hltb-match-name{font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hltb-match-meta{font-size:10px;color:var(--text2);margin-top:3px}
+.hltb-search-row{display:flex;gap:6px;margin:.7rem 0}
+.hltb-search-row .form-input{min-width:0;padding:7px 9px;font-size:12px}
 
 /* FIREBASE */
 .fb-step{display:flex;gap:12px;margin-bottom:14px}
@@ -763,6 +781,8 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
         <button class="btn btn-ghost btn-sm" id="d-edit-time">Edit Time</button>
       </div>
       <div class="sessions-log" id="d-log"></div>
+      <!-- HOWLONGTOBEAT -->
+      <div class="hltb-panel" id="d-hltb"></div>
       <!-- ACTIONS -->
       <div class="modal-actions" style="margin-top:1.25rem">
         <button class="btn btn-danger" id="d-delete">Delete</button>
@@ -889,6 +909,7 @@ const UI_COPY=[
   ['Оновити теги (EN)','Refresh tags (EN)'],['Скасувати','Cancel'],['Почати','Start'],['Додати гру','Add Game'],['Редагувати гру','Edit Game'],['Пошук у RAWG','Search on RAWG'],['Назва *','Title *'],['Статус','Status'],['Пріоритет беклогу','Backlog priority'],['Рік додавання','Year added'],['Платформа','Platform'],['Обкладинка URL','Cover URL'],['Нотатки','Notes'],['Зберегти','Save'],['Зберегти нотатки','Save notes'],['Закрити','Close'],['Видалити','Delete'],['Видалити сесію','Delete session'],['Редагувати час','Edit time'],['Журнал сесій','Session log'],['Оцінка','Rating'],['Скинути','Clear'],['Змінити час','Edit time'],['Загальний час гри','Total playtime'],['Сесії','Sessions'],['Додати сесію вручну','Add session manually'],['Дата','Date'],['Год','Hour'],['Хв','Min'],['Зберегти зміни','Save changes'],
   ['Усього ігор','Total Games'],['Загальний час','Total Playtime'],['Найпопулярніші ігри за часом','Top Games by Playtime'],['Розподіл за статусом','Status Breakdown'],['Платформи','Platform Distribution'],['Найкращі жанри','Top Genres'],['Активність (останні 26 тижнів)','Activity (last 26 weeks)'],['Статистика сесій','Session Stats'],['Найкраще оцінені ігри','Top Rated Games'],['Розподіл оцінок','Rating Distribution'],
   ['Інформація','Info'],['Грати в Steam','Play in Steam'],['Почати таймер','Start timer'],['Зараз граю','Now playing'],['Очікування','Stand By'],['Змінити статус','Change status'],['Змінити статус гри: ','Change game status: '],['Ще немає даних','No data yet'],['Немає сесій','No sessions'],['Ще немає сесій','No sessions yet'],['Редагувати','Edit'],['сесія','session'],['сесій','sessions'],['ігри','games'],['гра','game'],
+  ['Час проходження HLTB','HLTB completion times'],['Пошук даних HLTB…','Looking up HLTB…'],['HLTB ще не знайдено для цієї гри.','HLTB has not been found for this game yet.'],['HLTB тимчасово недоступний. Спробуй ще раз трохи пізніше.','HLTB is temporarily unavailable. Try again a little later.'],['Основний сюжет','Main Story'],['Сюжет + додаткове','Main + Extras'],['На 100%','Completionist'],['Усі стилі','All Styles'],['Немає даних','No data'],['Відкрити HLTB','Open HLTB'],['Оновити HLTB','Refresh HLTB'],['Змінити збіг','Change match'],['Сховати HLTB','Hide HLTB'],['Показати HLTB','Show HLTB'],['Дані HLTB приховано для цієї гри.','HLTB data is hidden for this game.'],['Обери версію гри в HLTB','Choose the game version in HLTB'],['Є кілька можливих збігів. Обери правильну версію — це збережеться у твоїй бібліотеці.','There are several possible matches. Choose the correct version — it will be saved in your library.'],['Шукати іншу назву','Search a different title'],['Пошук у HLTB','Search HLTB'],['Нічого не знайдено. Спробуй іншу назву гри.','Nothing was found. Try a different game title.'],['Натисни «Оновити HLTB», щоб спробувати ще раз.','Press “Refresh HLTB” to try again.'],['Дані з HowLongToBeat.com','Data from HowLongToBeat.com'],
   ['PRG ОБЛІКОВИЙ ЗАПИС','PRG ACCOUNT'],['Синхронізовано','Synced'],['Помилка синхронізації','Sync error'],['Немає результатів','No results'],['Пошук…','Searching…'],['Завантаження даних Steam…','Loading Steam data…'],['Читаємо Steam…','Reading Steam…'],['Показано','Showing'],['з','of'],['Вже є у лаунчері','Already in launcher'],['Ігор не знайдено. Перевір Steam на цьому ПК або обери інше джерело імпорту.','No games found. Check Steam on this PC or choose another import source.'],
   ['Гра готова до запуску','Game is ready to launch'],['Steam знайшов установлену гру','Steam found the installed game'],['Запустити гру і таймер','Launch game and timer'],['Steam готує завантаження…','Steam is preparing the download…'],['Завантаження скасовано в Steam','Download cancelled in Steam'],['Steam прибрав гру з черги','Steam removed the game from the queue'],['Спробувати завантажити ще раз','Try downloading again'],['Steam не знайдено','Steam was not found'],['Встановіть Steam або запустіть його хоча б один раз','Install Steam or start it at least once'],['Очікуємо, поки Steam почне встановлення…','Waiting for Steam to start installing…'],['Запит на встановлення надіслано Steam','Install request sent to Steam'],['Перевіряємо Steam…','Checking Steam…'],
   ['У цьому фільтрі поки порожньо','This filter is empty'],['Спробуй змінити фільтри або додай нову гру до бібліотеки.','Try changing filters or adding a game to your library.'],['Ще немає сесій','No sessions yet'],['Створи PRG-акаунт — твоя бібліотека та сайт будуть тільки твоїми.','Create a PRG Account — your library and website will be yours alone.'],['У мене вже є акаунт','I already have an account'],['Увійди, щоб синхронізувати бібліотеку та отримати власну сторінку статистики.','Sign in to sync your library and get your own statistics page.'],['Посилання скопійовано','Link copied']
@@ -1552,6 +1573,83 @@ function saveModal(){
   if(reopenDetailId)openDetail(reopenDetailId);
 }
 
+// ── HOWLONGTOBEAT GAME CARD METADATA ───────────────────────────────────────
+// Lookups happen only when a game card is opened (or the user asks again), not
+// across the whole library.  The selected result is stored with the game so a
+// later cloud sync does not need to query HLTB again.
+const HLTB_POSITIVE_CACHE_MS=30*24*60*60*1000;
+const HLTB_FAILURE_CACHE_MS=10*60*1000;
+const hltbCandidates=new Map();
+const hltbLoadingIds=new Set();
+function escapeHltbHtml(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));}
+function hltbTitleKey(title){return String(title||'').toLocaleLowerCase().replace(/\([^)]*\)|\[[^\]]*\]/g,' ').replace(/[^\p{L}\p{N}]+/gu,' ').replace(/\b(edition|deluxe|complete|remastered|remake|game of the year|goty)\b/gu,' ').replace(/\s+/g,' ').trim();}
+function hltbDuration(minutes){if(!Number.isFinite(Number(minutes))||Number(minutes)<=0)return t('No data');const total=Math.round(Number(minutes));return `${Math.floor(total/60)}h ${total%60}m`;}
+function hltbPersist(game){save();pushToFb();renderGrid();if(detailId===game.id)renderHltbPanel(game);}
+function hltbApplyMatch(game,candidate){
+  if(!game||!candidate)return;
+  game.hltb={id:candidate.id,title:candidate.title,year:candidate.year||null,mainStoryMinutes:candidate.mainStoryMinutes||null,mainExtraMinutes:candidate.mainExtraMinutes||null,completionistMinutes:candidate.completionistMinutes||null,allStylesMinutes:candidate.allStylesMinutes||null,sourceUrl:candidate.sourceUrl,checkedAt:Date.now(),hidden:false};
+  hltbCandidates.delete(game.id);hltbPersist(game);
+}
+function hltbShowPicker(game,candidates,query){
+  hltbCandidates.set(game.id,{candidates,query});renderHltbPanel(game);
+}
+function hltbRenderMatchPicker(game,state){
+  const rows=state.candidates.map((candidate,index)=>`<button class="hltb-match" data-hltb-action="select" data-hltb-index="${index}" title="${escapeHltbHtml(candidate.title)}"><span><span class="hltb-match-name">${escapeHltbHtml(candidate.title)}</span><span class="hltb-match-meta">${candidate.year||'—'} · ${t('Main Story')}: ${hltbDuration(candidate.mainStoryMinutes)}</span></span><span aria-hidden="true">›</span></button>`).join('');
+  return `<div class="hltb-heading"><div><div class="hltb-title">${t('Choose the game version in HLTB')}</div><div class="hltb-subtitle">${t('There are several possible matches. Choose the correct version — it will be saved in your library.')}</div></div></div><div class="hltb-search-row"><input class="form-input" id="hltb-search-input" value="${escapeHltbHtml(state.query||game.title)}" maxlength="160" aria-label="${t('Search HLTB')}"><button class="btn btn-ghost btn-sm" data-hltb-action="search">${t('Search HLTB')}</button></div><div class="hltb-match-list">${rows}</div>`;
+}
+function renderHltbPanel(game){
+  const panel=document.getElementById('d-hltb');if(!panel||!game)return;
+  const stored=game.hltb||{};const picker=hltbCandidates.get(game.id);const isLoading=hltbLoadingIds.has(game.id);
+  if(picker){panel.innerHTML=hltbRenderMatchPicker(game,picker);bindHltbPanelActions(game);return;}
+  if(stored.hidden){
+    panel.innerHTML=`<div class="hltb-heading"><div><div class="hltb-title">${t('HLTB completion times')}</div><div class="hltb-subtitle">${t('HLTB data is hidden for this game.')}</div></div></div><div class="hltb-actions"><button class="btn btn-ghost btn-sm" data-hltb-action="show">${t('Show HLTB')}</button></div>`;
+    bindHltbPanelActions(game);return;
+  }
+  if(isLoading){
+    panel.innerHTML=`<div class="hltb-heading"><div><div class="hltb-title">${t('HLTB completion times')}</div><div class="hltb-subtitle">${t('Looking up HLTB…')}</div></div></div>`;return;
+  }
+  if(stored.id&&stored.title){
+    panel.innerHTML=`<div class="hltb-heading"><div><div class="hltb-title">${t('HLTB completion times')}</div><div class="hltb-subtitle">${escapeHltbHtml(stored.title)}${stored.year?` · ${stored.year}`:''} · ${t('Data from HowLongToBeat.com')}</div></div></div><div class="hltb-times"><div class="hltb-time"><div class="hltb-time-label">${t('Main Story')}</div><div class="hltb-time-value">${hltbDuration(stored.mainStoryMinutes)}</div></div><div class="hltb-time"><div class="hltb-time-label">${t('Main + Extras')}</div><div class="hltb-time-value">${hltbDuration(stored.mainExtraMinutes)}</div></div><div class="hltb-time"><div class="hltb-time-label">${t('Completionist')}</div><div class="hltb-time-value">${hltbDuration(stored.completionistMinutes)}</div></div><div class="hltb-time"><div class="hltb-time-label">${t('All Styles')}</div><div class="hltb-time-value">${hltbDuration(stored.allStylesMinutes)}</div></div></div><div class="hltb-actions"><button class="btn btn-ghost btn-sm" data-hltb-action="open">${t('Open HLTB')}</button><button class="btn btn-ghost btn-sm" data-hltb-action="change">${t('Change match')}</button><button class="btn btn-ghost btn-sm" data-hltb-action="refresh">${t('Refresh HLTB')}</button><button class="btn btn-ghost btn-sm" data-hltb-action="hide">${t('Hide HLTB')}</button></div>`;
+    bindHltbPanelActions(game);return;
+  }
+  const unavailable=stored.error==='unavailable';
+  panel.innerHTML=`<div class="hltb-heading"><div><div class="hltb-title">${t('HLTB completion times')}</div><div class="hltb-subtitle">${unavailable?t('HLTB is temporarily unavailable. Try again a little later.'):t('HLTB has not been found for this game yet.')}</div></div></div><div class="hltb-actions"><button class="btn btn-ghost btn-sm" data-hltb-action="refresh">${t('Refresh HLTB')}</button><button class="btn btn-ghost btn-sm" data-hltb-action="hide">${t('Hide HLTB')}</button></div>`;
+  bindHltbPanelActions(game);
+}
+function bindHltbPanelActions(game){
+  const panel=document.getElementById('d-hltb');if(!panel)return;
+  panel.querySelectorAll('[data-hltb-action]').forEach(button=>button.onclick=async()=>{
+    const action=button.dataset.hltbAction;
+    if(action==='open'){if(game.hltb?.sourceUrl)await window.launcher?.openHltbGame?.(game.hltb.sourceUrl);return;}
+    if(guestBlock())return;
+    if(action==='hide'){game.hltb={...(game.hltb||{}),hidden:true};hltbCandidates.delete(game.id);hltbPersist(game);return;}
+    if(action==='show'){game.hltb={...(game.hltb||{}),hidden:false};hltbPersist(game);return;}
+    if(action==='refresh'){await lookupHltb(game.id,game.title,false);return;}
+    if(action==='change'){await lookupHltb(game.id,game.title,true);return;}
+    if(action==='search'){const query=panel.querySelector('#hltb-search-input')?.value?.trim();await lookupHltb(game.id,query,true);return;}
+    if(action==='select'){const picker=hltbCandidates.get(game.id);const candidate=picker?.candidates?.[Number(button.dataset.hltbIndex)];if(candidate)hltbApplyMatch(game,candidate);}
+  });
+}
+async function lookupHltb(id,query,alwaysPick){
+  const game=getGame(id);const cleanQuery=String(query||'').trim();if(!game||!cleanQuery||hltbLoadingIds.has(id))return;
+  if(!window.launcher?.searchHltb){game.hltb={...(game.hltb||{}),error:'unavailable',checkedAt:Date.now()};hltbPersist(game);return;}
+  hltbCandidates.delete(id);hltbLoadingIds.add(id);renderHltbPanel(game);
+  try{
+    const response=await window.launcher.searchHltb(cleanQuery);
+    const candidates=Array.isArray(response?.results)?response.results:[];
+    if(!response?.ok||!candidates.length){game.hltb={...(game.hltb||{}),error:response?.error==='NO_RESULTS'?'not-found':'unavailable',checkedAt:Date.now(),hidden:false};hltbPersist(game);return;}
+    const exact=candidates.find(candidate=>hltbTitleKey(candidate.title)===hltbTitleKey(game.title));
+    if(exact&&!alwaysPick)hltbApplyMatch(game,exact);
+    else hltbShowPicker(game,candidates,cleanQuery);
+  }catch{game.hltb={...(game.hltb||{}),error:'unavailable',checkedAt:Date.now(),hidden:false};hltbPersist(game);}
+  finally{hltbLoadingIds.delete(id);if(detailId===id)renderHltbPanel(game);}
+}
+function maybeLookupHltb(game){
+  const stored=game.hltb||{};const age=Date.now()-Number(stored.checkedAt||0);
+  if(isGuest||stored.hidden||hltbLoadingIds.has(game.id)||hltbCandidates.has(game.id)||stored.id&&age<HLTB_POSITIVE_CACHE_MS||stored.error&&age<HLTB_FAILURE_CACHE_MS)return;
+  lookupHltb(game.id,game.title,false);
+}
+
 // DETAIL
 function openDetail(id){
   detailId=id;const game=getGame(id);if(!game)return;
@@ -1584,7 +1682,9 @@ function openDetail(id){
   const log=document.getElementById('d-log');
   log.innerHTML=!sessions.length?`<div style="color:var(--text3);font-size:13px;padding:8px 0">${t('No sessions yet')}</div>`
     :[...sessions].reverse().map(s=>`<div class="session-row"><span class="session-date">${fmtDate(s.start)}</span><span class="session-dur">${fmtTime(s.dur)}</span></div>`).join('');
+  renderHltbPanel(game);
   document.getElementById('detail-modal').classList.remove('hidden');
+  maybeLookupHltb(game);
 }
 function closeDetail(){document.getElementById('detail-modal').classList.add('hidden');}
 

@@ -16,6 +16,10 @@ contextBridge.exposeInMainWorld('launcher', {
   getRunningAppId: ()      => ipcRenderer.invoke('steam:getRunningAppId'),
   onSteamRunningApp: (callback) => ipcRenderer.on('steam:runningApp', (_, status) => callback(status)),
 
+  // HowLongToBeat (keyless, on-demand metadata lookup)
+  searchHltb: (query) => ipcRenderer.invoke('hltb:search', query),
+  openHltbGame: (url) => ipcRenderer.invoke('hltb:openGame', url),
+
   // Nintendo (experimental connector)
   setNintendoProfile: (uid) => ipcRenderer.invoke('nintendo:setProfile', uid),
   getSteamImportGames: () => ipcRenderer.invoke('steam:importGames'),
