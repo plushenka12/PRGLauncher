@@ -1573,10 +1573,10 @@ const HLTB_FAILURE_CACHE_MS=10*60*1000;
 const hltbCandidates=new Map();
 const hltbLoadingIds=new Set();
 function escapeHltbHtml(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));}
-// Storefronts often append a platform/edition suffix which HLTB does not use
-// (for example "— Nintendo Switch 2 Edition"). Strip only known terminal
-// descriptors: words in the actual game title remain untouched.
-function hltbSearchTitle(title){const original=String(title||'').trim();const clean=original.replace(/\s*(?:[-–—:]\s*)?(?:nintendo\s+switch\s*2?\s+edition|switch\s*2?\s+edition|playstation\s*[45]\s+edition|ps\s*[45]\s+edition|xbox\s+(?:one|series\s+[xs](?:\|s)?)\s+edition|pc\s+edition|steam\s+edition)\s*$/iu,'').trim();return clean||original;}
+// Storefronts often append a platform/edition bundle after a spaced dash. If
+// that right-hand part explicitly says Switch/PS/Xbox/PC or Edition, discard
+// the whole bundle (including its DLC name) and retain the real game title.
+function hltbSearchTitle(title){const original=String(title||'').trim();const bundle=original.match(/^(.+?)\s+[-–—]\s+(.+)$/u);if(bundle&&/\b(?:nintendo\s+switch|switch\s*2?|playstation|ps\s*[45]|xbox|pc|steam|edition)\b/iu.test(bundle[2]))return bundle[1].trim()||original;const clean=original.replace(/\s*(?:[-–—:]\s*)?(?:nintendo\s+switch\s*2?\s+edition|switch\s*2?\s+edition|playstation\s*[45]\s+edition|ps\s*[45]\s+edition|xbox\s+(?:one|series\s+[xs](?:\|s)?)\s+edition|pc\s+edition|steam\s+edition)\s*$/iu,'').trim();return clean||original;}
 function hltbTitleKey(title){return hltbSearchTitle(title).toLocaleLowerCase().replace(/\([^)]*\)|\[[^\]]*\]/g,' ').replace(/[^\p{L}\p{N}]+/gu,' ').replace(/\b(edition|deluxe|complete|remastered|remake|game of the year|goty)\b/gu,' ').replace(/\s+/g,' ').trim();}
 function hltbMatchScore(game,candidate){const gameWords=new Set(hltbTitleKey(game.title).split(' ').filter(Boolean));const candidateWords=new Set(hltbTitleKey(candidate.title).split(' ').filter(Boolean));if(!gameWords.size||!candidateWords.size)return 0;if([...gameWords].every(word=>candidateWords.has(word))&&gameWords.size===candidateWords.size)return 1000;const overlap=[...gameWords].filter(word=>candidateWords.has(word)).length;return Math.round(overlap/gameWords.size*100)-(candidateWords.size-overlap)*3;}
 function rankHltbCandidates(game,candidates){return [...candidates].sort((a,b)=>hltbMatchScore(game,b)-hltbMatchScore(game,a)||a.title.localeCompare(b.title));}
