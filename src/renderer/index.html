@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://media.rawg.io https://shared.akamai.steamstatic.com https://cdn.akamai.steamstatic.com; connect-src 'self' https://api.rawg.io https://store.steampowered.com https://www.gstatic.com https://*.googleapis.com https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com wss://*.googleapis.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://media.rawg.io https://shared.akamai.steamstatic.com https://cdn.akamai.steamstatic.com https://backloggd.com https://*.backloggd.com https://images.igdb.com; connect-src 'self' https://api.rawg.io https://store.steampowered.com https://www.gstatic.com https://*.googleapis.com https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com wss://*.googleapis.com;">
 <title>PRGLauncher</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -15,7 +15,7 @@
   --accent:#7b2fff;--accent2:#5a00ff;
   --green:#00ff41;--amber:#39ff14;--coral:#ff3366;--blue:#00c8ff;
   --playing:#7b2fff;--backlog:#00c8ff;--completed:#00ff41;
-  --fh:'Syne',sans-serif;--fb:'DM Sans',sans-serif;--fm:'DM Mono',monospace;
+  --fh:'Manrope',sans-serif;--fb:'DM Sans',sans-serif;--fm:'DM Mono',monospace;
   --r:12px;--rs:8px;
 }
 html[data-theme="ocean"]{--bg:#07111a;--bg2:#0b1b2a;--bg3:#10253a;--bg4:#17334d;--border:rgba(34,211,238,.12);--border2:rgba(34,211,238,.28);--text:#f0fbff;--text2:#b9e5f3;--text3:#85b8c9;--accent:#38bdf8;--accent2:#0284c7;--green:#22d3ee;--amber:#facc15;--coral:#fb7185;--blue:#60a5fa;--playing:#38bdf8;--backlog:#a78bfa;--completed:#22d3ee}
@@ -58,11 +58,13 @@ body.mini-transition-out{animation:mainToMini .16s cubic-bezier(.3,.8,.3,1)}body
 
 main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 .page{display:none}.page.active{display:block;animation:pageIn .22s ease both}@keyframes pageIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-.download-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}.download-card{appearance:none;width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:16px;cursor:pointer;transition:border-color .15s,transform .15s;color:var(--text);font-family:var(--fb);text-align:left}.download-card:hover{border-color:var(--border2);transform:translateY(-2px)}.download-card-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.download-card-title{font-family:var(--fh);font-weight:700;font-size:16px;color:var(--text)}.download-card-state{font-size:11px;color:var(--green);font-family:var(--fm);white-space:nowrap}.download-card .steam-setup-detail{color:var(--text3)}.download-empty{padding:4rem 1rem;text-align:center;color:var(--text3);background:var(--bg3);border:1px dashed var(--border2);border-radius:var(--r);grid-column:1/-1}.download-empty-icon,.empty-state-icon{display:block;font-size:30px;opacity:.72;margin-bottom:10px}.download-empty strong,.empty-state strong{display:block;color:var(--text2);font-family:var(--fh);font-size:17px;margin-bottom:4px}.download-empty small,.empty-state small{color:var(--text3)}
+.download-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}.download-card{appearance:none;width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:16px;cursor:pointer;transition:border-color .15s,transform .15s;color:var(--text);font-family:var(--fb);text-align:left}.download-card:hover{border-color:var(--border2);transform:translateY(-2px)}.download-card-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.download-card-title{font-family:var(--fh);font-weight:700;font-size:16px;color:var(--text)}.download-card-state{font-size:11px;color:var(--green);font-family:var(--fm);white-space:nowrap}.download-card .steam-setup-detail{color:var(--text3)}.download-empty{padding:3.5rem 1rem;text-align:center;color:var(--text3);background:color-mix(in srgb,var(--bg3) 70%,transparent);border:1px dashed var(--border2);border-radius:var(--r);grid-column:1/-1}.download-empty-icon,.empty-state-icon{display:block;font-size:27px;opacity:.58;margin-bottom:10px}.download-empty strong,.empty-state strong{display:block;color:var(--text2);font-family:var(--fh);font-size:16px;margin-bottom:4px}.download-empty small,.empty-state small{color:var(--text2)}
 .settings-trigger{width:36px;height:32px;border:1px solid var(--border2);border-radius:7px;background:color-mix(in srgb,var(--bg3) 70%,var(--accent) 30%);color:var(--text);cursor:pointer;font-size:17px;box-shadow:0 3px 12px rgba(0,0,0,.2);transition:transform .15s,filter .15s}.settings-trigger:hover{transform:translateY(-1px);filter:brightness(1.14)}.settings-trigger:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .backlog-import-toolbar{display:flex;gap:8px;align-items:center;margin:-.25rem 0 12px;flex-wrap:wrap}.backlog-import-search{flex:1;min-width:190px}.backlog-import-toolbar .btn{padding:7px 10px;font-size:11px}.backlog-import-match{font:10px var(--fm);color:var(--text3);margin-left:auto}.backlog-import-list{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-height:440px;overflow:auto;padding:2px}.backlog-import-row{position:relative;display:flex;flex-direction:column;align-items:stretch;gap:8px;padding:0 0 10px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:border-color .15s,transform .15s}.backlog-import-row:hover{border-color:var(--border2);transform:translateY(-2px)}.backlog-import-row:has(input:checked){border-color:var(--accent)}.backlog-import-row.filtered-out{display:none}.backlog-import-row.already-added{opacity:.58;background:transparent}.backlog-import-cover{width:100%;height:92px;object-fit:cover;background:var(--bg4);display:block}.backlog-import-check{position:absolute;top:8px;right:8px;width:20px;height:20px;accent-color:var(--accent);filter:drop-shadow(0 1px 3px #000)}.backlog-import-info{padding:0 10px;min-width:0}.backlog-import-name{font-size:13px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.backlog-import-id{font-family:var(--fm);font-size:9px;color:var(--text3);margin-top:2px}.backlog-import-existing{font-size:10px;color:var(--green);margin-top:3px}.backlog-import-row .form-select{margin:0 10px;width:calc(100% - 20px);padding:6px 8px;font-size:11px}
 .steam-setup{max-width:620px;margin:4rem auto;background:var(--bg3);border:1px solid var(--border2);border-radius:16px;padding:2rem;text-align:center}.steam-setup-icon{font-size:38px;margin-bottom:12px}.steam-setup h2{font-family:var(--fh);font-size:24px;margin-bottom:8px}.steam-setup-game{color:var(--accent);font-weight:600;margin-bottom:20px}.steam-progress-track{height:10px;background:var(--bg4);border-radius:999px;overflow:hidden;margin:18px 0 10px}.steam-progress-fill{width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--accent2),var(--green));transition:width .35s ease}.steam-setup-status{min-height:24px;color:var(--text2);font-size:14px}.steam-setup-detail{min-height:20px;color:var(--text3);font-family:var(--fm);font-size:12px;margin-top:4px}.steam-setup-actions{display:flex;justify-content:center;gap:10px;margin-top:24px;flex-wrap:wrap}.steam-setup-note{margin-top:18px;color:var(--text3);font-size:12px;line-height:1.5}
+.steam-discovered-preview{display:flex;align-items:center;gap:12px;margin:16px 0;padding:9px;border:1px solid var(--border);border-radius:10px;background:var(--bg3);text-align:left}.steam-discovered-cover{width:120px;height:56px;object-fit:cover;border-radius:6px;background:var(--bg4);flex:none}.steam-discovered-info{min-width:0;flex:1}.steam-discovered-time{font:11px var(--fm);color:var(--text2);margin-top:5px}
 
+.backloggd-import-url{display:flex;gap:8px;align-items:center;margin-top:10px}.backloggd-import-url .form-input{flex:1;min-width:0}.backloggd-import-options{display:flex;gap:14px;flex-wrap:wrap;padding:10px 0;color:var(--text2);font-size:12px}.backloggd-import-options label{display:flex;align-items:center;gap:6px}.backloggd-import-status{min-height:22px;color:var(--text2);font-size:12px;margin:-.35rem 0 .8rem}.backloggd-import-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;max-height:430px;overflow:auto;padding:2px}.backloggd-import-row{position:relative;display:flex;flex-direction:column;gap:8px;padding:0 0 10px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:border-color .15s,transform .15s}.backloggd-import-row:hover{border-color:var(--border2);transform:translateY(-2px)}.backloggd-import-row:has(input:checked){border-color:var(--accent)}.backloggd-import-row.filtered-out{display:none}.backloggd-import-row.already-added{opacity:.58}.backloggd-import-cover{width:100%;height:128px;object-fit:cover;background:var(--bg4);display:block}.backloggd-import-check{position:absolute;top:8px;right:8px;width:20px;height:20px;accent-color:var(--accent);filter:drop-shadow(0 1px 3px #000)}.backloggd-import-info{padding:0 10px;min-width:0}.backloggd-import-name{font-size:12px;font-weight:700;line-height:1.25;min-height:30px}.backloggd-import-meta{font:10px var(--fm);color:var(--text2);margin-top:4px}.backloggd-import-existing{font-size:10px;color:var(--green);margin-top:4px}.backloggd-import-row .form-select{margin:0 10px;width:calc(100% - 20px);padding:6px 8px;font-size:11px}
 .toolbar{display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;flex-wrap:wrap}.toolbar .btn{min-height:36px}
 .toolbar-title{font-family:var(--fh);font-size:26px;font-weight:800;flex:1;letter-spacing:-.5px}
 .filter-tabs{display:flex;gap:4px;background:var(--bg3);border-radius:var(--rs);padding:4px}
@@ -71,7 +73,7 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 .filter-tab:hover:not(.active){color:var(--text)}
 
 /* YEAR TABS */
-.filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap}
+.filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap;max-height:120px;overflow:hidden;transition:max-height .2s ease,opacity .2s ease,margin .2s ease}.filter-bar.is-collapsed{max-height:0;opacity:0;margin-bottom:0;pointer-events:none}.quickplay-filter{display:flex;align-items:center;gap:6px;color:var(--text2);font-size:12px;white-space:nowrap}.quickplay-filter input{accent-color:var(--accent)}
 .library-search{min-width:190px;flex:1;max-width:300px;padding:8px 10px;border-radius:var(--rs);border:1px solid var(--border);background:var(--bg3);color:var(--text);font:12px var(--fb);outline:none}.library-search:focus{border-color:var(--accent)}
 .filter-select{font-family:var(--fb);font-size:13px;font-weight:500;padding:7px 32px 7px 12px;border-radius:20px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235a5a70'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;outline:none;transition:all .15s}
 .filter-select:hover{border-color:var(--accent);color:var(--text)}
@@ -87,31 +89,33 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 .btn-danger{background:rgba(248,113,113,.12);color:var(--coral);border:1px solid rgba(248,113,113,.2)}.btn-danger:hover{background:rgba(248,113,113,.2)}
 .btn-sm{font-size:12px;padding:5px 12px}
 
-.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.5rem}.stats-row .stat-card{background:linear-gradient(145deg,var(--bg3),color-mix(in srgb,var(--bg3) 72%,var(--accent) 28%));transition:transform .18s,border-color .18s}.stats-row .stat-card:hover{transform:translateY(-2px);border-color:var(--border2)}
+.stats-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin-bottom:1.15rem}.stats-row .stat-card{display:flex;align-items:baseline;justify-content:space-between;gap:10px;background:color-mix(in srgb,var(--bg3) 86%,var(--accent) 14%);transition:transform .18s,border-color .18s;padding:.65rem .8rem}.stats-row .stat-card:hover{transform:translateY(-2px);border-color:var(--border2)}
 .stat-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.25rem}
 .stat-filter{font:inherit;text-align:left;color:var(--text);cursor:pointer}.stat-filter:focus-visible{outline:2px solid var(--accent);outline-offset:3px}.stat-filter[aria-pressed="true"]{border-color:var(--accent)}
-.stat-label{font-size:12px;color:var(--text3);font-weight:500;letter-spacing:.5px;text-transform:uppercase;margin-bottom:6px}
-.stat-value{font-family:var(--fh);font-size:26px;font-weight:800;color:var(--text);line-height:1}
+.stat-label{font-size:10px;color:var(--text3);font-weight:600;letter-spacing:.55px;text-transform:uppercase;margin-bottom:5px}
+.stat-value{font-family:var(--fh);font-size:22px;font-weight:800;color:var(--text);line-height:1}
 .stat-value span{font-size:13px;font-weight:500;color:var(--text2);margin-left:4px}
 
-.game-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.game-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
 .game-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:border-color .2s,transform .15s,box-shadow .2s;display:flex;flex-direction:column;animation:cardIn .28s ease both}.game-card:nth-child(2){animation-delay:.025s}.game-card:nth-child(3){animation-delay:.05s}.game-card:nth-child(4){animation-delay:.075s}.game-card:nth-child(5){animation-delay:.1s}.game-card:nth-child(6){animation-delay:.125s}@keyframes cardIn{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
 .game-card:hover{border-color:var(--border2);transform:translateY(-3px);box-shadow:0 10px 24px rgba(0,0,0,.18)}
 .game-card.is-playing{border-color:rgba(167,139,250,.35);box-shadow:0 0 0 1px rgba(167,139,250,.1)}
 .card-cover{position:relative;aspect-ratio:16/9;background:var(--bg4);overflow:hidden;flex-shrink:0}
-.card-cover img{width:100%;height:100%;object-fit:cover;display:block}
+.card-cover img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .35s cubic-bezier(.2,.8,.2,1),filter .35s}.game-card:hover .card-cover img{transform:scale(1.035);filter:saturate(1.06)}
 .cover-fallback{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
 .cover-fb-text{font-family:var(--fh);font-size:36px;font-weight:800;color:var(--border2);user-select:none}
-.card-status-badge{position:absolute;top:8px;left:8px;font-size:11px;font-weight:700;padding:4px 9px;border-radius:20px;border:1px solid transparent;letter-spacing:.01em}
-.status-control{font:inherit;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.35);transition:transform .15s,filter .15s}.status-control:hover{transform:translateY(-1px);filter:brightness(1.12)}.status-control:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.card-status-badge{position:absolute;top:8px;left:8px;z-index:3;display:inline-flex;align-items:center;justify-content:center;appearance:none;font-size:11px;font-weight:700;padding:4px 9px;border-radius:20px;border:1px solid transparent;letter-spacing:.01em;line-height:1.2}
+.status-control{font-family:var(--fb);cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.35);transition:transform .15s,filter .15s}.status-control:hover{transform:translateY(-1px);filter:brightness(1.12)}.status-control:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.card-status-badge.status-control-detail{position:relative;top:auto;left:auto}
 .badge-playing{background:#5b21b6;color:#f5f3ff;border-color:#8b5cf6}
 .badge-backlog{background:#075985;color:#e0f2fe;border-color:#38bdf8}
 .badge-completed{background:#065f46;color:#d1fae5;border-color:#34d399}
+.badge-quickplay{background:#854d0e;color:#fef3c7;border-color:#f59e0b}
 .quick-status-menu{position:fixed;z-index:1000;display:grid;gap:4px;min-width:145px;padding:6px;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;box-shadow:0 14px 36px rgba(0,0,0,.45)}.quick-status-menu button{border:1px solid transparent;border-radius:7px;background:transparent;color:var(--text);padding:8px 10px;text-align:left;font:600 12px var(--fb);cursor:pointer}.quick-status-menu button:hover,.quick-status-menu button.active{background:var(--bg4);border-color:var(--border2)}
-.card-timer-badge{position:absolute;top:8px;right:8px;background:rgba(14,15,20,.85);border:1px solid rgba(167,139,250,.4);border-radius:6px;font-family:var(--fm);font-size:12px;color:var(--accent);padding:3px 8px}
-.card-platform-badge{position:absolute;bottom:8px;right:8px;background:rgba(14,15,20,.85);border:1px solid var(--border2);border-radius:6px;font-size:11px;font-weight:600;color:var(--text2);padding:2px 7px}
-.card-year-badge{position:absolute;bottom:8px;left:8px;background:rgba(14,15,20,.85);border:1px solid var(--border);border-radius:6px;font-family:var(--fm);font-size:10px;color:var(--text3);padding:2px 6px}
-.card-rating{position:absolute;bottom:8px;left:8px;background:rgba(8,8,15,.88);border:1px solid rgba(57,255,20,.35);border-radius:6px;font-family:var(--fm);font-size:11px;font-weight:600;color:var(--amber);padding:2px 8px;display:flex;align-items:center;gap:3px}
+.card-timer-badge{position:absolute;top:8px;right:8px;background:rgba(14,15,20,.78);border:1px solid rgba(167,139,250,.34);border-radius:6px;font-family:var(--fm);font-size:11px;color:var(--accent);padding:3px 7px;opacity:0;transform:translateY(-3px);transition:opacity .18s,transform .18s}
+.card-platform-badge{position:absolute;bottom:8px;right:8px;background:rgba(14,15,20,.72);border:1px solid var(--border);border-radius:6px;font-size:10px;font-weight:600;color:var(--text2);padding:2px 6px;opacity:0;transform:translateY(3px);transition:opacity .18s,transform .18s}
+.card-year-badge{position:absolute;bottom:8px;left:8px;background:rgba(14,15,20,.72);border:1px solid var(--border);border-radius:6px;font-family:var(--fm);font-size:9px;color:var(--text3);padding:2px 5px;opacity:0;transform:translateY(3px);transition:opacity .18s,transform .18s}
+.card-rating{position:absolute;bottom:8px;left:8px;background:rgba(8,8,15,.78);border:1px solid rgba(57,255,20,.3);border-radius:6px;font-family:var(--fm);font-size:10px;font-weight:600;color:var(--amber);padding:2px 6px;display:flex;align-items:center;gap:3px;opacity:0;transform:translateY(3px);transition:opacity .18s,transform .18s}
 .rating-picker{display:flex;gap:4px;flex-wrap:wrap}
 .rating-btn{width:32px;height:32px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center}
 .rating-btn:hover{border-color:var(--amber);color:var(--amber)}
@@ -120,17 +124,18 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 .d-rating-display{display:flex;align-items:center;gap:8px;margin-bottom:1.25rem}
 .d-rating-stars{font-size:22px;font-family:var(--fm);font-weight:800;color:var(--amber)}
 .d-rating-label{font-size:13px;color:var(--text3)}
-.card-body{padding:12px;flex:1;display:flex;flex-direction:column}
-.card-title{font-family:var(--fh);font-size:14px;font-weight:800;color:color-mix(in srgb,var(--text) 94%,#fff 6%);line-height:1.3;margin-bottom:4px;text-shadow:0 1px 8px rgba(0,0,0,.18)}
-.card-meta{font-size:12px;color:var(--text2);font-weight:500;margin-bottom:8px;display:flex;gap:10px;flex-wrap:wrap}
-.card-actions{display:flex;gap:6px;margin-top:auto}
+.card-body{position:relative;min-height:72px;padding:8px 10px 9px;flex:1;display:flex;flex-direction:column;background:linear-gradient(180deg,color-mix(in srgb,var(--bg3) 94%,var(--accent) 6%),var(--bg3))}
+.card-title-row{transition:opacity .18s,transform .18s}.card-title{font-family:var(--fh);font-size:14px;font-weight:800;color:color-mix(in srgb,var(--text) 94%,#fff 6%);line-height:1.3;min-height:2.6em;margin-bottom:4px;text-align:center;text-shadow:0 1px 8px rgba(0,0,0,.18);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.card-meta{position:absolute;left:10px;right:10px;bottom:38px;font-size:11px;color:var(--text2);font-weight:500;display:flex;gap:10px;flex-wrap:wrap;opacity:0;visibility:hidden;transform:translateY(4px);transition:opacity .18s,transform .18s,visibility .18s}
+.card-actions{position:absolute;left:10px;right:10px;bottom:9px;display:flex;gap:6px;opacity:0;visibility:hidden;transform:translateY(5px);transition:opacity .18s,transform .18s,visibility .18s;pointer-events:none}
+.game-card:hover .card-title-row,.game-card:focus-within .card-title-row{opacity:0;transform:translateY(-4px);pointer-events:none}.game-card:hover .card-timer-badge,.game-card:focus-within .card-timer-badge,.game-card:hover .card-platform-badge,.game-card:focus-within .card-platform-badge,.game-card:hover .card-year-badge,.game-card:focus-within .card-year-badge,.game-card:hover .card-rating,.game-card:focus-within .card-rating{opacity:1;transform:translateY(0)}.game-card:hover .card-meta,.game-card:focus-within .card-meta{opacity:1;visibility:visible;transform:translateY(0)}.game-card:hover .card-actions,.game-card:focus-within .card-actions{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto}
 .card-btn{font-family:var(--fb);font-size:12px;font-weight:700;padding:6px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--bg4);color:var(--text);cursor:pointer;transition:all .15s;flex:1;text-align:center}
 .card-btn:hover{color:var(--text);border-color:var(--border2)}
 .card-btn-play{background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.25);color:var(--accent)}
 .card-btn-play:hover{background:rgba(167,139,250,.2)}
 .card-btn-pause{background:rgba(251,191,36,.08);border-color:rgba(251,191,36,.2);color:var(--amber)}
 .card-btn-pause:hover{background:rgba(251,191,36,.16)}
-.empty-state{grid-column:1/-1;text-align:center;padding:4rem 2rem;color:var(--text3);background:linear-gradient(145deg,var(--bg3),transparent);border:1px dashed var(--border);border-radius:var(--r)}
+.empty-state{grid-column:1/-1;text-align:center;padding:3.5rem 2rem;color:var(--text3);background:linear-gradient(145deg,color-mix(in srgb,var(--bg3) 80%,transparent),transparent);border:1px dashed var(--border);border-radius:var(--r)}
 .empty-state p{font-family:var(--fh);font-size:18px;font-weight:700;color:var(--text2);margin-bottom:8px}
 
 /* MODAL */
@@ -201,7 +206,12 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 .detail-cover-info{position:absolute;bottom:0;left:0;right:0;padding:1.25rem 1.5rem}
 .detail-title{font-family:var(--fh);font-size:22px;font-weight:800;color:#fff;margin-bottom:8px;line-height:1.2}
 .detail-meta-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.detail-body{padding:1.25rem 1.5rem;overflow-y:auto;flex:1}
+.detail-body{padding:1.25rem 1.5rem;overflow-y:auto;overscroll-behavior:contain;flex:1}
+.detail-tabs{display:flex;gap:5px;padding:0 0 1rem;border-bottom:1px solid var(--border);margin-bottom:1rem}
+.detail-tab{border:1px solid var(--border);background:var(--bg3);color:var(--text2);border-radius:8px;padding:7px 13px;font-family:var(--fb);font-size:12px;font-weight:700;cursor:pointer}
+.detail-tab:hover{border-color:var(--accent2);color:var(--text)}
+.detail-tab.active{background:var(--accent);border-color:var(--accent);color:#fff;box-shadow:0 4px 14px color-mix(in srgb,var(--accent) 30%,transparent)}
+.detail-pane.hidden{display:none}
 .detail-stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.25rem}
 .detail-stat{background:var(--bg3);border-radius:var(--rs);padding:10px 12px}
 .detail-stat-label{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);font-weight:500;margin-bottom:4px}
@@ -232,6 +242,15 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 .hltb-match-meta{font-size:10px;color:var(--text2);margin-top:3px}
 .hltb-search-row{display:flex;gap:6px;margin:.7rem 0}
 .hltb-search-row .form-input{min-width:0;padding:7px 9px;font-size:12px}
+.game-history{margin-top:1.25rem}
+.history-list{display:grid;gap:0;border-left:2px solid var(--border);margin-left:5px;padding-left:13px}
+.history-item{position:relative;padding:0 0 11px;font-size:12px;color:var(--text2);line-height:1.4}
+.history-item:last-child{padding-bottom:0}
+.history-item::before{content:'';position:absolute;left:-19px;top:4px;width:6px;height:6px;border-radius:50%;background:var(--accent2);box-shadow:0 0 0 3px var(--bg2)}
+.history-item-title{font-weight:700;color:var(--text)}
+.history-item-time{font-size:10px;color:var(--text3);margin-top:2px}
+.source-chips{display:flex;flex-wrap:wrap;gap:6px;margin:-4px 0 16px}.source-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border:1px solid var(--border2);border-radius:999px;background:color-mix(in srgb,var(--bg3) 78%,var(--accent) 22%);color:var(--text2);font-size:11px;font-weight:700}.source-chip-id{display:none}
+.duplicate-list{display:grid;gap:10px;max-height:430px;overflow:auto;margin-top:14px}.duplicate-group{border:1px solid var(--border);border-radius:10px;padding:12px;background:color-mix(in srgb,var(--bg3) 82%,transparent)}.duplicate-group-title{font-weight:800;color:var(--text);margin-bottom:8px}.duplicate-game-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--border);font-size:12px;color:var(--text2)}.duplicate-game-meta{font:10px var(--fm);color:var(--text3);margin-top:2px}.duplicate-group .btn{white-space:nowrap}
 
 /* FIREBASE */
 .fb-step{display:flex;gap:12px;margin-bottom:14px}
@@ -247,7 +266,8 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 /* STATS PAGE */
 .stats-page-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:2rem}
 .year-recap{margin-bottom:16px;padding:20px;border:1px solid var(--border2);border-radius:var(--r);background:linear-gradient(120deg,rgba(123,47,255,.16),rgba(0,200,255,.07))}.year-recap-head{display:flex;justify-content:space-between;gap:12px;align-items:baseline;margin-bottom:15px}.year-recap-title{font-family:var(--fh);font-size:22px;font-weight:800}.year-recap-sub{font-size:12px;color:var(--text2)}.year-recap-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.year-recap-stat{background:rgba(8,8,15,.26);border:1px solid var(--border);border-radius:8px;padding:10px}.year-recap-label{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)}.year-recap-value{font-family:var(--fh);font-size:19px;font-weight:700;margin-top:4px}.year-recap-value.small{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}@media(max-width:640px){.year-recap-grid{grid-template-columns:1fr 1fr}.year-recap-stat:last-child{grid-column:span 2}}
-.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:2rem}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:1.5rem}
+.stats-more{margin:0 0 1.5rem;border:1px solid var(--border);border-radius:var(--r);background:color-mix(in srgb,var(--bg3) 72%,transparent)}.stats-more summary{cursor:pointer;list-style:none;padding:11px 14px;color:var(--text2);font-size:12px;font-weight:700}.stats-more summary::-webkit-details-marker{display:none}.stats-more summary::after{content:'+';float:right;color:var(--accent);font:700 16px var(--fm);line-height:1}.stats-more[open] summary{border-bottom:1px solid var(--border);color:var(--text)}.stats-more[open] summary::after{content:'−'}.stats-more-grid{padding:1rem 1rem 0}
 .chart-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem}
 .chart-card-title{font-size:13px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:1rem}
 .bar-row{display:flex;align-items:center;gap:10px;font-size:12px;margin-bottom:10px}
@@ -273,7 +293,8 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 .top-game-sub{font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .top-game-time{font-family:var(--fm);font-size:13px;color:var(--text);font-weight:600;flex-shrink:0;min-width:36px;text-align:right}
 .platform-stat-name{color:var(--text)!important;font-weight:600}.platform-stat-count{color:var(--text2)!important}
-[data-tooltip]{position:relative}[data-tooltip]::after{content:attr(data-tooltip);position:absolute;z-index:1200;right:0;top:calc(100% + 8px);width:max-content;max-width:230px;padding:7px 9px;border-radius:7px;background:var(--bg2);border:1px solid var(--border2);color:var(--text);font:500 11px/1.35 var(--fb);box-shadow:0 10px 24px rgba(0,0,0,.4);opacity:0;visibility:hidden;transform:translateY(-3px);pointer-events:none;transition:opacity .14s,transform .14s;white-space:normal;text-align:left}[data-tooltip]:hover::after,[data-tooltip]:focus-visible::after{opacity:1;visibility:visible;transform:translateY(0)}
+/* Tooltip anchoring is a default; it must not override a component's positioning. */
+:where([data-tooltip]){position:relative}[data-tooltip]::after{content:attr(data-tooltip);position:absolute;z-index:1200;right:0;top:calc(100% + 8px);width:max-content;max-width:230px;padding:7px 9px;border-radius:7px;background:var(--bg2);border:1px solid var(--border2);color:var(--text);font:500 11px/1.35 var(--fb);box-shadow:0 10px 24px rgba(0,0,0,.4);opacity:0;visibility:hidden;transform:translateY(-3px);pointer-events:none;transition:opacity .14s,transform .14s;white-space:normal;text-align:left}[data-tooltip]:hover::after,[data-tooltip]:focus-visible::after{opacity:1;visibility:visible;transform:translateY(0)}
 .platform-stat-row{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
 .platform-stat-row:last-child{border-bottom:none}
 .platform-stat-icon{font-size:16px;width:24px;text-align:center;flex-shrink:0}
@@ -290,9 +311,9 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 .nintendo-manual-title{font-size:12px;color:var(--text2);font-weight:700;margin-bottom:5px}
 .nintendo-manual-help{font-size:11px;color:var(--text3);line-height:1.45;margin-bottom:8px}
 .nintendo-manual-auth .form-input{width:100%;margin-bottom:8px;font-family:var(--fm);font-size:11px}
-.settings-modal{max-width:760px}.settings-heading{display:flex;align-items:center;justify-content:space-between}.settings-heading .modal-title{margin-bottom:0}.settings-tabs{display:flex;gap:5px;border-bottom:1px solid var(--border);margin:18px 0 4px;overflow-x:auto}.settings-tab{flex:1;min-width:max-content;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--text3);font:700 12px var(--fb);padding:10px 12px;cursor:pointer}.settings-tab:hover{color:var(--text2)}.settings-tab.active{color:var(--green);border-bottom-color:var(--green)}.settings-pane{display:none;padding-top:12px}.settings-pane.active{display:block;animation:pageIn .18s ease both}.settings-section-title{font-size:14px;font-weight:800;color:var(--text);margin:14px 0 8px}.settings-section-title .tab-beta{font-size:9px}.settings-theme-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.settings-theme-grid .theme-choice{width:100%;display:flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:8px;background:var(--bg3);color:var(--text2);padding:10px;cursor:pointer;text-align:left;font:600 12px var(--fb)}.settings-theme-grid .theme-choice:hover,.settings-theme-grid .theme-choice.active{border-color:var(--accent);background:var(--bg4);color:var(--text)}.theme-dot{width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,var(--dot-a),var(--dot-b));flex:none}.settings-scale-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.settings-scale-row .filter-select{min-width:145px}.settings-description{margin:0 0 13px;color:var(--text2);font-size:13px;line-height:1.5}
+.settings-modal{max-width:760px}.settings-heading{display:flex;align-items:center;justify-content:space-between}.settings-heading .modal-title{margin-bottom:0}.settings-tabs{display:flex;gap:5px;border-bottom:1px solid var(--border);margin:18px 0 4px;overflow-x:auto}.settings-tab{flex:1;min-width:max-content;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--text3);font:700 12px var(--fb);padding:10px 12px;cursor:pointer}.settings-tab:hover{color:var(--text2)}.settings-tab.active{color:var(--green);border-bottom-color:var(--green)}.settings-pane{display:none;padding-top:12px}.settings-pane.active{display:block;animation:pageIn .18s ease both}.settings-section-title{font-size:14px;font-weight:800;color:var(--text);margin:18px 0 8px;padding-top:8px;border-top:1px solid var(--border)}.settings-pane>.settings-section-title:first-child{margin-top:2px;padding-top:0;border-top:0}.settings-section-title .tab-beta{font-size:9px}.settings-theme-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.settings-theme-grid .theme-choice{width:100%;display:flex;align-items:center;gap:8px;border:1px solid var(--border);border-radius:8px;background:var(--bg3);color:var(--text2);padding:10px;cursor:pointer;text-align:left;font:600 12px var(--fb)}.settings-theme-grid .theme-choice:hover,.settings-theme-grid .theme-choice.active{border-color:var(--accent);background:var(--bg4);color:var(--text)}.theme-dot{width:14px;height:14px;border-radius:50%;background:linear-gradient(135deg,var(--dot-a),var(--dot-b));flex:none}.settings-scale-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.settings-scale-row .filter-select{min-width:145px}.settings-description{margin:0 0 13px;color:var(--text2);font-size:13px;line-height:1.5}
 .settings-modal .nintendo-sync-card{max-width:none;margin:0;padding:1rem 0 0;border:0;background:transparent}.settings-modal .nintendo-sync-icon{display:none}.settings-modal .nintendo-sync-copy{margin:8px 0 14px;max-width:none}.settings-modal .nintendo-sync-note{margin-top:12px}.nintendo-last-sync{font-size:11px;color:var(--text3);margin-top:12px}
-.settings-data-row{display:flex;align-items:center;justify-content:space-between;gap:16px;border:1px solid var(--border);border-radius:10px;padding:13px 14px}.settings-data-title{font-size:13px;color:var(--text);font-weight:700}.settings-data-actions{display:flex;gap:8px;flex-shrink:0}
+.settings-data-row{display:flex;align-items:center;justify-content:space-between;gap:16px;border:1px solid var(--border);border-radius:10px;padding:12px 13px;background:color-mix(in srgb,var(--bg3) 72%,transparent)}.settings-data-title{font-size:13px;color:var(--text);font-weight:700}.settings-data-actions{display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
 .settings-sync-options{display:flex;gap:18px;align-items:center;justify-content:center;margin-top:12px;font-size:11px;color:var(--text2)}.settings-sync-options label{display:flex;align-items:center;gap:6px}.settings-sync-options input{accent-color:var(--accent)}.settings-sync-options .filter-select{font-size:11px;padding:4px 7px}
 .nintendo-history-preview{margin:20px auto 0;text-align:left;border-top:1px solid var(--border);padding-top:16px}
 .nintendo-preview-title{font-size:12px;color:var(--text2);font-weight:700;margin-bottom:8px}
@@ -330,10 +351,14 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
 @media(max-width:980px){main{padding:1.5rem}.game-grid{grid-template-columns:repeat(3,1fr)}.stats-row{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:640px){#session-bar{padding:0 1rem}.main-tabs{top:52px;padding:0 1rem;overflow-x:auto}.main-tab{padding:11px 14px;font-size:13px;white-space:nowrap}main{padding:1rem}.toolbar{align-items:stretch}.toolbar-title{width:100%;flex-basis:100%;font-size:23px}.toolbar .btn{flex:1;justify-content:center}.filter-bar{gap:7px}.filter-bar .filter-select,.library-search{min-width:0;flex:1}.library-search{max-width:none;order:-1;flex-basis:100%}.game-grid{grid-template-columns:repeat(2,1fr);gap:10px}.card-body{padding:10px}.card-title{font-size:13px}.card-actions{flex-wrap:wrap}.stats-row{grid-template-columns:1fr 1fr}.chart-row{grid-template-columns:1fr}.stats-page-grid{grid-template-columns:1fr 1fr}.platform-grid{grid-template-columns:repeat(2,1fr)}.year-mini-stats{grid-template-columns:1fr 1fr}.add-session-row{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){#session-bar{padding:0 1rem}.main-tabs{top:52px;padding:0 1rem;overflow-x:auto}.main-tab{padding:11px 14px;font-size:13px;white-space:nowrap}main{padding:1rem}.toolbar{align-items:stretch}.toolbar-title{width:100%;flex-basis:100%;font-size:23px}.toolbar .btn{flex:1;justify-content:center}.filter-bar{gap:7px}.filter-bar .filter-select,.library-search{min-width:0;flex:1}.library-search{max-width:none;order:-1;flex-basis:100%}.game-grid{grid-template-columns:repeat(2,1fr);gap:14px}.card-body{padding:10px}.card-title{font-size:13px}.card-actions{flex-wrap:wrap}.stats-row{grid-template-columns:1fr 1fr}.chart-row{grid-template-columns:1fr}.stats-page-grid{grid-template-columns:1fr 1fr}.platform-grid{grid-template-columns:repeat(2,1fr)}.year-mini-stats{grid-template-columns:1fr 1fr}.add-session-row{grid-template-columns:1fr 1fr}}
 @media(max-width:640px){.backlog-import-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:420px){.backlog-import-list{grid-template-columns:1fr}}
 @media(max-width:420px){.game-grid{grid-template-columns:1fr}.bar-right{gap:2px}.sync-badge{display:none}.win-btn{width:28px}.logo{font-size:16px}.stats-page-grid{grid-template-columns:1fr}.stats-row .stat-value{font-size:22px}}
+@media(max-width:980px){.backloggd-import-list{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:640px){.backloggd-import-list{grid-template-columns:repeat(2,minmax(0,1fr))}.backloggd-import-url{align-items:stretch;flex-direction:column}}
+@media(max-width:640px){.settings-data-row{align-items:stretch;flex-direction:column;gap:10px}.settings-data-actions{justify-content:flex-start}.settings-data-actions .btn{flex:1}.settings-tabs{margin-top:14px}.settings-pane{padding-top:8px}}
+@media(max-width:420px){.backloggd-import-list{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.001ms!important}}
 .download-grid>.skeleton-grid{grid-column:1/-1}
 .skeleton-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.skeleton-card{height:260px;border-radius:var(--r);border:1px solid var(--border);background:linear-gradient(105deg,var(--bg3) 25%,var(--bg4) 37%,var(--bg3) 63%);background-size:400% 100%;animation:skeletonShimmer 1.35s ease-in-out infinite}@keyframes skeletonShimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}@media(max-width:980px){.skeleton-grid{grid-template-columns:repeat(3,1fr)}}@media(max-width:640px){.skeleton-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:420px){.skeleton-grid{grid-template-columns:1fr}}
@@ -459,10 +484,12 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
         <button class="filter-tab" data-filter="Playing">Playing</button>
         <button class="filter-tab" data-filter="Backlog">Backlog</button>
         <button class="filter-tab" data-filter="Completed">Completed</button>
+        <button class="filter-tab" data-filter="QuickPlay">Quick Play</button>
       </div>
+      <button class="btn btn-ghost btn-sm" id="filter-toggle" type="button" aria-expanded="false">Фільтри</button>
       <button class="btn btn-primary" id="add-game-btn">+ Add Game</button>
     </div>
-    <div class="filter-bar">
+    <div class="filter-bar is-collapsed">
       <select class="filter-select" id="f-bar-year">
         <option value="all">All years</option>
       </select>
@@ -486,11 +513,13 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
       </select>
       <input class="library-search" id="library-search" placeholder="Пошук у бібліотеці…">
       <select class="filter-select" id="library-sort" title="Сортування"><option value="recent">Остання сесія</option><option value="time">Найбільше часу</option><option value="title">Назва A–Я</option><option value="added">Нещодавно додані</option></select>
+      <label class="quickplay-filter"><input type="checkbox" id="quickplay-toggle"> <span>Показувати швидкі ігри</span></label>
       <span id="filter-count" style="font-size:12px;color:var(--text3);font-family:var(--fm);margin-left:4px"></span>
     </div>
     <div class="stats-row">
       <div class="stat-card"><div class="stat-label">Total Games</div><div class="stat-value" id="stat-total">0</div></div>
       <button type="button" class="stat-card stat-filter" data-status="Playing" aria-pressed="false" title="Показати ігри зі статусом Playing"><div class="stat-label">Playing</div><div class="stat-value" id="stat-playing" style="color:var(--playing)">0</div></button>
+      <button type="button" class="stat-card stat-filter" data-status="Backlog" aria-pressed="false" title="Показати ігри зі статусом Backlog"><div class="stat-label">Backlog</div><div class="stat-value" id="stat-backlog" style="color:var(--backlog)">0</div></button>
       <div class="stat-card"><div class="stat-label">Total Playtime</div><div class="stat-value" id="stat-playtime">0<span>h</span></div></div>
       <button type="button" class="stat-card stat-filter" data-status="Completed" aria-pressed="false" title="Показати завершені ігри"><div class="stat-label">Completed</div><div class="stat-value" id="stat-completed" style="color:var(--completed)">0</div></button>
     </div>
@@ -514,10 +543,15 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
       <div class="chart-card"><div class="chart-card-title">Activity (last 26 weeks)</div><div class="heatmap-grid" id="heatmap"></div></div>
       <div class="chart-card"><div class="chart-card-title">Session Stats</div><div id="session-stats-list"></div></div>
     </div>
-    <div class="chart-row">
-      <div class="chart-card"><div class="chart-card-title">Top Rated Games</div><div id="top-rated-list"></div></div>
-      <div class="chart-card"><div class="chart-card-title">Rating Distribution</div><div id="rating-dist"></div></div>
-    </div>
+    <details class="stats-more">
+      <summary>More statistics</summary>
+      <div class="stats-more-grid">
+        <div class="chart-row">
+          <div class="chart-card"><div class="chart-card-title">Top Rated Games</div><div id="top-rated-list"></div></div>
+          <div class="chart-card"><div class="chart-card-title">Rating Distribution</div><div id="rating-dist"></div></div>
+        </div>
+      </div>
+    </details>
     <div id="year-sections"></div>
   </div>
 
@@ -575,6 +609,11 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
       <button class="btn btn-primary" id="steam-import-profile">Завантажити бібліотеку Steam</button>
       <p class="nintendo-manual-help">Обери встановлені на цьому ПК ігри або колекцію BACKLOG. Це локальний імпорт, не повна онлайн-бібліотека акаунта Steam.</p>
       <div class="settings-data-actions"><button class="btn btn-primary btn-sm" id="steam-import-installed">Імпорт встановлених ігор</button><button class="btn btn-ghost btn-sm" id="steam-import-backlog">Імпорт BACKLOG</button></div>
+      <div class="settings-section-title">Backloggd</div>
+      <div class="settings-data-row"><div><div class="settings-data-title">Імпорт публічного профілю</div><div class="nintendo-manual-help">Перенесе вибрані ігри зі сторінки Backloggd. Пароль і приватні дані не потрібні.</div></div><div class="settings-data-actions"><button class="btn btn-primary btn-sm" id="backloggd-import-open">Імпорт Backloggd</button><button class="btn btn-ghost btn-sm" id="backloggd-refresh-covers">Оновити RAWG-обкладинки</button></div></div>
+      <label class="form-label" for="backloggd-profile-url">Посилання на профіль Backloggd</label>
+      <input class="form-input" id="backloggd-profile-url" placeholder="https://backloggd.com/u/username/games" autocomplete="off">
+      <p class="nintendo-manual-help">Працює лише з публічним профілем. Wishlist та нестандартні стани не імпортуються автоматично.</p>
       <div class="settings-section-title">Nintendo Sync <span class="tab-beta">BETA</span></div>
     <section class="chart-card nintendo-sync-card">
       <div class="nintendo-sync-icon">🎮</div>
@@ -605,7 +644,17 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
     <div class="settings-data-row"><div><div class="settings-data-title">PRGLauncher <span id="app-version-label"></span></div><div class="nintendo-manual-help" id="update-status-label">Перевірка доступна для встановленої версії.</div></div><div class="settings-data-actions"><button class="btn btn-ghost btn-sm" id="check-update-btn">Перевірити оновлення</button><button class="btn btn-primary btn-sm" id="download-update-btn" style="display:none">Завантажити</button><button class="btn btn-primary btn-sm" id="install-update-btn" style="display:none">Встановити</button></div></div>
     <div class="settings-section-title">Обслуговування бібліотеки</div>
     <div class="settings-data-row"><div><div class="settings-data-title">Оновити теги</div><div class="nintendo-manual-help">Знаходить жанри й теги для ігор, де їх ще немає.</div></div><div class="settings-data-actions"><button class="btn btn-ghost btn-sm" id="refetch-tags-btn" title="Оновити всі теги англійською">🔄 Refresh Tags</button></div></div>
+    <div class="settings-data-row"><div><div class="settings-data-title">Об’єднання дублікатів</div><div class="nintendo-manual-help">Перевір назви, вибери основну картку та об’єднай джерела й сесії вручну. Останню операцію можна скасувати.</div></div><div class="settings-data-actions"><button class="btn btn-ghost btn-sm" id="find-duplicates-btn">Перевірити дублікати</button><button class="btn btn-ghost btn-sm" id="undo-merge-btn" disabled>Скасувати останнє об’єднання</button></div></div>
     </section>
+    </div>
+  </div>
+
+  <div class="modal-overlay hidden" id="duplicate-modal">
+    <div class="modal" style="max-width:760px" role="dialog" aria-modal="true" aria-labelledby="duplicate-title">
+      <div class="settings-heading"><div class="modal-title" id="duplicate-title">Дублікати бібліотеки</div><button class="win-btn close" id="duplicate-close" title="Закрити" aria-label="Закрити дублікати">✕</button></div>
+      <p class="nintendo-manual-help" id="duplicate-summary">Перевіряємо назви та джерела…</p>
+      <div id="duplicate-list" class="duplicate-list"></div>
+      <div class="modal-actions"><button class="btn btn-ghost" id="duplicate-close-bottom">Закрити</button></div>
     </div>
   </div>
 
@@ -641,6 +690,32 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
       <button class="btn btn-ghost" id="backlog-import-skip">Не зараз</button>
       <button class="btn btn-primary" id="backlog-import-add">Додати вибрані</button>
     </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="steam-discovered-modal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-title">Нова гра у Steam</div>
+    <p style="font-size:13px;color:var(--text2);line-height:1.55">PRGLauncher помітив, що ти запустив гру, якої ще немає у бібліотеці.</p>
+    <div class="steam-discovered-preview"><img class="steam-discovered-cover" id="steam-discovered-cover" alt=""><div class="steam-discovered-info"><div class="steam-setup-game" id="steam-discovered-title">—</div><div class="steam-discovered-time" id="steam-discovered-time">Попередній час: перевіряємо Steam…</div></div></div>
+    <label class="form-label" for="steam-discovered-status">Статус гри</label><select class="form-select" id="steam-discovered-status"><option value="Playing">Playing</option><option value="Backlog">Backlog</option><option value="Completed">Completed</option><option value="QuickPlay">Quick Play</option></select>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="steam-discovered-skip">Не зараз</button>
+      <button class="btn btn-primary" id="steam-discovered-add">Додати в бібліотеку</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay hidden" id="backloggd-import-modal">
+  <div class="modal" style="max-width:980px">
+    <div class="modal-title" id="backloggd-import-title">Імпорт Backloggd</div>
+    <p style="font-size:13px;color:var(--text2);margin:-.7rem 0 1rem">Переглянь публічний профіль, вибери ігри та задай їм статус у PRGLauncher.</p>
+    <div class="backloggd-import-status" id="backloggd-import-status">Встав URL профілю, щоб почати.</div>
+    <div class="backloggd-import-url"><input class="form-input" id="backloggd-import-url" placeholder="https://backloggd.com/u/username/games" autocomplete="off"><button class="btn btn-primary" type="button" id="backloggd-import-load">Завантажити</button></div>
+    <div class="backloggd-import-options"><label><input type="checkbox" id="backloggd-import-ratings" checked> Імпортувати оцінки</label><label><input type="checkbox" id="backloggd-import-platforms" checked> Імпортувати платформи</label><span class="nintendo-manual-help">Наявні Steam/Nintendo-сесії залишаться в цій самій картці.</span></div>
+    <div class="backlog-import-toolbar"><input class="form-input backlog-import-search" id="backloggd-import-search" type="search" placeholder="Пошук ігор у списку" autocomplete="off"><button class="btn btn-ghost btn-sm" type="button" id="backloggd-import-select-all">Обрати всі</button><button class="btn btn-ghost btn-sm" type="button" id="backloggd-import-clear-all">Зняти вибір</button><span class="backlog-import-match" id="backloggd-import-match"></span></div>
+    <div class="backloggd-import-list" id="backloggd-import-list"><div class="sr-msg">Ще не завантажено.</div></div>
+    <div class="modal-actions"><button class="btn btn-ghost" id="backloggd-import-skip">Скасувати</button><button class="btn btn-primary" id="backloggd-import-add" disabled>Додати вибрані</button></div>
   </div>
 </div>
 
@@ -687,7 +762,7 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
       <select class="form-select" id="f-status">
         <option value="Backlog">Backlog</option>
         <option value="Playing">Playing</option>
-        <option value="Completed">Completed</option>
+        <option value="Completed">Completed</option><option value="QuickPlay">Quick Play</option>
       </select>
     </div>
     <div class="form-group">
@@ -744,6 +819,11 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
     </div>
     <!-- BODY -->
     <div class="detail-body">
+      <div class="detail-tabs" role="tablist" aria-label="Game details">
+        <button type="button" class="detail-tab active" id="detail-tab-overview" data-detail-tab="overview" role="tab" aria-selected="true">Overview</button>
+        <button type="button" class="detail-tab" id="detail-tab-history" data-detail-tab="history" role="tab" aria-selected="false">History</button>
+      </div>
+      <div class="detail-pane" id="d-overview-pane">
       <!-- STATS -->
       <div class="detail-stats-grid">
         <div class="detail-stat"><div class="detail-stat-label">Playtime</div><div class="detail-stat-value" id="d-playtime">—</div></div>
@@ -751,6 +831,8 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
         <div class="detail-stat"><div class="detail-stat-label">Avg Session</div><div class="detail-stat-value" id="d-avg">—</div></div>
         <div class="detail-stat"><div class="detail-stat-label">Last Played</div><div class="detail-stat-value" id="d-last">—</div></div>
       </div>
+      <div class="detail-section-label">Sources</div>
+      <div class="source-chips" id="d-sources"></div>
       <!-- HOWLONGTOBEAT -->
       <div class="hltb-panel" id="d-hltb"></div>
       <!-- NOTES -->
@@ -783,6 +865,14 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
         <button class="btn btn-ghost" id="d-edit">Edit Game</button>
         <button class="btn btn-primary" id="d-save-notes">Save Notes</button>
         <button class="btn btn-ghost" id="d-close">Close</button>
+      </div>
+      </div>
+      <div class="detail-pane hidden" id="d-history-pane">
+        <div class="detail-section-label">Game history</div>
+        <div class="history-list" id="d-history"></div>
+        <div class="modal-actions" style="margin-top:1.25rem">
+          <button class="btn btn-ghost" id="d-close-history">Close</button>
+        </div>
       </div>
     </div>
   </div>
@@ -865,6 +955,7 @@ let steamSetupInterval = null;
 let steamSetupSawDownload = false;
 let steamSetupSteamHidden = false;
 let downloadsInterval = null;
+const steamPromptedAppIds = new Set();
 const steamStatusCache = new Map();
 let filter = 'all';
 let yearFilter = 'all';
@@ -872,6 +963,8 @@ let ratingFilter = 'all';
 let platformFilter = 'all';
 let libraryQuery = '';
 let librarySort = localStorage.getItem('gv-library-sort-v1') || 'recent';
+let showQuickPlay = localStorage.getItem('gv-show-quickplay-v1') === '1';
+let skipMergeOnce=false;
 let editingId = null;
 let detailId = null;
 let editReturnToDetailId = null;
@@ -893,21 +986,33 @@ let fbConfig = FB_HARDCODED;
 const UI_COPY=[
   ['Твій ігровий простір','Your game space'],['Увійди','Sign in'],['Створити акаунт','Create account'],['Продовжити з Google','Continue with Google'],['Забув пароль?','Forgot password?'],['PRG Account не підключено','PRG Account is not connected'],
   ['Плаваючий мінібар','Floating mini-bar'],['Згорнути','Minimize'],['Розгорнути','Maximize'],['Сховати в трей','Hide to tray'],['Налаштування','Settings'],['Відкрити налаштування','Open settings'],['Закрити налаштування','Close settings'],['Міні-режим: показує компактну панель поверх вікон','Mini mode: shows a compact panel above windows'],['Згорнути застосунок','Minimize app'],['Розгорнути або відновити розмір вікна','Maximize or restore window'],['Сховати PRGLauncher у системний трей','Hide PRGLauncher in the system tray'],['Закрити налаштування','Close settings'],['Офлайн','Offline'],['Пауза','Pause'],
-  ['Бібліотека','Library'],['Завантаження','Downloads'],['Статистика','Statistics'],['Усі','All'],['Граю','Playing'],['Беклог','Backlog'],['Пройдено','Completed'],['+ Додати гру','+ Add Game'],
+  ['Бібліотека','Library'],['Завантаження','Downloads'],['Статистика','Statistics'],['Усі','All'],['Граю','Playing'],['Беклог','Backlog'],['Пройдено','Completed'],['Швидкі','Quick Play'],['Показувати швидкі ігри','Show Quick Play games'],['+ Додати гру','+ Add Game'],['Фільтри','Filters'],['Сховати фільтри','Hide filters'],
   ['Усі роки','All years'],['Усі оцінки','All ratings'],['Тільки з оцінкою','Rated only'],['Без оцінки','Unrated'],['Усі платформи','All platforms'],['Пошук у бібліотеці…','Search library…'],['Остання сесія','Last session'],['Найбільше часу','Most playtime'],['Назва A–Я','Title A–Z'],['Нещодавно додані','Recently added'],
   ['Загальні','General'],['Вигляд','Appearance'],['Інтеграції','Integrations'],['Дані','Data'],['Мова','Language'],['Мова інтерфейсу','Interface language'],['Застосовується одразу та зберігається для наступних запусків.','Applies immediately and is saved for future launches.'],
   ['Тема оформлення','Theme'],['Неоновий фіолетовий','Neon Violet'],['Океан','Ocean'],['Жар','Ember'],['Рожева','Rose'],['Графіт','Slate'],['Масштаб інтерфейсу','Interface scale'],['90% · компактний','90% · compact'],['100% · стандартний','100% · standard'],['110% · більший','110% · large'],['120% · великий','120% · extra large'],['Збільшує текст і всі елементи інтерфейсу.','Scales text and all interface elements.'],
   ['Посилання на Steam-профіль','Steam profile link'],['Завантажити бібліотеку Steam','Load Steam library'],['Імпорт встановлених ігор','Import installed games'],['Імпорт BACKLOG','Import BACKLOG'],['Steam-профіль підключено','Steam profile connected'],['Steam-профіль не підключено','No Steam profile connected'],['Профіль використовується для імпорту бібліотеки.','This profile is used for library imports.'],['Встав посилання нижче, щоб підключити профіль для імпорту.','Paste a link below to connect a profile for importing.'],['Від’єднати Steam','Disconnect Steam'],['Від’єднати Steam-профіль','Disconnect Steam profile'],['Немає підключеного Steam-профілю','No Steam profile connected'],['Від’єднати Steam-профіль? Ігри вже додані до лаунчера залишаться.','Disconnect Steam profile? Games already added to the launcher will remain.'],['Підключення Nintendo Account','Connect Nintendo Account'],['Не підключено','Not connected'],['Підключити Nintendo Account','Connect Nintendo Account'],['Запросити весь список','Request full list'],['Синхронізувати зараз','Sync now'],['Від’єднати Nintendo Account','Disconnect Nintendo Account'],['Підтягнути обкладинки для Nintendo-ігор','Fetch Nintendo game covers'],
   ['Резервна копія','Backup'],['Оновлення','Updates'],['Обслуговування бібліотеки','Library maintenance'],['Оновити теги','Refresh tags'],['Копіювати сайт','Copy website'],['Вийти','Sign out'],['Перевірити оновлення','Check for updates'],['Завантажити','Download'],['Встановити','Install'],
   ['Підготовка гри','Preparing game'],['Гра ще не готова','Game is not ready yet'],['До бібліотеки','Back to library'],['Нові ігри у BACKLOG','New BACKLOG games'],['Обери ігри та статус для імпорту в PRGLauncher.','Choose games and a status to import into PRGLauncher.'],['Пошук ігор у списку','Search games in the list'],['Обрати всі','Select all'],['Зняти вибір','Clear selection'],['Не зараз','Not now'],['Додати вибрані','Add selected'],
-  ['Оновити теги (EN)','Refresh tags (EN)'],['Скасувати','Cancel'],['Почати','Start'],['Додати гру','Add Game'],['Редагувати гру','Edit Game'],['Пошук у RAWG','Search on RAWG'],['Назва *','Title *'],['Статус','Status'],['Пріоритет беклогу','Backlog priority'],['Рік додавання','Year added'],['Платформа','Platform'],['Обкладинка URL','Cover URL'],['Нотатки','Notes'],['Зберегти','Save'],['Зберегти нотатки','Save notes'],['Закрити','Close'],['Видалити','Delete'],['Видалити сесію','Delete session'],['Редагувати час','Edit time'],['Журнал сесій','Session log'],['Оцінка','Rating'],['Скинути','Clear'],['Змінити час','Edit time'],['Загальний час гри','Total playtime'],['Сесії','Sessions'],['Додати сесію вручну','Add session manually'],['Дата','Date'],['Год','Hour'],['Хв','Min'],['Зберегти зміни','Save changes'],
-  ['Усього ігор','Total Games'],['Загальний час','Total Playtime'],['Найпопулярніші ігри за часом','Top Games by Playtime'],['Розподіл за статусом','Status Breakdown'],['Платформи','Platform Distribution'],['Найкращі жанри','Top Genres'],['Активність (останні 26 тижнів)','Activity (last 26 weeks)'],['Статистика сесій','Session Stats'],['Найкраще оцінені ігри','Top Rated Games'],['Розподіл оцінок','Rating Distribution'],
-  ['Інформація','Info'],['Грати в Steam','Play in Steam'],['Почати таймер','Start timer'],['Зараз граю','Now playing'],['Очікування','Stand By'],['Змінити статус','Change status'],['Змінити статус гри: ','Change game status: '],['Ще немає даних','No data yet'],['Немає сесій','No sessions'],['Ще немає сесій','No sessions yet'],['Редагувати','Edit'],['сесія','session'],['сесій','sessions'],['ігри','games'],['гра','game'],
+  ['Оновити теги (EN)','Refresh tags (EN)'],['Скасувати','Cancel'],['Почати','Start'],['Додати гру','Add Game'],['Редагувати гру','Edit Game'],['Пошук у RAWG','Search on RAWG'],['Назва *','Title *'],['Статус','Status'],['Пріоритет беклогу','Backlog priority'],['Рік додавання','Year added'],['Платформа','Platform'],['Обкладинка URL','Cover URL'],['Нотатки','Notes'],['Зберегти','Save'],['Зберегти нотатки','Save notes'],['Закрити','Close'],['Видалити','Delete'],['Видалити сесію','Delete session'],['Редагувати час','Edit time'],['Журнал сесій','Session log'],['Оцінка','Rating'],['Скинути','Clear'],['Змінити час','Edit time'],['Загальний час гри','Total playtime'],['Сесії','Sessions'],['Швидкі','Quick Play'],['Показувати швидкі ігри','Show Quick Play games'],['Додати сесію вручну','Add session manually'],['Дата','Date'],['Год','Hour'],['Хв','Min'],['Зберегти зміни','Save changes'],
+  ['Усього ігор','Total Games'],['Загальний час','Total Playtime'],['Найпопулярніші ігри за часом','Top Games by Playtime'],['Розподіл за статусом','Status Breakdown'],['Платформи','Platform Distribution'],['Найкращі жанри','Top Genres'],['Активність (останні 26 тижнів)','Activity (last 26 weeks)'],['Статистика сесій','Session Stats'],['Найкраще оцінені ігри','Top Rated Games'],['Розподіл оцінок','Rating Distribution'],['Більше статистики','More statistics'],
+  ['Інформація','Info'],['Грати в Steam','Play in Steam'],['Почати таймер','Start timer'],['Зараз граю','Now playing'],['Очікування','Stand By'],['Змінити статус','Change status'],['Змінити статус гри: ','Change game status: '],['QuickPlay','Quick Play'],['Ще немає даних','No data yet'],['Немає сесій','No sessions'],['Ще немає сесій','No sessions yet'],['Редагувати','Edit'],['сесія','session'],['сесій','sessions'],['ігри','games'],['гра','game'],
   ['Час проходження HLTB','HLTB completion times'],['Пошук даних HLTB…','Looking up HLTB…'],['HLTB ще не знайдено для цієї гри.','HLTB has not been found for this game yet.'],['HLTB тимчасово недоступний. Спробуй ще раз трохи пізніше.','HLTB is temporarily unavailable. Try again a little later.'],['Основний сюжет','Main Story'],['Сюжет + додаткове','Main + Extras'],['На 100%','Completionist'],['Усі стилі','All Styles'],['Немає даних','No data'],['Відкрити HLTB','Open HLTB'],['Оновити HLTB','Refresh HLTB'],['Змінити збіг','Change match'],['Сховати HLTB','Hide HLTB'],['Показати HLTB','Show HLTB'],['Дані HLTB приховано для цієї гри.','HLTB data is hidden for this game.'],['Обери версію гри в HLTB','Choose the game version in HLTB'],['Є кілька можливих збігів. Обери правильну версію — це збережеться у твоїй бібліотеці.','There are several possible matches. Choose the correct version — it will be saved in your library.'],['Шукати іншу назву','Search a different title'],['Пошук у HLTB','Search HLTB'],['Нічого не знайдено. Спробуй іншу назву гри.','Nothing was found. Try a different game title.'],['Натисни «Оновити HLTB», щоб спробувати ще раз.','Press “Refresh HLTB” to try again.'],['Дані з HowLongToBeat.com','Data from HowLongToBeat.com'],
+  ['Огляд','Overview'],['Історія','History'],['Історія гри','Game history'],['Гру додано до бібліотеки','Game added to library'],['Імпортовано з','Imported from'],['Змінено статус','Status changed'],['Редагування гри','Game edited'],['Прив’язано HLTB','HLTB match linked'],['Сесія гри','Play session'],['Немає подій','No history events yet'],
+  ['Показати ігри зі статусом Playing','Show games with Playing status'],['Показати ігри зі статусом Backlog','Show games with Backlog status'],['Показати завершені ігри','Show completed games'],['Нова гра у Steam','New Steam game'],['PRGLauncher помітив, що ти запустив гру, якої ще немає у бібліотеці.','PRGLauncher detected a Steam game that is not in your library yet.'],['Статус гри','Game status'],['Додати в бібліотеку','Add to library'],['Попередній час: перевіряємо Steam…','Previous playtime: checking Steam…'],['Попередній час: дані Steam недоступні','Previous playtime: Steam data unavailable'],
   ['PRG ОБЛІКОВИЙ ЗАПИС','PRG ACCOUNT'],['Синхронізовано','Synced'],['Помилка синхронізації','Sync error'],['Немає результатів','No results'],['Пошук…','Searching…'],['Завантаження даних Steam…','Loading Steam data…'],['Читаємо Steam…','Reading Steam…'],['Показано','Showing'],['з','of'],['Вже є у лаунчері','Already in launcher'],['Ігор не знайдено. Перевір Steam на цьому ПК або обери інше джерело імпорту.','No games found. Check Steam on this PC or choose another import source.'],
   ['Гра готова до запуску','Game is ready to launch'],['Steam знайшов установлену гру','Steam found the installed game'],['Запустити гру і таймер','Launch game and timer'],['Steam готує завантаження…','Steam is preparing the download…'],['Завантаження скасовано в Steam','Download cancelled in Steam'],['Steam прибрав гру з черги','Steam removed the game from the queue'],['Спробувати завантажити ще раз','Try downloading again'],['Steam не знайдено','Steam was not found'],['Встановіть Steam або запустіть його хоча б один раз','Install Steam or start it at least once'],['Очікуємо, поки Steam почне встановлення…','Waiting for Steam to start installing…'],['Запит на встановлення надіслано Steam','Install request sent to Steam'],['Перевіряємо Steam…','Checking Steam…'],
   ['У цьому фільтрі поки порожньо','This filter is empty'],['Спробуй змінити фільтри або додай нову гру до бібліотеки.','Try changing filters or adding a game to your library.'],['Ще немає сесій','No sessions yet'],['Створи PRG-акаунт — твоя бібліотека та сайт будуть тільки твоїми.','Create a PRG Account — your library and website will be yours alone.'],['У мене вже є акаунт','I already have an account'],['Увійди, щоб синхронізувати бібліотеку та отримати власну сторінку статистики.','Sign in to sync your library and get your own statistics page.'],['Посилання скопійовано','Link copied']
 ];
+UI_COPY.push(...[
+  ['Імпорт Backloggd','Import Backloggd'],['Імпорт публічного профілю','Import public profile'],['Посилання на профіль Backloggd','Backloggd profile link'],['Перенесе вибрані ігри зі сторінки Backloggd. Пароль і приватні дані не потрібні.','Imports selected games from a Backloggd page. No password or private data is needed.'],['Працює лише з публічним профілем. Wishlist та нестандартні стани не імпортуються автоматично.','Works with public profiles only. Wishlist and custom states are not imported automatically.'],['Встав URL профілю, щоб почати.','Paste a profile URL to begin.'],['Переглянь публічний профіль, вибери ігри та задай їм статус у PRGLauncher.','Review the public profile, choose games and set their PRGLauncher status.'],['Ще не завантажено.','Not loaded yet.'],['Імпортувати оцінки','Import ratings'],['Імпортувати платформи','Import platforms'],['Ігор не знайдено','No games found'],['У профілі Backloggd не знайдено публічних ігор. Перевір URL і видимість бібліотеки.','No public games found in this Backloggd profile. Check the URL and library visibility.'],['Backloggd не дозволив завантаження профілю. Перевір, що профіль публічний, або відкрий його в браузері й спробуй ще раз.','Backloggd blocked the profile request. Check that the profile is public, or open it in a browser and try again.']
+]);
+UI_COPY.push(['Оновити RAWG-обкладинки','Refresh RAWG covers'],['Оновлюємо…','Refreshing…'],['Немає Backloggd-ігор','No Backloggd games']);
+UI_COPY.push(['Джерела','Sources']);
+UI_COPY.push(['Скасовано','Undone']);
+UI_COPY.push(['Сесію видалено','Session deleted'],['Сесію відредаговано','Session edited'],['Час гри змінено','Playtime edited']);
+UI_COPY.push(['Об’єднано з','Merged with'],['іншою карткою','another game card']);
+UI_COPY.push(['Дублікатів не знайдено','No duplicates found'],['Об’єднати','Merge'],['Основна: ','Primary: ']);
+UI_COPY.push(['Поділитися recap','Share recap'],['Скопійовано','Copied']);
 const UK_TEXT=new Map(UI_COPY.map(([uk,en])=>[en,uk]));
 const EN_TEXT=new Map(UI_COPY.map(([uk,en])=>[uk,en]));
 let currentLanguage=localStorage.getItem('gv-language')==='en'?'en':'uk';
@@ -930,7 +1035,7 @@ function applyLanguage(language){
 
 const profileStorageKey=key=>currentUser?`${key}:${currentUser.uid}`:key;
 const loadProfileGames=()=>{try{return JSON.parse(localStorage.getItem(profileStorageKey('gv-games'))||'[]');}catch{return [];}};
-const save = () => {localStorage.setItem(profileStorageKey('gv-games'), JSON.stringify(games));window.launcher?.trackSteamApps?.(games.map(g=>g.steamAppId).filter(Boolean));};
+const save = () => {skipMergeOnce=false;games.forEach(game=>{if(game.status==='Sessions')game.status='QuickPlay';if(typeof ensureGameSources==='function')ensureGameSources(game);(game.sessions||[]).forEach(session=>{if(!session.source)session.source=game.steamAppId?'steam':game.nintendoTitleId?'nintendo-sync':'manual';});});localStorage.setItem(profileStorageKey('gv-games'), JSON.stringify(games));const undo=document.getElementById('undo-merge-btn');if(undo)undo.disabled=!localStorage.getItem(profileStorageKey('gv-last-merge-backup'));window.launcher?.trackSteamApps?.(games.map(g=>g.steamAppId).filter(Boolean));};
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2);
 const getGame = id => games.find(g => g.id === id);
 const PLATFORM_ICONS = {'PC':'🖥️','Nintendo Switch':'🎮','Nintendo 3DS':'🕹️','PS3':'🎯','Other':'📦'};
@@ -1024,7 +1129,7 @@ function initFb(cfg) {
       clearInterval(nintendoSyncTimer);nintendoProfileReady=false;
       if(activeGameId)stopTimer(true);
       currentUser=user||null;games=[];renderGrid();updateStats();updateSessionBar();
-      document.getElementById('backlog-import-modal').classList.add('hidden');
+      document.getElementById('backlog-import-modal').classList.add('hidden');document.getElementById('backloggd-import-modal').classList.add('hidden');
       nintendoHistoryData=[];nintendoPendingNotice=[];nintendoIgnoredIds=new Set();nintendoNotifiedIds=new Set();
       nintendoIgnoredIds=new Set(JSON.parse(localStorage.getItem(profileStorageKey('gv-nintendo-ignored-v1'))||'[]'));
       nintendoNotifiedIds=new Set(JSON.parse(localStorage.getItem(profileStorageKey('gv-nintendo-notified-v1'))||'[]'));
@@ -1048,7 +1153,7 @@ function updateSteamProfileUI(){
   if(status)status.textContent=t(profile?'Профіль використовується для імпорту бібліотеки.':'Встав посилання нижче, щоб підключити профіль для імпорту.');
   if(disconnect){disconnect.disabled=!profile;disconnect.title=t(profile?'Від’єднати Steam-профіль':'Немає підключеного Steam-профілю');}
 }
-function updateProfileUI(){const email=currentUser?.email||t('PRG Account не підключено');const label=document.getElementById('profile-email-label'),link=document.getElementById('profile-link');if(label)label.textContent=email;if(link)link.textContent=currentUser?`prgtracker.netlify.app/?u=${currentUser.uid}`:'Увійди, щоб створити персональне посилання';updateSteamProfileUI();}
+function updateProfileUI(){const email=currentUser?.email||t('PRG Account не підключено');const label=document.getElementById('profile-email-label'),link=document.getElementById('profile-link');if(label)label.textContent=email;if(link)link.textContent=currentUser?`prgtracker.netlify.app/?u=${currentUser.uid}`:'Увійди, щоб створити персональне посилання';updateSteamProfileUI();const backloggdInput=document.getElementById('backloggd-profile-url');if(backloggdInput)backloggdInput.value=currentUser?localStorage.getItem(profileStorageKey('gv-backloggd-profile-url'))||'':'';}
 async function startUserSync(user){
   if(!user?.uid||currentUser?.uid!==user.uid||syncRetryInFlight)return false;
   syncRetryInFlight=true;
@@ -1099,7 +1204,7 @@ function makeStatsDashboard(){
   const now=Date.now();
   const allSessions=games.flatMap(game=>(game.sessions||[]).map(session=>({...session,title:game.title,cover:game.cover||null})));
   const totalPlaytime=games.reduce((sum,game)=>sum+(game.playtime||0),0);
-  const status={Playing:0,Backlog:0,Completed:0};
+  const status={Playing:0,Backlog:0,Completed:0,QuickPlay:0};
   const platforms={};const genres={};const activity={};
   games.forEach(game=>{
     if(Object.prototype.hasOwnProperty.call(status,game.status))status[game.status]++;
@@ -1178,7 +1283,7 @@ function startTimer(gameId,source='manual'){
   const idx=games.findIndex(g=>g.id===gameId);
   if(idx>0){const[g]=games.splice(idx,1);games.unshift(g);}
   const changedStatus=game.status==='Backlog';
-  if(changedStatus)game.status='Playing';
+  if(changedStatus){game.status='Playing';addGameHistory(game,'status',{from:'Backlog',to:'Playing'},source);}
   save();
   if(changedStatus)pushToFb().catch(error=>console.warn('[Sync] Status update failed',error));
   clearInterval(timerInterval); timerInterval=setInterval(tickTimer,500);
@@ -1354,19 +1459,33 @@ function stopTimer(silent){
   if(!activeGameId)return;
   clearInterval(timerInterval);
   const elapsed=Date.now()-activeStart,game=getGame(activeGameId);
-  if(game&&elapsed>1000){game.playtime=(game.playtime||0)+elapsed;if(!game.sessions)game.sessions=[];game.sessions.push({start:activeStart,end:Date.now(),dur:elapsed});game.lastPlayed=Date.now();const _si=games.findIndex(g=>g.id===activeGameId);if(_si>0){const[_g]=games.splice(_si,1);games.unshift(_g);}save();pushToFb();}
+  if(game&&elapsed>1000){game.playtime=(game.playtime||0)+elapsed;if(!game.sessions)game.sessions=[];game.sessions.push({start:activeStart,end:Date.now(),dur:elapsed,source:activeSource==='steam'?'steam':'manual'});game.lastPlayed=Date.now();const _si=games.findIndex(g=>g.id===activeGameId);if(_si>0){const[_g]=games.splice(_si,1);games.unshift(_g);}save();pushToFb();}
   activeGameId=null; activeStart=null;
   activeSource='manual';localStorage.removeItem('gv-active'); localStorage.removeItem('gv-start');localStorage.removeItem('gv-active-source');
   if(!silent){updateSessionBar();renderGrid();updateStats();}
 }
 
+async function promptUnknownSteamGame(appId){
+  const id=String(appId||'');if(!id||steamPromptedAppIds.has(id)||guestBlock())return;
+  steamPromptedAppIds.add(id);
+  try{
+    const result=await window.launcher?.getSteamStoreGames?.([Number(id)]);const info=Array.isArray(result)?result[0]:null;if(!info?.title)return;
+    const existing=games.find(item=>item.title&&normalizeBackloggdTitle(item.title)===normalizeBackloggdTitle(info.title));
+    if(existing){existing.steamAppId=Number(id);existing.platforms=Array.isArray(existing.platforms)?existing.platforms:['PC'];if(!existing.platforms.includes('PC'))existing.platforms.push('PC');addGameSource(existing,{type:'steam',id,platform:'PC'});if(!existing.cover&&info.cover)existing.cover=info.cover;save();pushToFb();renderGrid();updateStats();if(!activeGameId)startTimer(existing.id,'steam');return;}
+    const modal=document.getElementById('steam-discovered-modal');const title=document.getElementById('steam-discovered-title');const cover=document.getElementById('steam-discovered-cover');const time=document.getElementById('steam-discovered-time');const statusSelect=document.getElementById('steam-discovered-status');const add=document.getElementById('steam-discovered-add');const skip=document.getElementById('steam-discovered-skip');
+    title.textContent=info.title;cover.src=info.cover||'';cover.style.visibility=info.cover?'visible':'hidden';time.textContent=t('Попередній час: перевіряємо Steam…');let previousMinutes=null;
+    try{const profile=document.getElementById('steam-profile-url')?.value?.trim();if(currentUser&&profile){const token=await currentUser.getIdToken();const library=await window.launcher?.getSteamProfileLibrary?.(profile,token);const found=library?.games?.find(game=>String(game.appId)===id);if(found&&Number.isFinite(Number(found.minutes)))previousMinutes=Number(found.minutes);}}catch{}
+    time.textContent=previousMinutes!=null?`${currentLanguage==='en'?'Previous playtime: ':'Попередній час: '}${Math.floor(previousMinutes/60)} год ${previousMinutes%60} хв`:t('Попередній час: дані Steam недоступні');modal.classList.remove('hidden');
+    const close=()=>modal.classList.add('hidden');skip.onclick=close;add.onclick=()=>{const now=Date.now();const selectedStatus=statusSelect.value||'Playing';const game={id:uid(),title:info.title,status:selectedStatus,platform:'PC',platforms:['PC'],cover:info.cover||null,notes:null,genres:[],tags:['Steam Activity'],rating:null,steamAppId:Number(id),steamLastSeenMinutes:previousMinutes,sources:[{type:'steam',id:id,platform:'PC'}],playtime:previousMinutes!=null?previousMinutes*60000:0,sessions:[],lastPlayed:now,added:now};games.unshift(game);addGameHistory(game,'added',null,'Steam Activity',now);save();pushToFb();buildFilterBar();renderGrid();updateStats();close();if(selectedStatus==='Playing'&&!activeGameId)startTimer(game.id,'steam');};
+  }catch(error){console.warn('[Steam] Could not resolve unknown game',error);}
+}
 function trackSteamSession(status){
   const runningAppId=status?.appId?String(status.appId):null;
   const game=runningAppId&&games.find(item=>String(item.steamAppId)===runningAppId);
   if(!runningAppId){if(activeSource==='steam')stopTimer(false);return;}
   // A different Steam game replaces an auto-tracked session. A manual session
   // remains under the user's control and is never interrupted by this watcher.
-  if(!game){if(activeSource==='steam')stopTimer(false);return;}
+  if(!game){if(activeSource==='steam')stopTimer(false);promptUnknownSteamGame(runningAppId);return;}
   if(activeGameId===game.id)return;
   if(activeGameId&&activeSource==='steam')stopTimer(true);
   if(!activeGameId)startTimer(game.id,'steam');
@@ -1399,7 +1518,9 @@ function coverEl(game){
 function fallbackEl(game){const d=document.createElement('div');d.className='cover-fallback';const t=document.createElement('div');t.className='cover-fb-text';t.textContent=game.title.slice(0,2).toUpperCase();d.appendChild(t);return d;}
 
 function getFilteredGames(){
+  games.forEach(game=>{if(game.status==='Sessions')game.status='QuickPlay';});
   let list = filter==='all'?[...games]:games.filter(g=>g.status===filter);
+  if(filter==='all'&&!showQuickPlay)list=list.filter(g=>g.status!=='QuickPlay');
   if(libraryQuery)list=list.filter(g=>g.title.toLocaleLowerCase().includes(libraryQuery));
   if(yearFilter!=='all') list=list.filter(g=>getGameYear(g)===yearFilter);
   if(platformFilter!=='all') list=list.filter(g=>(g.platform||'Other')===platformFilter);
@@ -1412,11 +1533,11 @@ function getFilteredGames(){
   else list.sort((a,b)=>(b.lastPlayed||0)-(a.lastPlayed||0));
   return list;
 }
-const GAME_STATUSES=['Backlog','Playing','Completed'];
+const GAME_STATUSES=['Backlog','Playing','Completed','QuickPlay'];
 function closeQuickStatusMenu(){document.getElementById('quick-status-menu')?.remove();}
 function setGameStatus(gameId,status){
   const game=getGame(gameId);if(!game||!GAME_STATUSES.includes(status)||game.status===status)return;
-  game.status=status;save();pushToFb().catch(error=>console.warn('[Sync] Status update failed',error));
+  const previous=game.status;game.status=status;addGameHistory(game,'status',{from:previous,to:status},'manual');save();pushToFb().catch(error=>console.warn('[Sync] Status update failed',error));
   buildFilterBar();renderGrid();updateStats();
   if(detailId===gameId&&document.getElementById('detail-modal').classList.contains('hidden')===false)openDetail(gameId);
 }
@@ -1429,8 +1550,10 @@ function openQuickStatusMenu(gameId,anchor){
   const rect=anchor.getBoundingClientRect();const top=Math.min(window.innerHeight-menu.offsetHeight-10,rect.bottom+6);const left=Math.min(window.innerWidth-menu.offsetWidth-10,Math.max(10,rect.left));menu.style.top=`${Math.max(10,top)}px`;menu.style.left=`${left}px`;
 }
 function createStatusButton(game,detail=false){
-  const badge=document.createElement('button');badge.type='button';badge.className=`card-status-badge status-control badge-${game.status.toLowerCase()}`;badge.textContent=t(game.status);badge.title=t('Змінити статус');badge.dataset.tooltip=t('Змінити статус гри: ')+t(game.status);badge.setAttribute('aria-label',t('Змінити статус гри: ')+t(game.status));
-  if(detail)badge.style.position='static';
+  const status=GAME_STATUSES.includes(game.status)?game.status:'Backlog';
+  if(game.status!==status)game.status=status;
+  const badge=document.createElement('button');badge.type='button';badge.className=`card-status-badge status-control badge-${status.toLowerCase()}`;badge.textContent=t(status);badge.title=t('Змінити статус');badge.dataset.tooltip=t('Змінити статус гри: ')+t(status);badge.setAttribute('aria-label',t('Змінити статус гри: ')+t(status));badge.dataset.status=status;
+  if(detail)badge.classList.add('status-control-detail');
   badge.onclick=event=>{event.stopPropagation();if(!guestBlock())openQuickStatusMenu(game.id,badge);};return badge;
 }
 
@@ -1451,9 +1574,8 @@ function renderGrid(){
     else if(yearFilter==='all'&&yr){const yb=document.createElement('span');yb.className='card-year-badge';yb.textContent=yr;coverDiv.appendChild(yb);}
     card.appendChild(coverDiv);
     const body=document.createElement('div');body.className='card-body';
-    const titleRow=document.createElement('div');titleRow.style.cssText='display:flex;align-items:baseline;justify-content:space-between;gap:6px;margin-bottom:4px';
+    const titleRow=document.createElement('div');titleRow.className='card-title-row';titleRow.style.cssText='display:flex;align-items:baseline;justify-content:space-between;gap:6px;margin-bottom:4px';
     const titleEl=document.createElement('div');titleEl.className='card-title';titleEl.style.cssText='margin-bottom:0;flex:1;min-width:0';titleEl.textContent=game.title;titleRow.appendChild(titleEl);
-    if(game.rating){const rEl=document.createElement('span');rEl.style.cssText='font-family:var(--fm);font-size:11px;font-weight:600;color:var(--amber);flex-shrink:0;white-space:nowrap';rEl.textContent=game.rating+'/10';titleRow.appendChild(rEl);}
     body.appendChild(titleRow);
     const meta=document.createElement('div');meta.className='card-meta';const s=(game.sessions||[]).length;
     meta.innerHTML=`<span>${sessionCountText(s)}</span><span>${fmtHours(game.playtime||0)}</span>`;body.appendChild(meta);
@@ -1483,6 +1605,7 @@ function updateStats(){
   const list=getFilteredGames();
   document.getElementById('stat-total').textContent=list.length;
   document.getElementById('stat-playing').textContent=list.filter(g=>g.status==='Playing').length;
+  document.getElementById('stat-backlog').textContent=list.filter(g=>g.status==='Backlog').length;
   document.getElementById('stat-completed').textContent=list.filter(g=>g.status==='Completed').length;
   const totalMs=list.reduce((a,g)=>a+(g.playtime||0),0),h=totalMs/3600000;
   document.getElementById('stat-playtime').innerHTML=h<1?`${Math.round(totalMs/60000)}<span>m</span>`:`${h.toFixed(1)}<span>h</span>`;
@@ -1552,12 +1675,16 @@ function saveModal(){
   let savedGameId=editingId;
   if(editingId){
     const g=getGame(editingId);
+    const previousStatus=g.status,previousTitle=g.title;
     Object.assign(g,d);
     // Preserve added year
     g.added=new Date(yr,0,1).getTime();
+    if(previousStatus!==g.status)addGameHistory(g,'status',{from:previousStatus,to:g.status},'manual');
+    if(previousTitle!==g.title||previousStatus===g.status)addGameHistory(g,'edited',null,'manual');
   } else {
     savedGameId=uid();
-    games.unshift({id:savedGameId,...d,playtime:0,sessions:[],lastPlayed:null,added:new Date(yr,0,1).getTime()});
+    const created={id:savedGameId,...d,playtime:0,sessions:[],lastPlayed:null,added:new Date(yr,0,1).getTime(),history:[]};
+    games.unshift(created);addGameHistory(created,'added',null,'manual',created.added);
   }
   const reopenDetailId=editReturnToDetailId===savedGameId?savedGameId:null;
   save();pushToFb();closeModal();buildFilterBar();renderGrid();updateStats();
@@ -1585,6 +1712,7 @@ function hltbPersist(game){save();pushToFb();renderGrid();if(detailId===game.id)
 function hltbApplyMatch(game,candidate){
   if(!game||!candidate)return;
   game.hltb={id:candidate.id,title:candidate.title,year:candidate.year||null,mainStoryMinutes:candidate.mainStoryMinutes||null,mainExtraMinutes:candidate.mainExtraMinutes||null,completionistMinutes:candidate.completionistMinutes||null,allStylesMinutes:candidate.allStylesMinutes||null,sourceUrl:candidate.sourceUrl,checkedAt:Date.now(),hidden:false};
+  addGameHistory(game,'hltb',candidate.title,'HowLongToBeat');
   hltbCandidates.delete(game.id);hltbPersist(game);
 }
 function hltbShowPicker(game,candidates,query){
@@ -1647,9 +1775,58 @@ function maybeLookupHltb(game){
   lookupHltb(game.id,game.title,false);
 }
 
+// ── GAME HISTORY ───────────────────────────────────────────────────────────
+// Newer records append explicit events. Older libraries are supported too:
+// their existing `added`, source IDs and sessions are projected into the same
+// timeline without rewriting the underlying data.
+function addGameHistory(game,kind,detail=null,source=null,at=Date.now()){
+  if(!game)return;
+  if(!Array.isArray(game.history))game.history=[];
+  game.history.push({id:uid(),kind,detail,source,at:Number(at)||Date.now()});
+  if(game.history.length>200)game.history.splice(0,game.history.length-200);
+}
+function historySourceLabel(source){if(source==='nintendo-sync'||source==='Nintendo Sync')return 'Nintendo Sync';if(source==='steam'||source==='Steam Import')return 'Steam';if(source==='manual')return currentLanguage==='en'?'Manual':'Вручну';return source||'';}
+function gameHistoryEvents(game){
+  const events=Array.isArray(game.history)?[...game.history]:[];
+  if(!events.some(event=>event.kind==='added')&&game.added)events.push({kind:'added',at:game.added});
+  if(game.steamAppId&&!events.some(event=>event.kind==='import'&&/steam/i.test(String(event.source||''))))events.push({kind:'import',source:'Steam Import',at:game.added||Date.now()});
+  if(game.nintendoTitleId&&!events.some(event=>event.kind==='import'&&/nintendo/i.test(String(event.source||''))))events.push({kind:'import',source:'Nintendo Sync',at:game.added||Date.now()});
+  (game.sessions||[]).forEach(session=>events.push({kind:'session',source:session.source,at:session.start||session.end||Date.now(),detail:{duration:session.dur||0}}));
+  return events.filter(event=>Number(event.at)>0).sort((a,b)=>Number(b.at)-Number(a.at)).slice(0,80);
+}
+function historyEventText(event){
+  if(event.kind==='added')return t('Game added to library');
+  if(event.kind==='import')return `${t('Imported from')} ${historySourceLabel(event.source)}`;
+  if(event.kind==='status')return `${t('Status changed')}: ${t(event.detail?.from||'')} → ${t(event.detail?.to||'')}`;
+  if(event.kind==='edited')return t('Game edited');
+  if(event.kind==='hltb')return t('HLTB match linked');
+  if(event.kind==='session'){const duration=event.detail?.duration;return `${t('Play session')}${event.source?` · ${historySourceLabel(event.source)}`:''}${duration?` · ${fmtTime(duration)}`:''}`;}
+  if(event.kind==='session-delete')return `${t('Сесію видалено')}${event.detail?.duration?` · ${fmtTime(event.detail.duration)}`:''}`;
+  if(event.kind==='session-edit')return `${t('Сесію відредаговано')}${event.detail?.from&&event.detail?.to?` · ${fmtTime(event.detail.from)} → ${fmtTime(event.detail.to)}`:''}`;
+  if(event.kind==='playtime-edit')return `${t('Час гри змінено')}${event.detail?.from!=null&&event.detail?.to!=null?` · ${fmtTime(event.detail.from)} → ${fmtTime(event.detail.to)}`:''}`;
+  if(event.kind==='merge')return `${t('Об’єднано з')} ${event.detail?.title||t('іншою карткою')}`;
+  return String(event.detail||'');
+}
+function renderGameHistory(game){
+  const list=document.getElementById('d-history');if(!list||!game)return;
+  const events=gameHistoryEvents(game);
+  if(!events.length){list.innerHTML=`<div class="history-item"><div class="history-item-title">${t('No history events yet')}</div></div>`;return;}
+  list.innerHTML=events.map(event=>`<div class="history-item"><div class="history-item-title">${escapeHltbHtml(historyEventText(event))}</div><div class="history-item-time">${new Date(event.at).toLocaleString(currentLanguage==='en'?'en-US':'uk-UA',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})}</div></div>`).join('');
+}
+function setDetailTab(tab){
+  const selected=tab==='history'?'history':'overview';
+  const labels={overview:'Overview',history:'History'};
+  document.querySelectorAll('.detail-tab').forEach(button=>{const active=button.dataset.detailTab===selected;button.classList.toggle('active',active);button.setAttribute('aria-selected',String(active));button.textContent=t(labels[button.dataset.detailTab]||button.dataset.detailTab);});
+  document.getElementById('d-overview-pane')?.classList.toggle('hidden',selected!=='overview');
+  document.getElementById('d-history-pane')?.classList.toggle('hidden',selected!=='history');
+}
+
 // DETAIL
+function sourceDisplayName(source){const names={steam:'Steam',nintendo:'Nintendo',backloggd:'Backloggd',gog:'GOG',epic:'Epic Games',ubisoft:'Ubisoft Connect',ea:'EA app','battle.net':'Battle.net',playstation:'PlayStation',xbox:'Xbox'};return names[String(source?.type||'').toLowerCase()]||source?.type||'Platform';}
+function renderGameSources(game){const box=document.getElementById('d-sources');if(!box)return;box.replaceChildren();const sources=typeof ensureGameSources==='function'?ensureGameSources(game):Array.isArray(game.sources)?game.sources:[];if(!sources.length){const empty=document.createElement('span');empty.className='source-chip';empty.textContent=t('Не підключено');box.appendChild(empty);return;}sources.forEach(source=>{const chip=document.createElement('span');chip.className='source-chip';const name=document.createElement('span');name.textContent=sourceDisplayName(source);chip.appendChild(name);if(source.id){const id=document.createElement('span');id.className='source-chip-id';id.textContent=String(source.id);chip.appendChild(id);}box.appendChild(chip);});}
 function openDetail(id){
   detailId=id;const game=getGame(id);if(!game)return;
+  setDetailTab('overview');
   const isActive=activeGameId===id,elapsed=isActive?Date.now()-activeStart:0,total=(game.playtime||0)+elapsed;
   const sessions=game.sessions||[];
   // Cover banner
@@ -1662,6 +1839,7 @@ function openDetail(id){
   document.getElementById('d-title').textContent=game.title;
   const detailBadge=document.getElementById('d-badge');detailBadge.replaceChildren(createStatusButton(game,true));
   document.getElementById('d-platform').textContent=game.platform?(PLATFORM_ICONS[game.platform]||'')+' '+game.platform:'';
+  renderGameSources(game);
   // Rating picker init
   setRatingUI(game.rating||0);
   // Notes
@@ -1677,6 +1855,7 @@ function openDetail(id){
   log.innerHTML=!sessions.length?`<div style="color:var(--text3);font-size:13px;padding:8px 0">${t('No sessions yet')}</div>`
     :[...sessions].reverse().map(s=>`<div class="session-row"><span class="session-date">${fmtDate(s.start)}</span><span class="session-dur">${fmtTime(s.dur)}</span></div>`).join('');
   renderHltbPanel(game);
+  renderGameHistory(game);
   document.getElementById('detail-modal').classList.remove('hidden');
   maybeLookupHltb(game);
 }
@@ -1717,7 +1896,9 @@ function renderTimeEditorSessions(game){
 
 window.deleteSession = function(idx){
   const game=getGame(timeEditId);if(!game)return;
+  const removed=game.sessions[idx];
   game.sessions.splice(idx,1);
+  addGameHistory(game,'session-delete',{duration:removed?.dur||0},'manual');
   renderTimeEditorSessions(game);
 };
 
@@ -1731,8 +1912,10 @@ window.editSessionDur = function(idx){
   if(parts.length!==3||parts.some(isNaN)){alert('Invalid format. Use HH:MM:SS');return;}
   const newMs=(parts[0]*3600+parts[1]*60+parts[2])*1000;
   if(newMs<=0)return;
+  const previousMs=game.sessions[idx].dur||0;
   game.sessions[idx].dur=newMs;
   game.sessions[idx].end=game.sessions[idx].start+newMs;
+  addGameHistory(game,'session-edit',{from:previousMs,to:newMs},'manual');
   renderTimeEditorSessions(game);
 };
 
@@ -1742,7 +1925,9 @@ function saveTimeEditor(){
   const m=parseInt(document.getElementById('te-min').value)||0;
   const s=parseInt(document.getElementById('te-sec').value)||0;
   const newMs=(h*3600+m*60+s)*1000;
+  const previousMs=Number(game.playtime||0);
   game.playtime=newMs;
+  if(previousMs!==newMs)addGameHistory(game,'playtime-edit',{from:previousMs,to:newMs},'manual');
   // recalc lastPlayed from sessions
   const sessions=game.sessions||[];
   if(sessions.length) game.lastPlayed=Math.max(...sessions.map(s=>s.end));
@@ -1763,7 +1948,7 @@ document.getElementById('as-add').onclick=()=>{
   const start=new Date(dateVal).getTime();
   const dur=(h*3600+m*60)*1000;
   if(!game.sessions)game.sessions=[];
-  game.sessions.push({start,end:start+dur,dur});
+  game.sessions.push({start,end:start+dur,dur,source:'manual'});
   game.sessions.sort((a,b)=>a.start-b.start);
   renderTimeEditorSessions(game);
 };
@@ -1773,14 +1958,22 @@ function renderStatsPage(){
   const totalMs=games.reduce((a,g)=>a+(g.playtime||0),0);
   const allSessions=games.flatMap(g=>g.sessions||[]);
   const currentYear=new Date().getFullYear();
-  const yearSessions=games.flatMap(game=>(game.sessions||[]).filter(session=>new Date(session.start).getFullYear()===currentYear).map(session=>({...session,game})));
-  const yearMs=yearSessions.reduce((sum,session)=>sum+(session.dur||0),0);
+  const recapYears=[...new Set(games.flatMap(game=>[(game.added?new Date(game.added).getFullYear():null),(game.lastPlayed?new Date(game.lastPlayed).getFullYear():null),...(game.sessions||[]).map(session=>new Date(session.start).getFullYear())]).filter(year=>Number.isFinite(year)&&year>1970))].sort((a,b)=>b-a);
+  if(!recapYears.includes(currentYear))recapYears.unshift(currentYear);
+  const savedRecapYear=Number(localStorage.getItem('gv-recap-year-v1'));
+  const recapYear=recapYears.includes(savedRecapYear)?savedRecapYear:currentYear;
+  const yearSessions=games.flatMap(game=>(game.sessions||[]).filter(session=>new Date(session.start).getFullYear()===recapYear).map(session=>({...session,game})));
+  const sessionGameIds=new Set(yearSessions.map(session=>session.game.id));
+  const importedYearMs=games.filter(game=>!sessionGameIds.has(game.id)&&Number(game.playtime)>0&&new Date(game.lastPlayed||game.added||0).getFullYear()===recapYear).reduce((sum,game)=>sum+Number(game.playtime||0),0);
+  const yearMs=yearSessions.reduce((sum,session)=>sum+(session.dur||0),0)+importedYearMs;
   const activeDays=[...new Set(yearSessions.map(session=>new Date(session.start).toISOString().slice(0,10)))].sort();
   let longestStreak=0,streak=0,previousDay=null;
   activeDays.forEach(day=>{const stamp=new Date(`${day}T00:00:00Z`).getTime();streak=previousDay===stamp-86400000?streak+1:1;longestStreak=Math.max(longestStreak,streak);previousDay=stamp;});
   const yearByGame=new Map();yearSessions.forEach(session=>yearByGame.set(session.game.id,(yearByGame.get(session.game.id)||0)+(session.dur||0)));
   const yearTop=[...yearByGame.entries()].sort((a,b)=>b[1]-a[1])[0];const yearTopGame=yearTop?getGame(yearTop[0]):null;
-  document.getElementById('year-recap').innerHTML=`<div class="year-recap-head"><div><div class="year-recap-title">Твій ${currentYear} у іграх</div><div class="year-recap-sub">Підсумок побудований лише з завершених сесій цього року</div></div><div class="year-recap-sub">${activeDays.length?`${activeDays.length} активних днів`:'Першу сесію ще чекаємо'}</div></div><div class="year-recap-grid"><div class="year-recap-stat"><div class="year-recap-label">Награно</div><div class="year-recap-value">${fmtHours(yearMs)}</div></div><div class="year-recap-stat"><div class="year-recap-label">Сесій</div><div class="year-recap-value">${yearSessions.length}</div></div><div class="year-recap-stat"><div class="year-recap-label">Активних днів</div><div class="year-recap-value">${activeDays.length}</div></div><div class="year-recap-stat"><div class="year-recap-label">Найдовша серія</div><div class="year-recap-value">${longestStreak} дн.</div></div><div class="year-recap-stat"><div class="year-recap-label">Гра року</div><div class="year-recap-value small">${yearTopGame?.title||'—'}</div></div></div>`;
+  document.getElementById('year-recap').innerHTML=`<div class="year-recap-head"><div><div class="year-recap-title">Твій ${recapYear} у іграх</div><div class="year-recap-sub">Сесії та імпортований playtime за цей рік</div></div><div style="display:flex;align-items:center;gap:10px"><select class="filter-select" id="recap-year-select" aria-label="Рік recap">${recapYears.map(year=>`<option value="${year}" ${year===recapYear?'selected':''}>${year}</option>`).join('')}</select><button class="btn btn-ghost btn-sm" id="recap-share-btn">Поділитися recap</button><div class="year-recap-sub">${activeDays.length?`${activeDays.length} активних днів`:'Першу сесію ще чекаємо'}</div></div></div><div class="year-recap-grid"><div class="year-recap-stat"><div class="year-recap-label">Награно</div><div class="year-recap-value">${fmtHours(yearMs)}</div></div><div class="year-recap-stat"><div class="year-recap-label">Сесій</div><div class="year-recap-value">${yearSessions.length}</div></div><div class="year-recap-stat"><div class="year-recap-label">Активних днів</div><div class="year-recap-value">${activeDays.length}</div></div><div class="year-recap-stat"><div class="year-recap-label">Найдовша серія</div><div class="year-recap-value">${longestStreak} дн.</div></div><div class="year-recap-stat"><div class="year-recap-label">Гра року</div><div class="year-recap-value small">${yearTopGame?.title||'—'}</div></div></div>`;
+  document.getElementById('recap-share-btn')?.addEventListener('click',async()=>{const text=`PRG Recap ${recapYear}\nНаграно: ${fmtHours(yearMs)}\nСесій: ${yearSessions.length}\nАктивних днів: ${activeDays.length}\nГра року: ${yearTopGame?.title||'—'}`;try{if(navigator.share)await navigator.share({title:`PRG Recap ${recapYear}`,text});else await navigator.clipboard.writeText(text);const button=document.getElementById('recap-share-btn');if(button){button.textContent=t('Скопійовано');setTimeout(()=>button.textContent=t('Поділитися recap'),1600);}}catch(error){if(error?.name!=='AbortError')console.warn('[Recap] Share failed',error);}});
+  document.getElementById('recap-year-select')?.addEventListener('change',event=>{localStorage.setItem('gv-recap-year-v1',event.target.value);renderStatsPage();});
   const avgSess=allSessions.length?allSessions.reduce((a,s)=>a+s.dur,0)/allSessions.length:0;
   const longestSess=allSessions.length?Math.max(...allSessions.map(s=>s.dur)):0;
   const totalH=totalMs/3600000;
@@ -1808,7 +2001,7 @@ function renderStatsPage(){
       <div class="top-game-time">${fmtHours(g.playtime||0)}</div>
     </div>`).join(''):'<div style="color:var(--text3);font-size:13px;padding:1rem 0">No data yet</div>';
   // Status pie
-  const statuses=[{l:'Playing',c:games.filter(g=>g.status==='Playing').length,col:'var(--playing)'},{l:'Backlog',c:games.filter(g=>g.status==='Backlog').length,col:'var(--backlog)'},{l:'Completed',c:games.filter(g=>g.status==='Completed').length,col:'var(--completed)'}];
+  const statuses=[{l:'Playing',c:games.filter(g=>g.status==='Playing').length,col:'var(--playing)'},{l:'Backlog',c:games.filter(g=>g.status==='Backlog').length,col:'var(--backlog)'},{l:'Completed',c:games.filter(g=>g.status==='Completed').length,col:'var(--completed)'},{l:'Quick Play',c:games.filter(g=>g.status==='QuickPlay').length,col:'#f59e0b'}];
   document.getElementById('status-pie').innerHTML=statuses.map(s=>`
     <div class="pie-legend-row"><div class="pie-dot" style="background:${s.col}"></div><div class="pie-legend-label">${s.l}</div><div class="pie-legend-val">${s.c} games</div></div>
     <div class="bar-track" style="margin:-4px 0 6px 20px"><div class="bar-fill" style="width:${games.length?s.c/games.length*100:0}%;background:${s.col}"></div></div>
@@ -1957,6 +2150,9 @@ document.getElementById('add-game-btn').onclick=()=>{if(!guestBlock())openAddMod
 document.getElementById('modal-cancel').onclick=closeModal;
 document.getElementById('modal-save').onclick=()=>{if(!guestBlock())saveModal();};
 document.getElementById('d-close').onclick=closeDetail;
+document.querySelectorAll('.detail-tab').forEach(button=>button.onclick=()=>setDetailTab(button.dataset.detailTab));
+document.getElementById('d-close-history').onclick=closeDetail;
+document.getElementById('detail-modal').addEventListener('wheel',event=>{if(document.getElementById('detail-modal').classList.contains('hidden'))return;const body=document.querySelector('#detail-modal .detail-body');if(!body)return;event.preventDefault();body.scrollTop+=event.deltaY;},{passive:false});
 document.getElementById('d-save-notes').onclick=()=>{
   if(guestBlock())return;
   const game=getGame(detailId);if(!game)return;
@@ -1988,11 +2184,19 @@ document.getElementById('refetch-tags-btn').onclick=()=>{
 };
 document.getElementById('refetch-cancel').onclick=()=>document.getElementById('refetch-modal').classList.add('hidden');
 document.getElementById('refetch-start').onclick=()=>{if(!guestBlock())refetchAllTags();};
+const undoMergeButton=document.getElementById('undo-merge-btn');
+if(undoMergeButton){undoMergeButton.disabled=!localStorage.getItem(profileStorageKey('gv-last-merge-backup'));undoMergeButton.onclick=()=>{if(!guestBlock()&&restoreLastMerge())undoMergeButton.textContent=t('Скасовано');};}
+document.getElementById('find-duplicates-btn')?.addEventListener('click',openDuplicateCenter);
+document.getElementById('duplicate-close')?.addEventListener('click',()=>document.getElementById('duplicate-modal')?.classList.add('hidden'));
+document.getElementById('duplicate-close-bottom')?.addEventListener('click',()=>document.getElementById('duplicate-modal')?.classList.add('hidden'));
 
 document.getElementById('f-bar-year').onchange=e=>{yearFilter=e.target.value==='all'?'all':parseInt(e.target.value);buildFilterBar();renderGrid();updateStats();};
 document.getElementById('f-bar-rating').onchange=e=>{ratingFilter=e.target.value;buildFilterBar();renderGrid();updateStats();};
 document.getElementById('f-bar-platform').onchange=e=>{platformFilter=e.target.value;buildFilterBar();renderGrid();updateStats();};
 document.getElementById('library-search').oninput=e=>{libraryQuery=e.target.value.trim().toLocaleLowerCase();renderGrid();};
+document.getElementById('filter-toggle').onclick=()=>{const bar=document.querySelector('.filter-bar');const button=document.getElementById('filter-toggle');const collapsed=bar.classList.toggle('is-collapsed');button.setAttribute('aria-expanded',String(!collapsed));button.textContent=t(collapsed?'Фільтри':'Сховати фільтри');};
+document.getElementById('quickplay-toggle').checked=showQuickPlay;
+document.getElementById('quickplay-toggle').onchange=e=>{showQuickPlay=e.target.checked;localStorage.setItem('gv-show-quickplay-v1',showQuickPlay?'1':'0');buildFilterBar();renderGrid();updateStats();};
 document.getElementById('library-sort').value=librarySort;document.getElementById('library-sort').onchange=e=>{librarySort=e.target.value;localStorage.setItem('gv-library-sort-v1',librarySort);renderGrid();};
 document.querySelectorAll('.platform-opt').forEach(opt=>opt.onclick=()=>setPlatformUI(opt.dataset.val));
 document.querySelectorAll('.rating-btn').forEach(btn=>btn.onclick=()=>setRatingUI(parseInt(btn.dataset.val)));
@@ -2092,10 +2296,11 @@ async function syncNintendoLibrary({showIgnored=false,announce=true}={}){
     incoming.forEach(item=>{
       const cleanTitle=value=>String(value||'').toLocaleLowerCase().replace(/\bnintendo\s+switch\s*2?\s+edition\b|\bswitch\s*2?\s+edition\b/gi,'').replace(/[^\p{L}\p{N}]+/gu,'').trim();
       const normalizedIncoming=cleanTitle(item.title);
-      const game=games.find(g=>g.nintendoTitleId===item.id)||games.find(g=>{const normalizedGame=cleanTitle(g.title);return (g.tags?.includes('Nintendo Sync')||g.platform?.startsWith('Nintendo'))&&normalizedGame&&(normalizedGame===normalizedIncoming||normalizedGame.includes(normalizedIncoming)||normalizedIncoming.includes(normalizedGame));});
+      const game=games.find(g=>g.nintendoTitleId===item.id)||games.find(g=>{const normalizedGame=cleanTitle(g.title);const hasExternalSource=g.backloggdGameId||g.sources?.some(source=>source.type==='backloggd'||source.type==='nintendo');return (hasExternalSource||g.tags?.includes('Nintendo Sync')||g.platform?.startsWith('Nintendo'))&&normalizedGame&&(normalizedGame===normalizedIncoming||normalizedGame.includes(normalizedIncoming)||normalizedIncoming.includes(normalizedGame));});
       if(!game){if(showIgnored||!nintendoIgnoredIds.has(item.id))pending.push(item);return;}
       matched++;
       if(!game.nintendoTitleId)game.nintendoTitleId=item.id;
+      addGameSource(game,{type:'nintendo',id:String(item.id),platform:item.platform||'Nintendo Switch'});
       const hasBaseline=game.nintendoLastSeenMinutes!==undefined&&game.nintendoLastSeenMinutes!==null;
       const previous=Number(game.nintendoLastSeenMinutes||0);const current=Math.max(previous,item.minutes||0);
       const playedAt=Date.parse(item.lastPlayedAt||'');
@@ -2223,6 +2428,39 @@ async function openSteamImport(source){
   }catch(error){if(owner===currentUser?.uid){list.textContent=error.message||'Не вдалося прочитати Steam.';add.disabled=true;}}
 }
 function showSteamOnboarding(){if(!currentUser||!syncActive)return;document.getElementById('steam-onboarding-modal').classList.remove('hidden');document.getElementById('steam-onboarding-url').focus();}
+let backloggdImportGames=[];
+function normalizeBackloggdTitle(value){return String(value||'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase().replace(/[^a-z0-9а-яёіїєґ]+/gi,' ').replace(/\s+/g,' ').replace(/\s+(nintendo switch 2 edition|nintendo switch edition|switch 2 edition|switch edition|complete edition|game of the year edition|goty edition|definitive edition|deluxe edition|ultimate edition|gold edition|enhanced edition|director s cut|remastered edition)\s*$/,'').trim();}
+function backloggdGameTitleKey(value){return normalizeBackloggdTitle(value).replace(/\b(nintendo switch 2 edition|nintendo switch edition|switch 2 edition|switch edition|complete edition|game of the year edition|goty edition|definitive edition|deluxe edition|ultimate edition|gold edition|enhanced edition|director s cut|remastered edition)\b/g,' ').replace(/\s+/g,' ').trim();}
+function mapBackloggdStatus(value){const status=String(value||'').toLocaleLowerCase();if(/wish|want|shelf|abandon|dropped|retired/.test(status))return null;if(/playing|currently|progress/.test(status))return 'Playing';if(/played|finish|complete|done|beat/.test(status))return 'Completed';if(/backlog|plan|queue|unplayed/.test(status))return 'Backlog';return 'Backlog';}
+function backloggdCoverUrl(value){const cover=String(value||'').trim();if(!cover)return '';if(cover.startsWith('//'))return `https:${cover}`;if(cover.startsWith('/'))return `https://backloggd.com${cover}`;return cover;}
+function updateBackloggdImportButton(){const selected=[...document.querySelectorAll('#backloggd-import-list .backloggd-import-row input:not(:disabled):checked')].length;const button=document.getElementById('backloggd-import-add');button.disabled=!selected;button.textContent=`${t('Додати вибрані')} (${selected})`;}
+function filterBackloggdImport(){const query=document.getElementById('backloggd-import-search').value.trim().toLocaleLowerCase();const rows=[...document.querySelectorAll('#backloggd-import-list .backloggd-import-row')];let shown=0;rows.forEach(row=>{const match=!query||row.dataset.search.includes(query);row.classList.toggle('filtered-out',!match);if(match)shown++;});document.getElementById('backloggd-import-match').textContent=rows.length?`${t('Показано')} ${shown} ${t('з')} ${rows.length}`:'';}
+function setBackloggdImportSelection(checked){document.querySelectorAll('#backloggd-import-list .backloggd-import-row:not(.filtered-out) input:not(:disabled)').forEach(input=>{input.checked=checked;});updateBackloggdImportButton();}
+function renderBackloggdImportRows(){const list=document.getElementById('backloggd-import-list');list.innerHTML='';const existingTitles=new Set(games.map(game=>normalizeBackloggdTitle(game.title)));const existingIds=new Set(games.map(game=>String(game.backloggdGameId||'')).filter(Boolean));backloggdImportGames.forEach((game,index)=>{const mapped=mapBackloggdStatus(game.status);if(!mapped)return;const exists=existingIds.has(String(game.id||''))||existingTitles.has(normalizeBackloggdTitle(game.title));const row=document.createElement('label');row.className=`backloggd-import-row${exists?' already-added':''}`;row.dataset.search=[game.title,game.platform,game.status].filter(Boolean).join(' ').toLocaleLowerCase();const cover=document.createElement('img');cover.className='backloggd-import-cover';cover.alt='';cover.loading='lazy';cover.src=backloggdCoverUrl(game.cover);cover.onerror=()=>{cover.style.visibility='hidden';};const check=document.createElement('input');check.className='backloggd-import-check';check.type='checkbox';check.checked=!exists;check.dataset.index=String(index);check.dataset.existing=exists?'1':'0';const info=document.createElement('div');info.className='backloggd-import-info';const name=document.createElement('div');name.className='backloggd-import-name';name.textContent=game.title;const meta=document.createElement('div');meta.className='backloggd-import-meta';const metaParts=[game.status||'Backlog',game.platform].filter(Boolean);if(Number.isFinite(Number(game.rating)))metaParts.push(`${Number(game.rating).toFixed(1)} / 5`);meta.textContent=metaParts.join(' · ');info.append(name,meta);if(exists){const existing=document.createElement('div');existing.className='backloggd-import-existing';existing.textContent=`${t('Вже є у лаунчері')} · RAWG можна оновити`;info.append(existing);}const select=document.createElement('select');select.className='form-select';select.disabled=false;select.innerHTML='<option value="Backlog">Backlog</option><option value="Playing">Playing</option><option value="Completed">Completed</option>';select.value=mapped;row.append(cover,check,info,select);check.addEventListener('change',updateBackloggdImportButton);list.appendChild(row);});if(!list.children.length)list.innerHTML=`<div class="sr-msg">${t('Ігор не знайдено')}</div>`;filterBackloggdImport();updateBackloggdImportButton();translateDom(list);}
+async function openBackloggdImport(){if(guestBlock())return;const modal=document.getElementById('backloggd-import-modal');const sourceInput=document.getElementById('backloggd-profile-url');const urlInput=document.getElementById('backloggd-import-url');urlInput.value=sourceInput.value.trim();document.getElementById('settings-modal').classList.add('hidden');modal.classList.remove('hidden');document.getElementById('backloggd-import-status').textContent=t('Встав URL профілю, щоб почати.');document.getElementById('backloggd-import-list').innerHTML=`<div class="sr-msg">${t('Ще не завантажено.')}</div>`;document.getElementById('backloggd-import-add').disabled=true;urlInput.focus();}
+async function loadBackloggdImport(){if(guestBlock())return;const urlInput=document.getElementById('backloggd-import-url');const status=document.getElementById('backloggd-import-status');const loadButton=document.getElementById('backloggd-import-load');const list=document.getElementById('backloggd-import-list');const url=urlInput.value.trim();if(!url){status.textContent='Встав посилання на публічний профіль Backloggd.';urlInput.focus();return;}loadButton.disabled=true;status.textContent='Завантажуємо публічний профіль Backloggd…';list.innerHTML='<div class="sr-msg">Читаємо ігри…</div>';try{const result=await window.launcher.importBackloggdProfile(url);if(!result?.ok)throw new Error(result?.error||'Не вдалося прочитати Backloggd.');backloggdImportGames=Array.isArray(result.games)?result.games:[];document.getElementById('backloggd-profile-url').value=url;localStorage.setItem(profileStorageKey('gv-backloggd-profile-url'),url);const skipped=backloggdImportGames.filter(game=>!mapBackloggdStatus(game.status)).length;status.textContent=`${result.username}: ${backloggdImportGames.length} ігор${skipped?` · пропущено ${skipped} Wishlist/інших`:''}`;document.getElementById('backloggd-import-title').textContent=`Backloggd · ${result.username}`;renderBackloggdImportRows();}catch(error){backloggdImportGames=[];status.textContent=error.message||'Не вдалося прочитати Backloggd.';list.innerHTML=`<div class="sr-msg">${status.textContent}</div>`;document.getElementById('backloggd-import-add').disabled=true;}finally{loadButton.disabled=false;translateDom(document.getElementById('backloggd-import-modal'));}}
+document.getElementById('backloggd-import-open').onclick=openBackloggdImport;
+document.getElementById('backloggd-refresh-covers').onclick=async()=>{if(guestBlock())return;const button=document.getElementById('backloggd-refresh-covers');const targets=games.filter(game=>game.backloggdGameId);if(!targets.length){button.textContent=t('Немає Backloggd-ігор');setTimeout(()=>button.textContent=t('Оновити RAWG-обкладинки'),1800);return;}button.disabled=true;button.textContent=t('Оновлюємо…');const updated=await enrichBackloggdCovers(targets);button.disabled=false;button.textContent=`RAWG: ${updated}/${targets.length}`;setTimeout(()=>button.textContent=t('Оновити RAWG-обкладинки'),2200);};
+document.getElementById('backloggd-import-load').onclick=loadBackloggdImport;
+document.getElementById('backloggd-import-load').addEventListener('click',()=>setTimeout(()=>enrichBackloggdPreviewCovers(),900));
+document.getElementById('backloggd-import-url').addEventListener('keydown',event=>{if(event.key==='Enter')loadBackloggdImport();});
+document.getElementById('backloggd-import-search').addEventListener('input',filterBackloggdImport);
+document.getElementById('backloggd-import-select-all').onclick=()=>setBackloggdImportSelection(true);
+document.getElementById('backloggd-import-clear-all').onclick=()=>setBackloggdImportSelection(false);
+document.getElementById('backloggd-import-skip').onclick=()=>document.getElementById('backloggd-import-modal').classList.add('hidden');
+async function enrichBackloggdPreviewCovers(){const rows=[...document.querySelectorAll('#backloggd-import-list .backloggd-import-row')];for(const row of rows){const source=backloggdImportGames[Number(row.querySelector('.backloggd-import-check')?.dataset.index)];if(!source?.title||source.rawgCover)continue;try{const data=await searchRAWG(source.title);const match=bestRawgMatch(source.title,data?.results);if(match?.background_image){source.rawgCover=match.background_image;const image=row.querySelector('.backloggd-import-cover');if(image)image.src=match.background_image;}await new Promise(resolve=>setTimeout(resolve,180));}catch{}}}
+function mergeGameRecord(primary,duplicate){if(!primary||!duplicate||primary===duplicate)return primary;ensureGameSources(primary);ensureGameSources(duplicate);(duplicate.sources||[]).forEach(source=>addGameSource(primary,source));primary.platforms=[...new Set([...(primary.platforms||[]),...(duplicate.platforms||[]),primary.platform,duplicate.platform].filter(Boolean))];if(!primary.steamAppId&&duplicate.steamAppId)primary.steamAppId=duplicate.steamAppId;if(!primary.nintendoTitleId&&duplicate.nintendoTitleId)primary.nintendoTitleId=duplicate.nintendoTitleId;if(primary.steamLastSeenMinutes==null&&duplicate.steamLastSeenMinutes!=null)primary.steamLastSeenMinutes=duplicate.steamLastSeenMinutes;if(primary.nintendoLastSeenMinutes==null&&duplicate.nintendoLastSeenMinutes!=null)primary.nintendoLastSeenMinutes=duplicate.nintendoLastSeenMinutes;if(!primary.backloggdGameId&&duplicate.backloggdGameId){primary.backloggdGameId=duplicate.backloggdGameId;primary.backloggdUrl=duplicate.backloggdUrl;primary.backloggdCover=duplicate.backloggdCover;}if((duplicate.rawgId&&!primary.rawgId)||(!primary.cover&&duplicate.cover)) {primary.cover=duplicate.cover;primary.rawgId=duplicate.rawgId||primary.rawgId;}if(!primary.rating&&duplicate.rating)primary.rating=duplicate.rating;if(primary.status==='Backlog'&&duplicate.status&&duplicate.status!=='Backlog')primary.status=duplicate.status;primary.playtime=Math.max(Number(primary.playtime||0),Number(duplicate.playtime||0));primary.lastPlayed=Math.max(Number(primary.lastPlayed||0),Number(duplicate.lastPlayed||0))||null;const sessions=[...(primary.sessions||[]),...(duplicate.sessions||[])];const sessionKeys=new Set();primary.sessions=sessions.filter(session=>{const key=`${session.start||0}:${session.end||0}:${session.source||''}`;if(sessionKeys.has(key))return false;sessionKeys.add(key);return true;}).sort((a,b)=>(a.start||0)-(b.start||0));const history=[...(primary.history||[]),...(duplicate.history||[])];const historyKeys=new Set();primary.history=history.filter(event=>{const key=event.id||`${event.kind}:${event.at}:${event.source||''}`;if(historyKeys.has(key))return false;historyKeys.add(key);return true;}).sort((a,b)=>(a.at||0)-(b.at||0));return primary;}
+function mergeDuplicateGames(){const before=games.map(game=>JSON.parse(JSON.stringify(game)));const bucket=new Map();const merged=[];games.forEach(game=>{const key=normalizeBackloggdTitle(game.title);if(!key){merged.push(game);return;}const primary=bucket.get(key);if(!primary){bucket.set(key,game);merged.push(game);return;}addGameHistory(primary,'merge',{title:game.title},'library');mergeGameRecord(primary,game);});if(merged.length!==games.length){games=merged;localStorage.setItem(profileStorageKey('gv-last-merge-backup'),JSON.stringify(before));const undo=document.getElementById('undo-merge-btn');if(undo)undo.disabled=false;}}
+function restoreLastMerge(){try{const raw=localStorage.getItem(profileStorageKey('gv-last-merge-backup'));if(!raw)return false;const restored=JSON.parse(raw);if(!Array.isArray(restored))return false;games=restored;localStorage.removeItem(profileStorageKey('gv-last-merge-backup'));skipMergeOnce=true;save();pushToFb();buildFilterBar();renderGrid();updateStats();const undo=document.getElementById('undo-merge-btn');if(undo)undo.disabled=true;return true;}catch(error){console.warn('[Merge] Could not restore backup',error);return false;}}
+function getDuplicateGroups(){const groups=new Map();games.forEach(game=>{const key=normalizeBackloggdTitle(game.title);if(!key)return;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(game);});return [...groups.values()].filter(group=>group.length>1);}
+function mergeDuplicateGroup(group){if(!Array.isArray(group)||group.length<2)return;localStorage.setItem(profileStorageKey('gv-last-merge-backup'),JSON.stringify(games));const primary=group[0];group.slice(1).forEach(duplicate=>{addGameHistory(primary,'merge',{title:duplicate.title},'library');mergeGameRecord(primary,duplicate);games=games.filter(game=>game!==duplicate);});save();pushToFb();buildFilterBar();renderGrid();updateStats();const undo=document.getElementById('undo-merge-btn');if(undo)undo.disabled=false;renderDuplicateGroups();}
+function renderDuplicateGroups(){const list=document.getElementById('duplicate-list');const summary=document.getElementById('duplicate-summary');if(!list||!summary)return;const groups=getDuplicateGroups();summary.textContent=groups.length?`Знайдено ${groups.length} груп дублікатів. Перша картка в групі буде основною.`:'Дублікатів не знайдено.';list.innerHTML='';if(!groups.length){list.innerHTML=`<div class="empty-state" style="padding:2rem">${t('Дублікатів не знайдено')}</div>`;return;}groups.forEach((group,index)=>{const card=document.createElement('div');card.className='duplicate-group';const title=document.createElement('div');title.className='duplicate-group-title';title.textContent=group[0].title;card.appendChild(title);group.forEach((game,gameIndex)=>{const row=document.createElement('div');row.className='duplicate-game-row';const info=document.createElement('div');const name=document.createElement('div');name.textContent=`${gameIndex===0?'Основна: ':''}${game.title}`;const meta=document.createElement('div');meta.className='duplicate-game-meta';meta.textContent=[game.platform,...(game.sources||[]).map(source=>sourceDisplayName(source)),`${(game.sessions||[]).length} ${t('сесій')}`].filter(Boolean).join(' · ');info.append(name,meta);row.appendChild(info);card.appendChild(row);});const merge=document.createElement('button');merge.type='button';merge.className='btn btn-primary btn-sm';merge.textContent=t('Об’єднати');merge.onclick=()=>mergeDuplicateGroup(group);card.appendChild(merge);list.appendChild(card);});translateDom(list);}
+function openDuplicateCenter(){document.getElementById('settings-modal')?.classList.add('hidden');document.getElementById('duplicate-modal')?.classList.remove('hidden');renderDuplicateGroups();}
+function ensureGameSources(game){if(!game)return[];if(!Array.isArray(game.sources))game.sources=[];if(game.steamAppId&&!game.sources.some(source=>source.type==='steam'))game.sources.push({type:'steam',id:String(game.steamAppId),platform:'PC'});if(game.nintendoTitleId&&!game.sources.some(source=>source.type==='nintendo'))game.sources.push({type:'nintendo',id:String(game.nintendoTitleId),platform:game.platform?.startsWith('Nintendo')?game.platform:'Nintendo Switch'});if(!Array.isArray(game.platforms))game.platforms=game.platform?[game.platform]:[];return game.sources;}
+function addGameSource(game,source){if(!game||!source?.type)return;const sources=ensureGameSources(game);if(!sources.some(item=>item.type===source.type&&String(item.id||'')===String(source.id||'')))sources.push(source);if(source.platform&&!game.platforms.includes(source.platform))game.platforms.push(source.platform);}
+function bestRawgMatch(title,results){const key=normalizeBackloggdTitle(title);const words=new Set(key.split(' ').filter(word=>word.length>1));return [...(results||[])].sort((a,b)=>{const score=item=>{const itemWords=new Set(normalizeBackloggdTitle(item.name).split(' ').filter(Boolean));const overlap=[...words].filter(word=>itemWords.has(word)).length;return overlap*10-Math.abs(itemWords.size-words.size)};return score(b)-score(a);})[0]||null;}
+async function enrichBackloggdCovers(targets){const unique=[...new Set(targets||[])].filter(game=>game?.title);let updated=0;for(const game of unique){try{const data=await searchRAWG(game.title);const match=bestRawgMatch(game.title,data?.results);if(match?.background_image){game.cover=match.background_image;game.rawgId=match.id;updated++;}else if(!game.cover&&game.backloggdCover)game.cover=game.backloggdCover;await new Promise(resolve=>setTimeout(resolve,180));}catch{if(!game.cover&&game.backloggdCover)game.cover=game.backloggdCover;}}if(updated){save();pushToFb();renderGrid();updateStats();}return updated;}
+document.getElementById('backloggd-import-add').onclick=async()=>{if(guestBlock())return;const importRatings=document.getElementById('backloggd-import-ratings').checked;const importPlatforms=document.getElementById('backloggd-import-platforms').checked;let added=0,merged=0;const targets=[];document.querySelectorAll('#backloggd-import-list .backloggd-import-row').forEach(row=>{const checkbox=row.querySelector('input[type="checkbox"]');if(!checkbox?.checked||checkbox.disabled)return;const source=backloggdImportGames[Number(checkbox.dataset.index)];if(!source)return;const titleKey=normalizeBackloggdTitle(source.title);const existing=games.find(game=>String(game.backloggdGameId||'')===String(source.id||'')||normalizeBackloggdTitle(game.title)===titleKey);const selectedStatus=row.querySelector('select')?.value||mapBackloggdStatus(source.status)||'Backlog';const sourceRecord={type:'backloggd',id:source.id?String(source.id):null,url:source.href?backloggdCoverUrl(source.href):null,platform:source.platform||null};if(existing){addGameSource(existing,sourceRecord);existing.backloggdGameId=source.id||existing.backloggdGameId||null;existing.backloggdUrl=sourceRecord.url||existing.backloggdUrl||null;existing.backloggdLastImportedAt=Date.now();if(importRatings&&Number.isFinite(Number(source.rating)))existing.rating=Number(source.rating);if(existing.status!==selectedStatus){const previous=existing.status;existing.status=selectedStatus;addGameHistory(existing,'status',{from:previous,to:selectedStatus},'Backloggd');}addGameHistory(existing,'import',null,'Backloggd');targets.push(existing);merged++;return;}const now=Date.now();const created={id:uid(),title:source.title,status:selectedStatus,platform:importPlatforms&&source.platform?source.platform:'PC',platforms:importPlatforms&&source.platform?[source.platform]:['PC'],cover:null,backloggdCover:backloggdCoverUrl(source.cover)||null,notes:null,genres:[],tags:['Backloggd Import'],rating:importRatings&&Number.isFinite(Number(source.rating))?Number(source.rating):null,steamAppId:null,nintendoTitleId:null,backloggdGameId:source.id||null,backloggdUrl:sourceRecord.url,backloggdLastImportedAt:now,sources:[sourceRecord],playtime:0,sessions:[],lastPlayed:null,added:now};games.unshift(created);addGameHistory(created,'added',null,'Backloggd',now);targets.push(created);added++;});if(added||merged){save();pushToFb();buildFilterBar();renderGrid();updateStats();}const modal=document.getElementById('backloggd-import-modal');document.getElementById('backloggd-import-status').textContent=`Додано ${added}, об’єднано з наявними ${merged}. Підтягуємо RAWG-обкладинки…`;modal.classList.add('hidden');const updated=await enrichBackloggdCovers(targets);document.getElementById('backloggd-import-status').textContent=`RAWG-обкладинки оновлено: ${updated} з ${targets.length}`;};
 document.getElementById('steam-onboarding-import').onclick=async()=>{const input=document.getElementById('steam-onboarding-url'),error=document.getElementById('steam-onboarding-error'),value=input.value.trim();if(!value){error.textContent='Встав посилання на Steam-профіль.';return;}document.getElementById('steam-profile-url').value=value;localStorage.setItem(profileStorageKey('gv-steam-profile-url'),value);updateSteamProfileUI();localStorage.setItem(profileStorageKey('gv-steam-onboarding-done-v1'),'1');document.getElementById('steam-onboarding-modal').classList.add('hidden');await openSteamImport('profile');};
 document.getElementById('steam-onboarding-skip').onclick=()=>{localStorage.setItem(profileStorageKey('gv-steam-onboarding-done-v1'),'1');document.getElementById('steam-onboarding-modal').classList.add('hidden');};
 document.getElementById('steam-onboarding-url').addEventListener('keydown',event=>{if(event.key==='Enter')document.getElementById('steam-onboarding-import').click();});
@@ -2271,9 +2509,10 @@ document.getElementById('backlog-import-search').addEventListener('input',filter
 document.getElementById('backlog-import-select-all').onclick=()=>setBacklogImportSelection(true,true);
 document.getElementById('backlog-import-clear-all').onclick=()=>setBacklogImportSelection(false,true);
 document.getElementById('backlog-import-skip').onclick=()=>document.getElementById('backlog-import-modal').classList.add('hidden');
-document.getElementById('backlog-import-add').onclick=()=>{const rows=[...document.querySelectorAll('#backlog-import-list .backlog-import-row')];let added=0;rows.forEach(row=>{const checkbox=row.querySelector('input[type="checkbox"]');if(!checkbox?.checked)return;const appId=Number(checkbox.dataset.appid);if(games.some(game=>Number(game.steamAppId)===appId))return;const source=backlogImportGames.find(game=>game.appId===appId);games.unshift({id:uid(),title:source?.title||`Steam game #${appId}`,status:row.querySelector('select').value,platform:'PC',cover:source?.cover||null,notes:null,genres:[],tags:['Steam Import'],rating:null,steamAppId:appId,playtime:Math.max(0,Number(source?.minutes)||0)*60000,sessions:[],lastPlayed:null,added:Date.now()});added++;});if(added){save();pushToFb();buildFilterBar();renderGrid();updateStats();}document.getElementById('backlog-import-modal').classList.add('hidden');};
-['game-modal','detail-modal','time-modal','refetch-modal','backlog-import-modal','settings-modal','steam-onboarding-modal'].forEach(id=>{document.getElementById(id).addEventListener('click',e=>{if(e.target===e.currentTarget)document.getElementById(id).classList.add('hidden');});});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')['game-modal','detail-modal','time-modal','refetch-modal','backlog-import-modal','settings-modal','steam-onboarding-modal'].forEach(id=>document.getElementById(id).classList.add('hidden'));});
+function mergeSteamPlaytime(game,source,wasSteamLinked){const minutes=Number(source?.minutes);if(!Number.isFinite(minutes)||minutes<0)return;if(game.steamLastSeenMinutes===undefined||game.steamLastSeenMinutes===null){game.steamLastSeenMinutes=minutes;if(!wasSteamLinked)game.playtime=Math.max(0,Number(game.playtime||0))+minutes*60000;return;}const previous=Number(game.steamLastSeenMinutes||0);if(minutes>previous){game.playtime=Math.max(0,Number(game.playtime||0))+(minutes-previous)*60000;game.steamLastSeenMinutes=minutes;}}
+document.getElementById('backlog-import-add').onclick=()=>{const rows=[...document.querySelectorAll('#backlog-import-list .backlog-import-row')];let added=0,merged=0;rows.forEach(row=>{const checkbox=row.querySelector('input[type="checkbox"]');if(!checkbox?.checked)return;const appId=Number(checkbox.dataset.appid);const source=backlogImportGames.find(game=>game.appId===appId);if(!source)return;const sourceTitle=String(source.title||'');const canMatchTitle=sourceTitle&&!/^Steam game #\d+$/i.test(sourceTitle);const titleKey=canMatchTitle?normalizeBackloggdTitle(sourceTitle):'';const existing=games.find(game=>Number(game.steamAppId)===appId||(titleKey&&normalizeBackloggdTitle(game.title)===titleKey));const selectedStatus=row.querySelector('select')?.value||'Backlog';if(existing){const wasSteamLinked=Boolean(existing.steamAppId);existing.steamAppId=appId;existing.steamLastSeenMinutes=existing.steamLastSeenMinutes===undefined&&wasSteamLinked?Number(source.minutes||0):existing.steamLastSeenMinutes;existing.platforms=Array.isArray(existing.platforms)?existing.platforms:['PC'];if(!existing.platforms.includes('PC'))existing.platforms.push('PC');addGameSource(existing,{type:'steam',id:String(appId),platform:'PC'});if(!existing.cover&&source.cover)existing.cover=source.cover;mergeSteamPlaytime(existing,source,wasSteamLinked);if(existing.status!==selectedStatus){const previous=existing.status;existing.status=selectedStatus;addGameHistory(existing,'status',{from:previous,to:selectedStatus},'Steam Import');}addGameHistory(existing,'import',null,'Steam Import');merged++;return;}const now=Date.now();const created={id:uid(),title:sourceTitle||`Steam game #${appId}`,status:selectedStatus,platform:'PC',platforms:['PC'],cover:source.cover||null,notes:null,genres:[],tags:['Steam Import'],rating:null,steamAppId:appId,steamLastSeenMinutes:Number.isFinite(Number(source.minutes))?Number(source.minutes):null,sources:[{type:'steam',id:String(appId),platform:'PC'}],playtime:Math.max(0,Number(source.minutes)||0)*60000,sessions:[],lastPlayed:null,added:now};games.unshift(created);addGameHistory(created,'added',null,'Steam Import',now);added++;});if(added||merged){save();pushToFb();buildFilterBar();renderGrid();updateStats();}document.getElementById('backlog-import-modal').classList.add('hidden');};
+['game-modal','detail-modal','time-modal','refetch-modal','backlog-import-modal','backloggd-import-modal','steam-discovered-modal','settings-modal','steam-onboarding-modal'].forEach(id=>{document.getElementById(id).addEventListener('click',e=>{if(e.target===e.currentTarget)document.getElementById(id).classList.add('hidden');});});
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(document.getElementById('quick-status-menu')){closeQuickStatusMenu();return;}['game-modal','detail-modal','time-modal','refetch-modal','backlog-import-modal','backloggd-import-modal','steam-discovered-modal','settings-modal','steam-onboarding-modal'].forEach(id=>document.getElementById(id).classList.add('hidden'));});
 document.addEventListener('visibilitychange',()=>{ if(!document.hidden&&activeGameId&&activeStart){clearInterval(timerInterval);tickTimer();timerInterval=setInterval(tickTimer,500);} });
 window.addEventListener('beforeunload',()=>{if(activeGameId)stopTimer(false);});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&nintendoPendingNotice.length){showNintendoToast(nintendoPendingNotice);nintendoPendingNotice=[];localStorage.removeItem(profileStorageKey('gv-nintendo-pending-notice-v1'));}});
@@ -2283,8 +2522,9 @@ if(activeGameId&&activeStart){clearInterval(timerInterval);timerInterval=setInte
 buildFilterBar(); updateSessionBar(); updateStats(); renderGrid();
 
 // --- PRG ACCOUNT ---
-function showLogin(){const overlay=document.getElementById('login-overlay');overlay.style.display='flex';requestAnimationFrame(()=>overlay.style.opacity='1');}
-function hideLogin(){const overlay=document.getElementById('login-overlay');overlay.style.opacity='0';setTimeout(()=>overlay.style.display='none',300);}
+let loginHideTimer=null;
+function showLogin(){const overlay=document.getElementById('login-overlay');if(loginHideTimer){clearTimeout(loginHideTimer);loginHideTimer=null;}overlay.style.display='flex';overlay.style.pointerEvents='auto';document.getElementById('auth-email').value='';document.getElementById('auth-password').value='';setAuthMode('signin');requestAnimationFrame(()=>{overlay.style.opacity='1';document.getElementById('auth-email')?.focus();});}
+function hideLogin(){const overlay=document.getElementById('login-overlay');if(loginHideTimer)clearTimeout(loginHideTimer);overlay.style.opacity='0';loginHideTimer=setTimeout(()=>{overlay.style.display='none';overlay.style.pointerEvents='none';loginHideTimer=null;},300);}
 function showAuthError(message){const el=document.getElementById('login-error');el.textContent=message;el.style.display='block';}
 function setAuthMode(mode){authMode=mode;const create=mode==='signup';document.getElementById('auth-submit-btn').textContent=t(create?'Створити акаунт':'Увійти');document.getElementById('auth-mode-btn').textContent=t(create?'У мене вже є акаунт':'Створити акаунт');document.getElementById('login-copy').textContent=t(create?'Створи PRG-акаунт — твоя бібліотека та сайт будуть тільки твоїми.':'Увійди, щоб синхронізувати бібліотеку та отримати власну сторінку статистики.');document.getElementById('auth-password').autocomplete=create?'new-password':'current-password';document.getElementById('login-error').style.display='none';}
 async function submitAuth(){const email=document.getElementById('auth-email').value.trim(),password=document.getElementById('auth-password').value,button=document.getElementById('auth-submit-btn');if(!fbAuth){showAuthError('Firebase ще завантажується. Зачекай кілька секунд і спробуй ще раз.');return;}if(!email||!password){showAuthError('Введи email і пароль.');return;}button.disabled=true;try{const api=window._fbImports;if(authMode==='signup')await api.createUserWithEmailAndPassword(fbAuth,email,password);else await api.signInWithEmailAndPassword(fbAuth,email,password);}catch(error){const messages={'auth/email-already-in-use':'Цей email уже має акаунт. Спробуй увійти.','auth/invalid-credential':'Невірний email або пароль.','auth/weak-password':'Пароль має містити щонайменше 6 символів.','auth/invalid-email':'Перевір email.','auth/network-request-failed':'Немає з’єднання з Firebase.','auth/too-many-requests':'Забагато спроб. Зачекай трохи.','auth/operation-not-allowed':'Цей спосіб входу не увімкнено у Firebase Console.'};showAuthError(messages[error.code]||`Помилка входу (${error.code||'unknown'}).`);console.error('[Auth]',error);}finally{button.disabled=false;}}

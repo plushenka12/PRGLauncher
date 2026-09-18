@@ -20,6 +20,9 @@ contextBridge.exposeInMainWorld('launcher', {
   searchHltb: (query) => ipcRenderer.invoke('hltb:search', query),
   openHltbGame: (url) => ipcRenderer.invoke('hltb:openGame', url),
 
+  // Backloggd public-profile importer (no password or private data)
+  importBackloggdProfile: (url) => ipcRenderer.invoke('backloggd:importProfile', url),
+
   // Nintendo (experimental connector)
   setNintendoProfile: (uid) => ipcRenderer.invoke('nintendo:setProfile', uid),
   getSteamImportGames: () => ipcRenderer.invoke('steam:importGames'),

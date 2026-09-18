@@ -44,6 +44,7 @@ let hltbSearchInFlight = null
 let hltbLastRequestAt = 0
 let hltbCredentials = null
 let hltbCredentialsExpiry = 0
+let backloggdImportWindow = null
 const launchedAtLogin = process.argv.includes('--hidden')
 const opacityAnimations = new Map()
 
@@ -223,6 +224,15 @@ function startSteamSilent() {
 }
 
 function hideSteamWindow() {
+  if (process.platform === 'darwin') {
+    // macOS requires the user to grant Automation access the first time this
+    // runs. We only call this from launcher-initiated Steam flows, so manually
+    // opened Steam is never hidden by background polling.
+    execFile('/usr/bin/osascript', ['-e', 'tell application "Steam" to hide'], { windowsHide: true }, error => {
+      if (error) console.warn('[Steam] macOS hide unavailable:', error.message)
+    })
+    return
+  }
   // macOS needs Accessibility permission for controlling another app's window.
   // Do not request that intrusive permission just to hide Steam; launching via
   // steam:// stays supported and the user remains in control of Steam's UI.
@@ -571,6 +581,7 @@ ipcMain.handle('steam:requestInstall', async (_, appId) => {
   if (!/^\d+$/.test(normalizedAppId)) return { action: 'error', message: 'Invalid Steam App ID' }
   await shell.openExternal(`steam://install/${normalizedAppId}`)
   mainWindow?.focus()
+  ;[500, 1500, 3000].forEach(delay => setTimeout(hideSteamWindow, delay))
   return { action: 'requested' }
 })
 
@@ -637,6 +648,96 @@ ipcMain.handle('hltb:openGame', async (_, url) => {
     await shell.openExternal(parsed.toString())
     return { ok: true }
   } catch { return { ok: false } }
+})
+
+// Backloggd exposes public profile pages but does not provide a stable public
+// API.  The importer uses a hidden, sandboxed browser window so the same
+// server-rendered cards a user sees are parsed without asking for a password,
+// cookie or private profile access.
+function normalizeBackloggdUrl(input) {
+  const value = String(input || '').trim()
+  if (!value) throw new Error('Встав посилання на публічний профіль Backloggd.')
+  let parsed
+  try { parsed = new URL(value.includes('://') ? value : `https://${value}`) } catch { throw new Error('Посилання Backloggd має неправильний формат.') }
+  if (parsed.protocol !== 'https:' || !['backloggd.com', 'www.backloggd.com'].includes(parsed.hostname.toLowerCase())) throw new Error('Потрібне посилання https://backloggd.com/u/…')
+  const match = parsed.pathname.match(/^\/u\/([^/]+)/i)
+  if (!match) throw new Error('Потрібне посилання на публічний профіль: backloggd.com/u/username')
+  const username = decodeURIComponent(match[1])
+  if (!/^[a-z0-9_-]{1,40}$/i.test(username)) throw new Error('Ім’я профілю Backloggd має неправильний формат.')
+  return { username, url: `https://backloggd.com/u/${encodeURIComponent(username)}/games` }
+}
+
+async function scrapeBackloggdProfile(input) {
+  const profile = normalizeBackloggdUrl(input)
+  if (backloggdImportWindow && !backloggdImportWindow.isDestroyed()) backloggdImportWindow.destroy()
+  backloggdImportWindow = new BrowserWindow({
+    show: false,
+    width: 1200,
+    height: 900,
+    webPreferences: { sandbox: true, contextIsolation: true, nodeIntegration: false, partition: 'persist:prg-backloggd-import' }
+  })
+  const windowRef = backloggdImportWindow
+  const rows = []
+  const seen = new Set()
+  const extractionScript = `(() => {
+    const cards = [...document.querySelectorAll('.rating-hover, [data-game-id], .game-cover')].map(node => node.closest('.rating-hover') || node.closest('[data-game-id]') || node).filter(Boolean);
+    const unique = [...new Set(cards)];
+    return unique.map(entry => {
+      const cover = entry.querySelector?.('.game-cover') || (entry.matches?.('.game-cover') ? entry : null);
+      const image = entry.querySelector?.('img');
+      const link = entry.matches?.('a[href]') ? entry : entry.querySelector?.('a[href]');
+      const titleNode = entry.querySelector?.('.game-text-centered, .game-title, [data-game-title]');
+      const title = (titleNode?.textContent || image?.alt || cover?.getAttribute?.('alt') || entry.getAttribute?.('data-game-title') || '').replace(/\\s+/g, ' ').trim();
+      const href = link?.getAttribute?.('href') || '';
+      const id = cover?.getAttribute?.('game_id') || entry.getAttribute?.('data-game-id') || (href.match(/\\/game\\/(\\d+)/i) || [])[1] || '';
+      const style = cover?.getAttribute?.('style') || image?.getAttribute?.('style') || '';
+      const styleUrl = (style.match(/url\\([\\"']?([^\\"')]+)[\\"']?\\)/i) || [])[1] || '';
+      const coverUrl = image?.getAttribute?.('data-src') || image?.getAttribute?.('data-original') || image?.getAttribute?.('src') || styleUrl || '';
+      const stars = entry.querySelector?.('.stars-top');
+      const width = (stars?.getAttribute?.('style') || '').match(/width\\s*:\\s*([0-9.]+)%/i);
+      let rating = width ? Number(width[1]) / 20 : null;
+      if (!Number.isFinite(rating)) { const raw = entry.querySelector?.('[data-rating]')?.getAttribute?.('data-rating') || entry.getAttribute?.('data-rating'); rating = raw ? Number(raw) / 2 : null; }
+      if (!Number.isFinite(rating) || rating <= 0) rating = null;
+      const statusNode = entry.querySelector?.('[data-status-title]') || entry.closest?.('[data-status-title]');
+      const status = statusNode?.getAttribute?.('data-status-title') || entry.getAttribute?.('data-status-title') || entry.querySelector?.('[play_type]')?.getAttribute?.('play_type') || '';
+      const platform = (entry.querySelector?.('.game-platform, [data-platform]')?.textContent || entry.getAttribute?.('data-platform') || '').replace(/\\s+/g, ' ').trim();
+      return { id: String(id || ''), title, cover: coverUrl, rating, status, platform, href };
+    }).filter(game => game.title && (game.id || game.href));
+  })()`
+  try {
+    for (let page = 1; page <= 100; page += 1) {
+      if (windowRef.isDestroyed()) throw new Error('Імпорт Backloggd скасовано.')
+      const pageUrl = `${profile.url}?page=${page}`
+      await windowRef.loadURL(pageUrl)
+      // Let the profile page finish hydrating its card metadata before the
+      // DOM snapshot is taken (Backloggd progressively decorates cards).
+      await new Promise(resolve => setTimeout(resolve, 450))
+      const extracted = await windowRef.webContents.executeJavaScript(extractionScript, true)
+      if (!Array.isArray(extracted) || !extracted.length) break
+      const fresh = extracted.filter(game => {
+        const key = game.id || game.href || game.title.toLocaleLowerCase()
+        if (seen.has(key)) return false
+        seen.add(key); return true
+      })
+      rows.push(...fresh)
+      if (!fresh.length) break
+      if (extracted.length < 20) break
+    }
+    if (!rows.length) throw new Error('У профілі Backloggd не знайдено публічних ігор. Перевір URL і видимість бібліотеки.')
+    return { ok: true, username: profile.username, games: rows }
+  } catch (error) {
+    const message = error?.message || ''
+    if (/ERR_ABORTED|ERR_BLOCKED_BY_RESPONSE|403|Access denied/i.test(message)) throw new Error('Backloggd не дозволив завантаження профілю. Перевір, що профіль публічний, або відкрий його в браузері й спробуй ще раз.')
+    throw error
+  } finally {
+    if (windowRef && !windowRef.isDestroyed()) windowRef.destroy()
+    if (backloggdImportWindow === windowRef) backloggdImportWindow = null
+  }
+}
+
+ipcMain.handle('backloggd:importProfile', async (_, url) => {
+  try { return await scrapeBackloggdProfile(url) }
+  catch (error) { return { ok: false, error: error?.message || 'Не вдалося прочитати Backloggd.' } }
 })
 
 const NINTENDO_CLIENT_ID = '5c38e31cd085304b'
@@ -993,7 +1094,13 @@ function createWindow() {
 // ── TRAY ──────────────────────────────────────────────────────────────────
 function createTray() {
   const iconPath = path.join(__dirname, '..', '..', 'assets', 'icon.png')
-  const icon = fs.existsSync(iconPath) ? nativeImage.createFromPath(iconPath) : nativeImage.createEmpty()
+  let icon = fs.existsSync(iconPath) ? nativeImage.createFromPath(iconPath) : nativeImage.createEmpty()
+  if (process.platform === 'darwin' && !icon.isEmpty()) {
+    // Menu-bar icons must be small template images. Keep the colorful source
+    // for Dock/app branding, but use a crisp 18px monochrome status icon.
+    icon = icon.resize({ width: 18, height: 18 })
+    icon.setTemplateImage(true)
+  }
   tray = new Tray(icon)
   tray.setToolTip('PRGLauncher')
 
