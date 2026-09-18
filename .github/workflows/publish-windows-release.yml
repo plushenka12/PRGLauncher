@@ -6,7 +6,7 @@ on:
       tag:
         description: Existing release tag to build and publish
         required: true
-        default: '1.2.0'
+        default: '1.2.1'
         type: string
 
 permissions:
@@ -58,6 +58,9 @@ jobs:
               '- PRG Account замість локального режиму: окремі бібліотека, синхронізація та статистична сторінка для кожного користувача.',
               '- Mini-bar із плавним переходом, Stand By, закріпленням поверх вікон і підказками на іконках.',
               '- Автоматична перевірка оновлень при старті та новий брендинг із клевером.',
+              '- Duplicate Center для ручного об’єднання ігор, джерела в Game Info та відкат останнього merge.',
+              '- Річний PRG Recap із вибором року, імпортованим playtime та поширенням підсумку.',
+              '- macOS universal DMG з коректною template-іконкою menu bar та launcher-ініційованим приховуванням Steam.',
               '',
               '### Встановлення',
               `Завантаж **PRGLauncher-Setup-${tag}.exe**, запусти інсталятор і залиш стандартні опції. Надалі PRGLauncher зможе запропонувати оновлення сам.`,

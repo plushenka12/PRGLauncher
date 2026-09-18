@@ -3,12 +3,13 @@
 <head>
 <meta charset="utf-8">
 <title>PRGLauncher session</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  *{box-sizing:border-box} html,body{margin:0;width:100%;height:100%;overflow:hidden;background:transparent!important;font-family:Segoe UI,Arial,sans-serif}
-  #bar{height:58px;display:flex;align-items:center;gap:10px;padding:0 10px;border:1px solid rgba(167,139,250,.48);border-radius:12px;background:rgba(17,18,26,.98);box-shadow:0 10px 28px rgba(0,0,0,.38);color:#e8e7ef;-webkit-app-region:drag;transform-origin:top right;transition:opacity .18s cubic-bezier(.2,.8,.2,1),transform .18s cubic-bezier(.2,.8,.2,1)}
+  *{box-sizing:border-box} html,body{margin:0;width:100%;height:100%;overflow:hidden;background:transparent!important;font-family:'Manrope','Segoe UI',Arial,sans-serif}
+  #bar{height:56px;display:flex;align-items:center;gap:9px;padding:0 9px 0 11px;border:1px solid rgba(167,139,250,.34);border-radius:15px;background:rgba(17,18,26,.92);backdrop-filter:blur(18px);box-shadow:0 12px 32px rgba(0,0,0,.42),0 0 0 1px rgba(255,255,255,.025) inset;color:#e8e7ef;-webkit-app-region:drag;transform-origin:top right;transition:opacity .18s cubic-bezier(.2,.8,.2,1),transform .18s cubic-bezier(.2,.8,.2,1)}
   body.entering #bar{opacity:0;transform:translateY(-9px) scale(.94)}body.entering.entered #bar{opacity:1;transform:translateY(0) scale(1)}body.leaving #bar{opacity:0;transform:translateY(-7px) scale(.96)}@media(prefers-reduced-motion:reduce){#bar{transition:none!important}}
-  .dot{width:8px;height:8px;border-radius:50%;background:#00e676;box-shadow:0 0 9px #00e676;flex:none}.info{min-width:0;flex:1}.label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:#9693a7}.title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:600;margin-top:2px}.timer{font:600 15px Consolas,monospace;color:#a78bfa;white-space:nowrap}
-  button{width:28px;height:28px;border:0;border-radius:7px;background:transparent;color:#bbb7cb;cursor:pointer;font-size:14px;-webkit-app-region:no-drag}button:hover{background:rgba(167,139,250,.18);color:#fff}button.active{color:#fbbf24;background:rgba(251,191,36,.13)}#pause:hover{color:#fb7185}
+  .dot{width:7px;height:7px;border-radius:50%;background:#00e676;box-shadow:0 0 9px #00e676;flex:none}.info{min-width:0;flex:1}.label{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:#a6a2b7}.title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:650;margin-top:2px;color:#f3f1fa}.timer{font:600 14px Consolas,monospace;color:#c4b5fd;white-space:nowrap;padding-left:5px}
+  button{width:27px;height:27px;border:1px solid transparent;border-radius:8px;background:transparent;color:#aaa6bb;cursor:pointer;font-size:14px;-webkit-app-region:no-drag;transition:background .14s,color .14s,border-color .14s}button:hover{background:rgba(167,139,250,.16);border-color:rgba(167,139,250,.2);color:#fff}button.active{color:#fbbf24;background:rgba(251,191,36,.11);border-color:rgba(251,191,36,.22)}#pause:hover{color:#fb7185;border-color:rgba(251,113,133,.25)}
 </style>
 </head>
 <body>
