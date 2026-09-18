@@ -48,7 +48,7 @@ jobs:
             const tag = process.env.RELEASE_TAG;
             const { data: release } = await github.rest.repos.getReleaseByTag({ owner, repo, tag });
             const files = fs.readdirSync(path.join(process.cwd(), 'release'))
-              .filter(name => name.endsWith('.dmg'));
+              .filter(name => name.endsWith('.dmg') || name === 'latest-mac.yml' || name.endsWith('.dmg.blockmap'));
             if (!files.length) throw new Error('No DMG was produced.');
             for (const name of files) {
               const old = release.assets.find(asset => asset.name === name);
