@@ -649,6 +649,14 @@ ipcMain.handle('hltb:openGame', async (_, url) => {
     return { ok: true }
   } catch { return { ok: false } }
 })
+ipcMain.handle('app:openExternal', async (_, url) => {
+  try {
+    const parsed = new URL(String(url || ''))
+    if (parsed.protocol !== 'https:' || parsed.hostname !== 'prgtracker.netlify.app') return { ok: false }
+    await shell.openExternal(parsed.toString())
+    return { ok: true }
+  } catch { return { ok: false } }
+})
 
 // Backloggd exposes public profile pages but does not provide a stable public
 // API.  The importer uses a hidden, sandboxed browser window so the same

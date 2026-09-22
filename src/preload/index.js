@@ -19,6 +19,7 @@ contextBridge.exposeInMainWorld('launcher', {
   // HowLongToBeat (keyless, on-demand metadata lookup)
   searchHltb: (query) => ipcRenderer.invoke('hltb:search', query),
   openHltbGame: (url) => ipcRenderer.invoke('hltb:openGame', url),
+  openExternal: (url) => ipcRenderer.invoke('app:openExternal', url),
 
   // Backloggd public-profile importer (no password or private data)
   importBackloggdProfile: (url) => ipcRenderer.invoke('backloggd:importProfile', url),
