@@ -580,8 +580,11 @@ ipcMain.handle('steam:requestInstall', async (_, appId) => {
   const normalizedAppId = String(appId || '')
   if (!/^\d+$/.test(normalizedAppId)) return { action: 'error', message: 'Invalid Steam App ID' }
   await shell.openExternal(`steam://install/${normalizedAppId}`)
-  mainWindow?.focus()
-  ;[500, 1500, 3000].forEach(delay => setTimeout(hideSteamWindow, delay))
+  // Do not focus the launcher or hide Steam here. Steam must keep the library
+  // picker/modal in the foreground so the user can choose an install drive.
+  // The renderer hides Steam only after its status changes to `downloading`,
+  // which means the picker has already been accepted and the download is safe
+  // to continue in the background.
   return { action: 'requested' }
 })
 
