@@ -46,7 +46,8 @@ body.mini-transition-out{animation:mainToMini .16s cubic-bezier(.3,.8,.3,1)}body
 #sess-timer{font-family:var(--fm);font-size:13px;color:var(--accent);font-weight:500}
 .bar-right{display:flex;align-items:center;gap:8px;margin-left:auto}.win-controls{margin-left:4px}
 .macos .logo{margin-left:76px}.macos #win-min,.macos #win-max,.macos #win-close{display:none}
-.sync-badge{font-size:11px;padding:3px 8px;border-radius:20px;font-weight:600;flex-shrink:0}
+.sync-badge{font-size:11px;padding:4px 10px;border-radius:20px;font-weight:700;flex-shrink:0;cursor:pointer;font-family:var(--fb);transition:background .15s,border-color .15s,color .15s}
+.sync-badge.report{background:rgba(167,139,250,.16);color:var(--text);border:1px solid color-mix(in srgb,var(--accent) 55%,var(--border) 45%)}.sync-badge.report:hover{background:rgba(167,139,250,.3);border-color:var(--accent);color:#fff}.sync-badge.report:disabled{cursor:default;opacity:.55}
 .sync-badge.ok{background:rgba(52,211,153,.15);color:var(--green);border:1px solid rgba(52,211,153,.25)}
 .sync-badge.off{background:rgba(90,90,112,.15);color:var(--text3);border:1px solid var(--border)}
 .sync-badge.err{background:rgba(248,113,113,.12);color:var(--coral);border:1px solid rgba(248,113,113,.2)}
@@ -124,12 +125,12 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 .d-rating-display{display:flex;align-items:center;gap:8px;margin-bottom:1.25rem}
 .d-rating-stars{font-size:22px;font-family:var(--fm);font-weight:800;color:var(--amber)}
 .d-rating-label{font-size:13px;color:var(--text3)}
-.card-body{position:relative;min-height:72px;padding:8px 10px 9px;flex:1;display:flex;flex-direction:column;background:linear-gradient(180deg,color-mix(in srgb,var(--bg3) 94%,var(--accent) 6%),var(--bg3))}
+.card-body{position:relative;min-height:82px;padding:8px 10px 9px;flex:1;display:flex;flex-direction:column;background:linear-gradient(180deg,color-mix(in srgb,var(--bg3) 94%,var(--accent) 6%),var(--bg3))}
 .card-title-row{transition:opacity .18s,transform .18s}.card-title{font-family:var(--fh);font-size:14px;font-weight:800;color:color-mix(in srgb,var(--text) 94%,#fff 6%);line-height:1.3;min-height:2.6em;margin-bottom:4px;text-align:center;text-shadow:0 1px 8px rgba(0,0,0,.18);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
-.card-meta{position:absolute;left:10px;right:10px;bottom:38px;font-size:11px;color:var(--text2);font-weight:500;display:flex;gap:10px;flex-wrap:wrap;opacity:0;visibility:hidden;transform:translateY(4px);transition:opacity .18s,transform .18s,visibility .18s}
-.card-actions{position:absolute;left:10px;right:10px;bottom:9px;display:flex;gap:6px;opacity:0;visibility:hidden;transform:translateY(5px);transition:opacity .18s,transform .18s,visibility .18s;pointer-events:none}
+.card-meta{position:absolute;left:10px;right:10px;top:8px;bottom:auto;font-size:11px;color:var(--text2);font-weight:500;line-height:1.2;min-height:14px;max-height:18px;display:flex;align-items:center;gap:10px;flex-wrap:nowrap;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;opacity:0;visibility:hidden;transform:translateY(4px);transition:opacity .18s,transform .18s,visibility .18s}.card-meta>*{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-actions{position:absolute;left:10px;right:10px;bottom:9px;display:flex;gap:6px;align-items:stretch;opacity:0;visibility:hidden;transform:translateY(5px);transition:opacity .18s,transform .18s,visibility .18s;pointer-events:none}
 .game-card:hover .card-title-row,.game-card:focus-within .card-title-row{opacity:0;transform:translateY(-4px);pointer-events:none}.game-card:hover .card-timer-badge,.game-card:focus-within .card-timer-badge,.game-card:hover .card-platform-badge,.game-card:focus-within .card-platform-badge,.game-card:hover .card-year-badge,.game-card:focus-within .card-year-badge,.game-card:hover .card-rating,.game-card:focus-within .card-rating{opacity:1;transform:translateY(0)}.game-card:hover .card-meta,.game-card:focus-within .card-meta{opacity:1;visibility:visible;transform:translateY(0)}.game-card:hover .card-actions,.game-card:focus-within .card-actions{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto}
-.card-btn{font-family:var(--fb);font-size:12px;font-weight:700;padding:6px 10px;border-radius:6px;border:1px solid var(--border2);background:var(--bg4);color:var(--text);cursor:pointer;transition:all .15s;flex:1;text-align:center}
+.card-btn{font-family:var(--fb);font-size:12px;font-weight:700;padding:6px 10px;min-height:34px;line-height:1.15;display:flex;align-items:center;justify-content:center;border-radius:6px;border:1px solid var(--border2);background:var(--bg4);color:var(--text);cursor:pointer;transition:all .15s;flex:1;text-align:center}
 .card-btn:hover{color:var(--text);border-color:var(--border2)}
 .card-btn-play{background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.25);color:var(--accent)}
 .card-btn-play:hover{background:rgba(167,139,250,.2)}
@@ -265,7 +266,8 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 
 /* STATS PAGE */
 .stats-page-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:2rem}
-.year-recap{margin-bottom:16px;padding:20px;border:1px solid var(--border2);border-radius:var(--r);background:linear-gradient(120deg,rgba(123,47,255,.16),rgba(0,200,255,.07))}.year-recap-head{display:flex;justify-content:space-between;gap:12px;align-items:baseline;margin-bottom:15px}.year-recap-title{font-family:var(--fh);font-size:22px;font-weight:800}.year-recap-sub{font-size:12px;color:var(--text2)}.year-recap-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.year-recap-stat{background:rgba(8,8,15,.26);border:1px solid var(--border);border-radius:8px;padding:10px}.year-recap-label{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--text3)}.year-recap-value{font-family:var(--fh);font-size:19px;font-weight:700;margin-top:4px}.year-recap-value.small{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}@media(max-width:640px){.year-recap-grid{grid-template-columns:1fr 1fr}.year-recap-stat:last-child{grid-column:span 2}}
+.year-recap{margin-bottom:16px;padding:22px;border:1px solid var(--border2);border-radius:var(--r);background:radial-gradient(circle at 88% 0%,rgba(0,220,170,.16),transparent 35%),linear-gradient(125deg,rgba(123,47,255,.25),rgba(0,200,255,.08) 56%,rgba(8,8,15,.45));overflow:hidden}.year-recap-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:18px}.year-recap-title{font-family:var(--fh);font-size:29px;line-height:1.05;font-weight:900;letter-spacing:-.4px}.year-recap-sub{font-size:12px;color:var(--text2)}.year-recap-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}.year-recap-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}.year-recap-stat{background:rgba(8,8,15,.38);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:12px;min-width:0}.year-recap-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text2);font-weight:800}.year-recap-value{font-family:var(--fh);font-size:22px;font-weight:900;margin-top:5px;color:var(--text)}.year-recap-value.small{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.recap-section{margin-top:16px;padding:15px;border-radius:11px;background:rgba(8,8,15,.28);border:1px solid rgba(255,255,255,.1)}.recap-section-title{font:800 12px var(--fh);text-transform:uppercase;letter-spacing:.08em;color:var(--text2);margin-bottom:11px}.recap-top-layout{display:grid;grid-template-columns:minmax(200px,.85fr) 1.15fr;gap:18px}.recap-featured{display:flex;align-items:center;gap:12px;min-width:0}.recap-featured-cover{width:82px;height:108px;border-radius:7px;object-fit:cover;background:var(--bg4);border:1px solid var(--border2);flex:none}.recap-featured-name{font:800 17px/1.15 var(--fh);color:var(--text);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.recap-featured-time{font:700 12px var(--fm);color:var(--accent);margin-top:7px}.recap-list{display:grid;gap:9px}.recap-row{display:grid;grid-template-columns:minmax(0,1fr) 58px;gap:10px;align-items:center}.recap-row-name{font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.recap-row-track{height:6px;background:var(--bg4);border-radius:99px;overflow:hidden;margin-top:5px}.recap-row-fill{height:100%;border-radius:inherit;background:linear-gradient(90deg,var(--accent2),var(--green))}.recap-row-time{text-align:right;color:var(--text2);font:11px var(--fm)}.recap-months{display:grid;grid-template-columns:repeat(12,1fr);gap:6px;align-items:end;height:86px}.recap-month{display:flex;flex-direction:column;justify-content:end;gap:5px;height:100%;min-width:0}.recap-month-bar{min-height:3px;border-radius:4px 4px 2px 2px;background:linear-gradient(180deg,var(--accent),var(--accent2));opacity:.9}.recap-month-label{text-align:center;color:var(--text3);font:10px var(--fm)}
+@media(max-width:640px){.year-recap{padding:16px}.year-recap-head{display:block}.year-recap-actions{justify-content:flex-start;margin-top:12px}.year-recap-title{font-size:25px}.year-recap-grid{grid-template-columns:1fr 1fr}.year-recap-stat:last-child{grid-column:span 2}.recap-top-layout{grid-template-columns:1fr}.recap-months{gap:3px}}
 .chart-row{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:1.5rem}
 .stats-more{margin:0 0 1.5rem;border:1px solid var(--border);border-radius:var(--r);background:color-mix(in srgb,var(--bg3) 72%,transparent)}.stats-more summary{cursor:pointer;list-style:none;padding:11px 14px;color:var(--text2);font-size:12px;font-weight:700}.stats-more summary::-webkit-details-marker{display:none}.stats-more summary::after{content:'+';float:right;color:var(--accent);font:700 16px var(--fm);line-height:1}.stats-more[open] summary{border-bottom:1px solid var(--border);color:var(--text)}.stats-more[open] summary::after{content:'−'}.stats-more-grid{padding:1rem 1rem 0}
 .chart-card{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem}
@@ -351,10 +353,10 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
 @media(max-width:980px){main{padding:1.5rem}.game-grid{grid-template-columns:repeat(3,1fr)}.stats-row{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:640px){#session-bar{padding:0 1rem}.main-tabs{top:52px;padding:0 1rem;overflow-x:auto}.main-tab{padding:11px 14px;font-size:13px;white-space:nowrap}main{padding:1rem}.toolbar{align-items:stretch}.toolbar-title{width:100%;flex-basis:100%;font-size:23px}.toolbar .btn{flex:1;justify-content:center}.filter-bar{gap:7px}.filter-bar .filter-select,.library-search{min-width:0;flex:1}.library-search{max-width:none;order:-1;flex-basis:100%}.game-grid{grid-template-columns:repeat(2,1fr);gap:14px}.card-body{padding:10px}.card-title{font-size:13px}.card-actions{flex-wrap:wrap}.stats-row{grid-template-columns:1fr 1fr}.chart-row{grid-template-columns:1fr}.stats-page-grid{grid-template-columns:1fr 1fr}.platform-grid{grid-template-columns:repeat(2,1fr)}.year-mini-stats{grid-template-columns:1fr 1fr}.add-session-row{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){#session-bar{padding:0 1rem}.main-tabs{top:52px;padding:0 1rem;overflow-x:auto}.main-tab{padding:11px 14px;font-size:13px;white-space:nowrap}main{padding:1rem}.toolbar{align-items:stretch}.toolbar-title{width:100%;flex-basis:100%;font-size:23px}.toolbar .btn{flex:1;justify-content:center}.filter-bar{gap:7px}.filter-bar .filter-select,.library-search{min-width:0;flex:1}.library-search{max-width:none;order:-1;flex-basis:100%}.game-grid{grid-template-columns:repeat(2,1fr);gap:14px}.card-body{padding:10px}.card-title{font-size:13px}.card-actions{flex-wrap:nowrap}.stats-row{grid-template-columns:1fr 1fr}.chart-row{grid-template-columns:1fr}.stats-page-grid{grid-template-columns:1fr 1fr}.platform-grid{grid-template-columns:repeat(2,1fr)}.year-mini-stats{grid-template-columns:1fr 1fr}.add-session-row{grid-template-columns:1fr 1fr}}
 @media(max-width:640px){.backlog-import-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:420px){.backlog-import-list{grid-template-columns:1fr}}
-@media(max-width:420px){.game-grid{grid-template-columns:1fr}.bar-right{gap:2px}.sync-badge{display:none}.win-btn{width:28px}.logo{font-size:16px}.stats-page-grid{grid-template-columns:1fr}.stats-row .stat-value{font-size:22px}}
+@media(max-width:420px){.game-grid{grid-template-columns:1fr}.bar-right{gap:2px}.sync-badge{padding:3px 6px;font-size:10px}.win-btn{width:28px}.logo{font-size:16px}.stats-page-grid{grid-template-columns:1fr}.stats-row .stat-value{font-size:22px}}
 @media(max-width:980px){.backloggd-import-list{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:640px){.backloggd-import-list{grid-template-columns:repeat(2,minmax(0,1fr))}.backloggd-import-url{align-items:stretch;flex-direction:column}}
 @media(max-width:640px){.settings-data-row{align-items:stretch;flex-direction:column;gap:10px}.settings-data-actions{justify-content:flex-start}.settings-data-actions .btn{flex:1}.settings-tabs{margin-top:14px}.settings-pane{padding-top:8px}}
@@ -448,7 +450,7 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
   <div class="logo">PRG<span>Launcher</span></div>
   <div class="bar-right">
     <button class="settings-trigger" id="settings-btn" title="Налаштування" aria-label="Відкрити налаштування" data-tooltip="Відкрити налаштування">⚙</button>
-    <span class="sync-badge off" id="sync-badge">Offline</span>
+    <button class="sync-badge report" id="sync-badge" type="button" title="Відкрити звіт" data-tooltip="Відкрити персональний звіт на PRGTracker">Звіт</button>
   </div>
   <div class="win-controls">
     <button class="win-btn" id="compact-toggle" title="Floating mini-bar" aria-label="Відкрити міні-бар" data-tooltip="Міні-режим: показує компактну панель поверх вікон">▲</button>
@@ -972,7 +974,7 @@ let timeEditId = null;
 let selectedPlatform = 'PC';
 let selectedRating = 0;
 let searchTimeout = null;
-let fbApp=null,fbDb=null,fbAuth=null,fbUnsub=null,syncActive=false,statsPublishTimer=null,currentUser=null,authMode='signin';
+let fbApp=null,fbDb=null,fbAuth=null,fbUnsub=null,syncActive=false,statsPublishTimer=null,syncDebounceTimer=null,currentUser=null,authMode='signin';
 let syncRetryTimer=null,syncRetryDelay=5000,syncRetryInFlight=false;
 const FB_HARDCODED = {
   apiKey: 'AIzaSyBL-IHjUiSlmJ2N_caWx_MWAI8v2RL4Rpw',
@@ -1013,6 +1015,7 @@ UI_COPY.push(['Сесію видалено','Session deleted'],['Сесію ві
 UI_COPY.push(['Об’єднано з','Merged with'],['іншою карткою','another game card']);
 UI_COPY.push(['Дублікатів не знайдено','No duplicates found'],['Об’єднати','Merge'],['Основна: ','Primary: ']);
 UI_COPY.push(['Поділитися recap','Share recap'],['Скопійовано','Copied']);
+UI_COPY.push(['Звіт','Report'],['Відкрити персональний звіт на PRGTracker','Open your personal PRGTracker report'],['Увійди, щоб відкрити звіт','Sign in to open your report'],['Увійди в PRG Account, щоб відкрити звіт.','Sign in to PRG Account to open your report.'],['Твій рік у іграх','Your year in games'],['Твоя особиста історія гри за рік','Your personal gaming story for the year'],['Рік recap','Recap year'],['Награно','Played'],['Сесій','Sessions'],['Активних днів','Active days'],['Найдовша серія','Longest streak'],['Ігор зіграно','Games played'],['дн.','days'],['Гра року','Game of the year'],['Топ ігор за часом','Top games by time'],['Активність по місяцях','Activity by month'],['Час за платформами','Time by platform']);
 const UK_TEXT=new Map(UI_COPY.map(([uk,en])=>[en,uk]));
 const EN_TEXT=new Map(UI_COPY.map(([uk,en])=>[uk,en]));
 let currentLanguage=localStorage.getItem('gv-language')==='en'?'en':'uk';
@@ -1035,7 +1038,12 @@ function applyLanguage(language){
 
 const profileStorageKey=key=>currentUser?`${key}:${currentUser.uid}`:key;
 const loadProfileGames=()=>{try{return JSON.parse(localStorage.getItem(profileStorageKey('gv-games'))||'[]');}catch{return [];}};
-const save = () => {skipMergeOnce=false;games.forEach(game=>{if(game.status==='Sessions')game.status='QuickPlay';if(typeof ensureGameSources==='function')ensureGameSources(game);(game.sessions||[]).forEach(session=>{if(!session.source)session.source=game.steamAppId?'steam':game.nintendoTitleId?'nintendo-sync':'manual';});});localStorage.setItem(profileStorageKey('gv-games'), JSON.stringify(games));const undo=document.getElementById('undo-merge-btn');if(undo)undo.disabled=!localStorage.getItem(profileStorageKey('gv-last-merge-backup'));window.launcher?.trackSteamApps?.(games.map(g=>g.steamAppId).filter(Boolean));};
+function queueLibrarySync(){
+  if(!currentUser||!syncActive)return;
+  clearTimeout(syncDebounceTimer);
+  syncDebounceTimer=setTimeout(()=>{syncDebounceTimer=null;pushToFb().catch(error=>console.warn('[Sync] Debounced publish failed',error));},350);
+}
+const save = (options={}) => {skipMergeOnce=false;games.forEach(game=>{if(game.status==='Sessions')game.status='QuickPlay';if(typeof ensureGameSources==='function')ensureGameSources(game);(game.sessions||[]).forEach(session=>{if(!session.source)session.source=game.steamAppId?'steam':game.nintendoTitleId?'nintendo-sync':'manual';});});localStorage.setItem(profileStorageKey('gv-games'), JSON.stringify(games));const undo=document.getElementById('undo-merge-btn');if(undo)undo.disabled=!localStorage.getItem(profileStorageKey('gv-last-merge-backup'));window.launcher?.trackSteamApps?.(games.map(g=>g.steamAppId).filter(Boolean));if(options.publish!==false)queueLibrarySync();};
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2);
 const getGame = id => games.find(g => g.id === id);
 const PLATFORM_ICONS = {'PC':'🖥️','Nintendo Switch':'🎮','Nintendo 3DS':'🕹️','PS3':'🎯','Other':'📦'};
@@ -1125,7 +1133,7 @@ function initFb(cfg) {
     const {initializeApp,getFirestore,getAuth,onAuthStateChanged}=window._fbImports;
     fbApp=initializeApp(cfg,'gamevault');fbDb=getFirestore(fbApp);fbAuth=getAuth(fbApp);fbConfig=cfg;
     onAuthStateChanged(fbAuth,async user=>{
-      clearUserSyncRetry();syncRetryInFlight=false;syncActive=false;clearInterval(statsPublishTimer);if(fbUnsub){fbUnsub();fbUnsub=null;}
+      clearUserSyncRetry();syncRetryInFlight=false;syncActive=false;clearInterval(statsPublishTimer);clearTimeout(syncDebounceTimer);syncDebounceTimer=null;if(fbUnsub){fbUnsub();fbUnsub=null;}
       clearInterval(nintendoSyncTimer);nintendoProfileReady=false;
       if(activeGameId)stopTimer(true);
       currentUser=user||null;games=[];renderGrid();updateStats();updateSessionBar();
@@ -1176,7 +1184,7 @@ async function startUserSync(user){
       await setDoc(ref,{games,ts:Date.now(),ownerUid:user.uid,createdAt:Date.now(),onboardingDone:false,statsDashboard:makeStatsDashboard()});
       if(firstProfile)localStorage.setItem('gv-account-migrated-v1',user.uid);
     }
-    save();buildFilterBar();renderGrid();updateStats();
+    save({publish:false});buildFilterBar();renderGrid();updateStats();
   }
   catch(error){
     console.error('[Auth] Profile migration failed',error);
@@ -1184,7 +1192,7 @@ async function startUserSync(user){
     return false;
   }finally{syncRetryInFlight=false;}
   clearUserSyncRetry();
-  fbUnsub=onSnapshot(ref,snap=>{const r=snap.data();if(r?.games&&r.ts>(parseInt(localStorage.getItem(profileStorageKey('gv-local-ts'))||'0'))){games=r.games;games.sort((a,b)=>(b.lastPlayed||0)-(a.lastPlayed||0));save();buildFilterBar();renderGrid();updateStats();}},error=>{console.error('[Sync] Snapshot unavailable',error);syncActive=false;scheduleUserSyncRetry(user,'live sync unavailable');});
+  fbUnsub=onSnapshot(ref,snap=>{const r=snap.data();if(r?.games&&r.ts>(parseInt(localStorage.getItem(profileStorageKey('gv-local-ts'))||'0'))){games=r.games;games.sort((a,b)=>(b.lastPlayed||0)-(a.lastPlayed||0));save({publish:false});buildFilterBar();renderGrid();updateStats();}},error=>{console.error('[Sync] Snapshot unavailable',error);syncActive=false;scheduleUserSyncRetry(user,'live sync unavailable');});
   syncActive=true;setSyncBadge('ok');updateProfileUI();setTimeout(()=>{if(currentUser?.uid!==user.uid||!syncActive)return;pushToFb().catch(()=>{});clearInterval(statsPublishTimer);statsPublishTimer=setInterval(()=>publishStatsDashboard().catch(error=>{console.error('[Stats] Dashboard publish failed',error);scheduleUserSyncRetry(user,'dashboard unavailable');}),30000);},750);
   if(newProfile&&!games.length&&!localStorage.getItem(profileStorageKey('gv-steam-onboarding-done-v1')))setTimeout(showSteamOnboarding,450);
   return true;
@@ -1195,7 +1203,13 @@ async function pushToFb(){
   if(!syncActive){scheduleUserSyncRetry(currentUser,'waiting to publish local changes');return;}
   try{const{setDoc}=window._fbImports;const ref=userLibraryRef();await Promise.all([setDoc(ref,{games,ts,ownerUid:currentUser.uid,statsDashboard:makeStatsDashboard(ts)},{merge:true}),publishStatsDashboard(ts)]);}catch(e){console.error('[Stats] Could not publish dashboard:',e);syncActive=false;scheduleUserSyncRetry(currentUser,'could not publish changes');}
 }
-function setSyncBadge(s){const b=document.getElementById('sync-badge');b.className='sync-badge '+s;b.textContent=t(s==='ok'?'Synced':s==='err'?'Sync error':'Offline');}
+function setSyncBadge(s){const b=document.getElementById('sync-badge');if(!b)return;b.className='sync-badge report';b.textContent=t('Звіт');b.disabled=!currentUser;b.title=currentUser?t('Відкрити персональний звіт на PRGTracker'):t('Увійди, щоб відкрити звіт');}
+async function openStatsReport(){
+  if(!currentUser){showAuthError(t('Увійди в PRG Account, щоб відкрити звіт.'));showLogin();return;}
+  const url=`https://prgtracker.netlify.app/?u=${encodeURIComponent(currentUser.uid)}`;
+  if(window.launcher?.openExternal){await window.launcher.openExternal(url);return;}
+  window.open(url,'_blank','noopener,noreferrer');
+}
 
 // Public web dashboard payload. Keep this one-way and intentionally free from
 // notes, Steam IDs and the full game catalogue: the launcher remains the source
@@ -1218,8 +1232,15 @@ function makeStatsDashboard(){
   const recentSessions=[...allSessions].sort((a,b)=>(b.end||b.start||0)-(a.end||a.start||0)).slice(0,8).map(session=>({title:session.title,cover:session.cover,start:session.start,duration:session.dur||0}));
   const topGames=[...games].sort((a,b)=>(b.playtime||0)-(a.playtime||0)).slice(0,6).map(game=>({title:game.title,cover:game.cover||null,playtime:game.playtime||0,sessions:(game.sessions||[]).length,status:game.status||'Backlog',platform:game.platform||null}));
   const activityDays=Object.entries(activity).sort(([a],[b])=>a.localeCompare(b)).slice(-365).map(([date,playtime])=>({date,playtime}));
+  const yearlyMap=new Map();const ensureYear=year=>{if(!yearlyMap.has(year))yearlyMap.set(year,{games:new Map(),sessions:0,playtime:0,activeDays:new Set(),monthly:Array.from({length:12},()=>0)});return yearlyMap.get(year);};
+  games.forEach(game=>{
+    const sessions=Array.isArray(game.sessions)?game.sessions:[];const sessionYears=new Set();
+    sessions.forEach(session=>{const start=Number(session.start)||0;if(!start)return;const date=new Date(start),year=date.getFullYear(),bucket=ensureYear(year);sessionYears.add(year);const current=bucket.games.get(game.id)||{playtime:0,sessions:0};current.playtime+=Number(session.dur||0);current.sessions++;bucket.games.set(game.id,current);bucket.sessions++;bucket.playtime+=Number(session.dur||0);bucket.activeDays.add(date.toISOString().slice(0,10));bucket.monthly[date.getMonth()]+=Number(session.dur||0);});
+    if(!sessionYears.size&&Number(game.playtime)>0){const stamp=Number(game.lastPlayed||game.added||0),year=new Date(stamp).getFullYear();if(year>1970){const bucket=ensureYear(year);bucket.games.set(game.id,{playtime:Number(game.playtime||0),sessions:(game.sessions||[]).length});bucket.playtime+=Number(game.playtime||0);}}
+  });
+  const yearly=Object.fromEntries([...yearlyMap.entries()].map(([year,bucket])=>{const yearGames=[...bucket.games.entries()].map(([id,stats])=>{const game=games.find(item=>item.id===id);return game?{title:game.title,cover:game.cover||null,playtime:stats.playtime,sessions:stats.sessions,status:game.status||'Backlog',platform:game.platform||null}:null;}).filter(Boolean).sort((a,b)=>b.playtime-a.playtime);return [year,{year,playtime:bucket.playtime,sessions:bucket.sessions,activeDays:bucket.activeDays.size,monthly:bucket.monthly,games:yearGames}];}));
   return {
-    version:1,updatedAt:now,
+    version:2,updatedAt:now,yearly,
     totals:{games:games.length,playtime:totalPlaytime,steamPlaytime:games.filter(g=>g.steamAppId||g.platform==='PC').reduce((s,g)=>s+(g.playtime||0),0),nintendoPlaytime:games.filter(g=>g.tags?.includes('Nintendo Sync')||g.platform?.startsWith('Nintendo')).reduce((s,g)=>s+(g.playtime||0),0),sessions:allSessions.length,completed:status.Completed,backlog:status.Backlog,playing:status.Playing,completionRate:games.length?Math.round(status.Completed/games.length*100):0},
     topGames,recentSessions,status,platforms,genres:Object.entries(genres).sort((a,b)=>b[1]-a[1]).slice(0,12).map(([name,count])=>({name,count})),activity:activityDays
   };
@@ -1295,6 +1316,17 @@ async function launchAndTrack(gameId){
 
   // Games without an App ID remain usable as a manual timer.
   if(!game.steamAppId || !window.launcher?.isElectron){startTimer(gameId);return;}
+  // Installed Steam games should launch immediately from the card. The setup
+  // page is only needed when Steam still has to install or prepare the game.
+  try{
+    const status=await window.launcher.installStatus(game.steamAppId);
+    if(status?.state==='ready'){
+      const result=await window.launcher.launchGame(game.steamAppId);
+      if(result?.action==='requested')return;
+      alert(result?.message||'Не вдалося запустити гру через Steam.');
+      return;
+    }
+  }catch(error){console.error('[Steam] Direct launch check failed:',error);}
   openSteamSetup(gameId);
 }
 function showSteamPage(){
@@ -1970,9 +2002,18 @@ function renderStatsPage(){
   let longestStreak=0,streak=0,previousDay=null;
   activeDays.forEach(day=>{const stamp=new Date(`${day}T00:00:00Z`).getTime();streak=previousDay===stamp-86400000?streak+1:1;longestStreak=Math.max(longestStreak,streak);previousDay=stamp;});
   const yearByGame=new Map();yearSessions.forEach(session=>yearByGame.set(session.game.id,(yearByGame.get(session.game.id)||0)+(session.dur||0)));
-  const yearTop=[...yearByGame.entries()].sort((a,b)=>b[1]-a[1])[0];const yearTopGame=yearTop?getGame(yearTop[0]):null;
-  document.getElementById('year-recap').innerHTML=`<div class="year-recap-head"><div><div class="year-recap-title">Твій ${recapYear} у іграх</div><div class="year-recap-sub">Сесії та імпортований playtime за цей рік</div></div><div style="display:flex;align-items:center;gap:10px"><select class="filter-select" id="recap-year-select" aria-label="Рік recap">${recapYears.map(year=>`<option value="${year}" ${year===recapYear?'selected':''}>${year}</option>`).join('')}</select><button class="btn btn-ghost btn-sm" id="recap-share-btn">Поділитися recap</button><div class="year-recap-sub">${activeDays.length?`${activeDays.length} активних днів`:'Першу сесію ще чекаємо'}</div></div></div><div class="year-recap-grid"><div class="year-recap-stat"><div class="year-recap-label">Награно</div><div class="year-recap-value">${fmtHours(yearMs)}</div></div><div class="year-recap-stat"><div class="year-recap-label">Сесій</div><div class="year-recap-value">${yearSessions.length}</div></div><div class="year-recap-stat"><div class="year-recap-label">Активних днів</div><div class="year-recap-value">${activeDays.length}</div></div><div class="year-recap-stat"><div class="year-recap-label">Найдовша серія</div><div class="year-recap-value">${longestStreak} дн.</div></div><div class="year-recap-stat"><div class="year-recap-label">Гра року</div><div class="year-recap-value small">${yearTopGame?.title||'—'}</div></div></div>`;
-  document.getElementById('recap-share-btn')?.addEventListener('click',async()=>{const text=`PRG Recap ${recapYear}\nНаграно: ${fmtHours(yearMs)}\nСесій: ${yearSessions.length}\nАктивних днів: ${activeDays.length}\nГра року: ${yearTopGame?.title||'—'}`;try{if(navigator.share)await navigator.share({title:`PRG Recap ${recapYear}`,text});else await navigator.clipboard.writeText(text);const button=document.getElementById('recap-share-btn');if(button){button.textContent=t('Скопійовано');setTimeout(()=>button.textContent=t('Поділитися recap'),1600);}}catch(error){if(error?.name!=='AbortError')console.warn('[Recap] Share failed',error);}});
+  games.forEach(game=>{if(yearByGame.has(game.id)||!Number(game.playtime)||new Date(game.lastPlayed||game.added||0).getFullYear()!==recapYear)return;yearByGame.set(game.id,Number(game.playtime));});
+  const yearGames=[...yearByGame.entries()].map(([id,ms])=>({game:getGame(id),ms})).filter(item=>item.game).sort((a,b)=>b.ms-a.ms);
+  const yearTop=yearGames[0];const yearTopGame=yearTop?.game||null;
+  const monthMs=Array.from({length:12},()=>0);yearSessions.forEach(session=>{monthMs[new Date(session.start).getMonth()]+=Number(session.dur||0);});games.forEach(game=>{if(yearByGame.has(game.id)&&!yearSessions.some(session=>session.game.id===game.id)&&Number(game.playtime)>0){const month=new Date(game.lastPlayed||game.added||0);if(month.getFullYear()===recapYear)monthMs[month.getMonth()]+=Number(game.playtime||0);}});
+  const maxMonth=Math.max(...monthMs,1);const monthNames=currentLanguage==='en'?['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']:['Січ','Лют','Бер','Кві','Тра','Чер','Лип','Сер','Вер','Жов','Лис','Гру'];
+  const platformMs=new Map();yearGames.forEach(({game,ms})=>{const platform=game.platform||'Other';platformMs.set(platform,(platformMs.get(platform)||0)+ms);});
+  const esc=value=>escapeHltbHtml(value??'');
+  const topRows=yearGames.slice(0,5).map(({game,ms},index)=>`<div class="recap-row"><div><div class="recap-row-name"><span style="color:var(--text3);margin-right:6px">${index+1}</span>${esc(game.title)}</div><div class="recap-row-track"><div class="recap-row-fill" style="width:${Math.max(5,Math.round(ms/(yearTop?.ms||1)*100))}%"></div></div></div><div class="recap-row-time">${fmtHours(ms)}</div></div>`).join('')||`<div class="year-recap-sub">${t('Ще немає сесій')}</div>`;
+  const platformRows=[...platformMs.entries()].sort((a,b)=>b[1]-a[1]).slice(0,4).map(([platform,ms])=>`<div class="recap-row"><div><div class="recap-row-name">${esc(platform)}</div><div class="recap-row-track"><div class="recap-row-fill" style="width:${Math.max(5,Math.round(ms/(yearMs||1)*100))}%"></div></div></div><div class="recap-row-time">${fmtHours(ms)}</div></div>`).join('')||`<div class="year-recap-sub">—</div>`;
+  const monthRows=monthMs.map((ms,index)=>`<div class="recap-month" title="${monthNames[index]}: ${fmtHours(ms)}"><div class="recap-month-bar" style="height:${Math.max(3,Math.round(ms/maxMonth*62))}px"></div><div class="recap-month-label">${monthNames[index]}</div></div>`).join('');
+  document.getElementById('year-recap').innerHTML=`<div class="year-recap-head"><div><div class="year-recap-sub">PRG RECAP · ${recapYear}</div><div class="year-recap-title">${t('Твій рік у іграх')}</div><div class="year-recap-sub">${t('Твоя особиста історія гри за рік')}</div></div><div class="year-recap-actions"><select class="filter-select" id="recap-year-select" aria-label="${t('Рік recap')}">${recapYears.map(year=>`<option value="${year}" ${year===recapYear?'selected':''}>${year}</option>`).join('')}</select><button class="btn btn-ghost btn-sm" id="recap-share-btn">${t('Поділитися recap')}</button></div></div><div class="year-recap-grid"><div class="year-recap-stat"><div class="year-recap-label">${t('Награно')}</div><div class="year-recap-value">${fmtHours(yearMs)}</div></div><div class="year-recap-stat"><div class="year-recap-label">${t('Сесій')}</div><div class="year-recap-value">${yearSessions.length}</div></div><div class="year-recap-stat"><div class="year-recap-label">${t('Активних днів')}</div><div class="year-recap-value">${activeDays.length}</div></div><div class="year-recap-stat"><div class="year-recap-label">${t('Найдовша серія')}</div><div class="year-recap-value">${longestStreak} ${t('дн.')}</div></div><div class="year-recap-stat"><div class="year-recap-label">${t('Ігор зіграно')}</div><div class="year-recap-value">${yearGames.length}</div></div></div><div class="recap-section"><div class="recap-section-title">${t('Гра року')}</div><div class="recap-top-layout"><div class="recap-featured">${yearTopGame?.cover?`<img class="recap-featured-cover" src="${esc(yearTopGame.cover)}" alt="" loading="lazy">`:''}<div><div class="recap-featured-name">${esc(yearTopGame?.title||'—')}</div><div class="recap-featured-time">${yearTop?fmtHours(yearTop.ms):'—'}</div></div></div><div><div class="recap-section-title">${t('Топ ігор за часом')}</div><div class="recap-list">${topRows}</div></div></div></div><div class="recap-section"><div class="recap-section-title">${t('Активність по місяцях')}</div><div class="recap-months">${monthRows}</div></div><div class="recap-section"><div class="recap-section-title">${t('Час за платформами')}</div><div class="recap-list">${platformRows}</div></div>`;
+  document.getElementById('recap-share-btn')?.addEventListener('click',async()=>{const text=`PRG Recap ${recapYear}\n${t('Награно')}: ${fmtHours(yearMs)}\n${t('Сесій')}: ${yearSessions.length}\n${t('Активних днів')}: ${activeDays.length}\n${t('Гра року')}: ${yearTopGame?.title||'—'}`;try{if(navigator.share)await navigator.share({title:`PRG Recap ${recapYear}`,text});else await navigator.clipboard.writeText(text);const button=document.getElementById('recap-share-btn');if(button){button.textContent=t('Скопійовано');setTimeout(()=>button.textContent=t('Поділитися recap'),1600);}}catch(error){if(error?.name!=='AbortError')console.warn('[Recap] Share failed',error);}});
   document.getElementById('recap-year-select')?.addEventListener('change',event=>{localStorage.setItem('gv-recap-year-v1',event.target.value);renderStatsPage();});
   const avgSess=allSessions.length?allSessions.reduce((a,s)=>a+s.dur,0)/allSessions.length:0;
   const longestSess=allSessions.length?Math.max(...allSessions.map(s=>s.dur)):0;
@@ -2535,8 +2576,9 @@ document.getElementById('auth-mode-btn').onclick=()=>setAuthMode(authMode==='sig
 document.getElementById('auth-google-btn').onclick=loginWithGoogle;
 document.getElementById('auth-reset-btn').onclick=resetAuthPassword;
 ['auth-email','auth-password'].forEach(id=>document.getElementById(id).addEventListener('keydown',event=>{if(event.key==='Enter')submitAuth();}));
+document.getElementById('sync-badge')?.addEventListener('click',openStatsReport);
 document.getElementById('copy-profile-link-btn').onclick=async()=>{if(!currentUser){showAuthError('Увійди в PRG Account, щоб отримати персональне посилання.');showLogin();return;}const url=`https://prgtracker.netlify.app/?u=${currentUser.uid}`;try{await navigator.clipboard.writeText(url);document.getElementById('profile-link').textContent='Посилання скопійовано';}catch{document.getElementById('profile-link').textContent=url;}};
-document.getElementById('sign-out-btn').onclick=async()=>{if(!currentUser)return;if(!confirm('Вийти з PRG Account на цьому ПК? Локальна копія бібліотеки залишиться.'))return;clearUserSyncRetry();clearInterval(statsPublishTimer);if(fbUnsub)fbUnsub();syncActive=false;await window._fbImports.signOut(fbAuth);};
+document.getElementById('sign-out-btn').onclick=async()=>{if(!currentUser)return;if(!confirm('Вийти з PRG Account на цьому ПК? Локальна копія бібліотеки залишиться.'))return;clearUserSyncRetry();clearInterval(statsPublishTimer);clearTimeout(syncDebounceTimer);syncDebounceTimer=null;if(fbUnsub)fbUnsub();syncActive=false;await window._fbImports.signOut(fbAuth);};
 
 </script>
 <script>
