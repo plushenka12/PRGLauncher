@@ -69,14 +69,14 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 .toolbar{display:flex;align-items:center;gap:12px;margin-bottom:1.5rem;flex-wrap:wrap}.toolbar .btn{min-height:36px}
 .toolbar-title{font-family:var(--fh);font-size:26px;font-weight:800;flex:1;letter-spacing:-.5px}
 .filter-tabs{display:flex;gap:4px;background:var(--bg3);border-radius:var(--rs);padding:4px}
-.filter-tab{font-family:var(--fb);font-size:13px;font-weight:500;padding:6px 14px;border-radius:6px;border:none;background:transparent;color:var(--text2);cursor:pointer;transition:all .15s}
+.filter-tab{font-family:var(--fb);font-size:13px;font-weight:700;line-height:1.2;padding:6px 14px;border-radius:6px;border:none;background:transparent;color:var(--text2);cursor:pointer;transition:all .15s}
 .filter-tab.active{background:var(--bg4);color:var(--text)}
 .filter-tab:hover:not(.active){color:var(--text)}
 
 /* YEAR TABS */
 .filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;flex-wrap:wrap;max-height:120px;overflow:hidden;transition:max-height .2s ease,opacity .2s ease,margin .2s ease}.filter-bar.is-collapsed{max-height:0;opacity:0;margin-bottom:0;pointer-events:none}.quickplay-filter{display:flex;align-items:center;gap:6px;color:var(--text2);font-size:12px;white-space:nowrap}.quickplay-filter input{accent-color:var(--accent)}
 .library-search{min-width:190px;flex:1;max-width:300px;padding:8px 10px;border-radius:var(--rs);border:1px solid var(--border);background:var(--bg3);color:var(--text);font:12px var(--fb);outline:none}.library-search:focus{border-color:var(--accent)}
-.filter-select{font-family:var(--fb);font-size:13px;font-weight:500;padding:7px 32px 7px 12px;border-radius:20px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235a5a70'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;outline:none;transition:all .15s}
+.filter-select{font-family:var(--fb);font-size:13px;font-weight:700;line-height:1.2;padding:7px 32px 7px 12px;border-radius:20px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235a5a70'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;outline:none;transition:all .15s}
 .filter-select:hover{border-color:var(--accent);color:var(--text)}
 .filter-select.active{border-color:rgba(0,255,65,.4);background-color:rgba(0,255,65,.06);color:var(--green)}
 
@@ -115,7 +115,9 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 .quick-status-menu{position:fixed;z-index:1000;display:grid;gap:4px;min-width:145px;padding:6px;background:var(--bg2);border:1px solid var(--border2);border-radius:10px;box-shadow:0 14px 36px rgba(0,0,0,.45)}.quick-status-menu button{border:1px solid transparent;border-radius:7px;background:transparent;color:var(--text);padding:8px 10px;text-align:left;font:600 12px var(--fb);cursor:pointer}.quick-status-menu button:hover,.quick-status-menu button.active{background:var(--bg4);border-color:var(--border2)}
 .card-timer-badge{position:absolute;top:8px;right:8px;background:rgba(14,15,20,.78);border:1px solid rgba(167,139,250,.34);border-radius:6px;font-family:var(--fm);font-size:11px;color:var(--accent);padding:3px 7px;opacity:0;transform:translateY(-3px);transition:opacity .18s,transform .18s}
 .card-platform-badge{position:absolute;bottom:8px;right:8px;background:rgba(14,15,20,.72);border:1px solid var(--border);border-radius:6px;font-size:10px;font-weight:600;color:var(--text2);padding:2px 6px;opacity:0;transform:translateY(3px);transition:opacity .18s,transform .18s}
-.card-year-badge{position:absolute;bottom:8px;left:8px;background:rgba(14,15,20,.72);border:1px solid var(--border);border-radius:6px;font-family:var(--fm);font-size:9px;color:var(--text3);padding:2px 5px;opacity:0;transform:translateY(3px);transition:opacity .18s,transform .18s}
+.card-year-badge,.card-session-badge{position:absolute;bottom:8px;left:8px;background:rgba(14,15,20,.78);border:1px solid var(--border);border-radius:6px;font-family:var(--fm);font-size:9px;color:var(--text2);padding:2px 5px;opacity:0;transform:translateY(3px);transition:opacity .18s,transform .18s}
+.card-session-badge{opacity:1;transform:none;visibility:visible}
+.card-session-badge.has-rating{left:auto;right:8px;bottom:auto;top:34px}
 .card-rating{position:absolute;bottom:8px;left:8px;background:rgba(8,8,15,.78);border:1px solid rgba(57,255,20,.3);border-radius:6px;font-family:var(--fm);font-size:10px;font-weight:600;color:var(--amber);padding:2px 6px;display:flex;align-items:center;gap:3px;opacity:0;transform:translateY(3px);transition:opacity .18s,transform .18s}
 .rating-picker{display:flex;gap:4px;flex-wrap:wrap}
 .rating-btn{width:32px;height:32px;border-radius:6px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center}
@@ -125,11 +127,11 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 .d-rating-display{display:flex;align-items:center;gap:8px;margin-bottom:1.25rem}
 .d-rating-stars{font-size:22px;font-family:var(--fm);font-weight:800;color:var(--amber)}
 .d-rating-label{font-size:13px;color:var(--text3)}
-.card-body{position:relative;min-height:82px;padding:8px 10px 9px;flex:1;display:flex;flex-direction:column;background:linear-gradient(180deg,color-mix(in srgb,var(--bg3) 94%,var(--accent) 6%),var(--bg3))}
+.card-body{position:relative;min-height:76px;padding:7px 9px 8px;flex:1;display:flex;flex-direction:column;background:linear-gradient(180deg,color-mix(in srgb,var(--bg3) 94%,var(--accent) 6%),var(--bg3))}
 .card-title-row{transition:opacity .18s,transform .18s}.card-title{font-family:var(--fh);font-size:14px;font-weight:800;color:color-mix(in srgb,var(--text) 94%,#fff 6%);line-height:1.3;min-height:2.6em;margin-bottom:4px;text-align:center;text-shadow:0 1px 8px rgba(0,0,0,.18);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
-.card-meta{position:absolute;left:10px;right:10px;top:8px;bottom:auto;font-size:11px;color:var(--text2);font-weight:500;line-height:1.2;min-height:14px;max-height:18px;display:flex;align-items:center;gap:10px;flex-wrap:nowrap;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;opacity:0;visibility:hidden;transform:translateY(4px);transition:opacity .18s,transform .18s,visibility .18s}.card-meta>*{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.card-actions{position:absolute;left:10px;right:10px;bottom:9px;display:flex;gap:6px;align-items:stretch;opacity:0;visibility:hidden;transform:translateY(5px);transition:opacity .18s,transform .18s,visibility .18s;pointer-events:none}
-.game-card:hover .card-title-row,.game-card:focus-within .card-title-row{opacity:0;transform:translateY(-4px);pointer-events:none}.game-card:hover .card-timer-badge,.game-card:focus-within .card-timer-badge,.game-card:hover .card-platform-badge,.game-card:focus-within .card-platform-badge,.game-card:hover .card-year-badge,.game-card:focus-within .card-year-badge,.game-card:hover .card-rating,.game-card:focus-within .card-rating{opacity:1;transform:translateY(0)}.game-card:hover .card-meta,.game-card:focus-within .card-meta{opacity:1;visibility:visible;transform:translateY(0)}.game-card:hover .card-actions,.game-card:focus-within .card-actions{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto}
+.card-meta{position:absolute;left:9px;right:9px;top:7px;bottom:auto;font-size:11px;color:var(--text2);font-weight:500;line-height:1.2;min-height:14px;max-height:18px;display:flex;align-items:center;gap:10px;flex-wrap:nowrap;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;opacity:0;visibility:hidden;transform:translateY(4px);transition:opacity .18s,transform .18s,visibility .18s}.card-meta>*{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-actions{position:absolute;left:9px;right:9px;bottom:8px;display:flex;gap:6px;align-items:stretch;opacity:0;visibility:hidden;transform:translateY(5px);transition:opacity .18s,transform .18s,visibility .18s;pointer-events:none}
+.game-card:hover .card-title-row,.game-card:focus-within .card-title-row{opacity:0;transform:translateY(-4px);pointer-events:none}.game-card:hover .card-timer-badge,.game-card:focus-within .card-timer-badge,.game-card:hover .card-platform-badge,.game-card:focus-within .card-platform-badge,.game-card:hover .card-year-badge,.game-card:focus-within .card-year-badge,.game-card:hover .card-session-badge,.game-card:focus-within .card-session-badge,.game-card:hover .card-rating,.game-card:focus-within .card-rating{opacity:1;transform:translateY(0)}.game-card:hover .card-meta,.game-card:focus-within .card-meta{opacity:0;visibility:hidden;transform:translateY(0)}.game-card:hover .card-actions,.game-card:focus-within .card-actions{opacity:1;visibility:visible;transform:translateY(0);pointer-events:auto}
 .card-btn{font-family:var(--fb);font-size:12px;font-weight:700;padding:6px 10px;min-height:34px;line-height:1.15;display:flex;align-items:center;justify-content:center;border-radius:6px;border:1px solid var(--border2);background:var(--bg4);color:var(--text);cursor:pointer;transition:all .15s;flex:1;text-align:center}
 .card-btn:hover{color:var(--text);border-color:var(--border2)}
 .card-btn-play{background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.25);color:var(--accent)}
@@ -342,6 +344,7 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 .nintendo-sync-note,.nintendo-manual-help,.backlog-import-id,.sr-year,.session-date,
 .bar-val,.pie-legend-val,.year-section-sub{font-weight:600;color:var(--text2)}
 .main-tab{font-weight:600}
+.filter-tab,#filter-toggle,.quickplay-filter{font-family:var(--fb);font-size:13px;font-weight:700;line-height:1.2}
 .stat-label,.detail-stat-label,.detail-section-label,.year-mini-label{letter-spacing:.55px}
 .download-empty,.empty-state{color:var(--text2)}
 .download-empty small,.empty-state small{color:var(--text2)}
@@ -1601,16 +1604,14 @@ function renderGrid(){
     coverDiv.appendChild(createStatusButton(game));
     if(totalMs>0||isActive){const tb=document.createElement('span');tb.className='card-timer-badge';tb.textContent=fmtTime(totalMs);coverDiv.appendChild(tb);}
     if(game.platform){const pb=document.createElement('span');pb.className='card-platform-badge';pb.textContent=(PLATFORM_ICONS[game.platform]||'')+' '+game.platform;coverDiv.appendChild(pb);}
-    const yr=getGameYear(game);
+    const sessionCount=(game.sessions||[]).length;
+    const sb=document.createElement('span');sb.className='card-session-badge';sb.textContent=sessionCountText(sessionCount);if(game.rating)sb.classList.add('has-rating');coverDiv.appendChild(sb);
     if(game.rating){const rb=document.createElement('span');rb.className='card-rating';rb.innerHTML='★ '+game.rating+'/10';coverDiv.appendChild(rb);}
-    else if(yearFilter==='all'&&yr){const yb=document.createElement('span');yb.className='card-year-badge';yb.textContent=`${t('Додано')} ${yr}`;coverDiv.appendChild(yb);}
     card.appendChild(coverDiv);
     const body=document.createElement('div');body.className='card-body';
     const titleRow=document.createElement('div');titleRow.className='card-title-row';titleRow.style.cssText='display:flex;align-items:baseline;justify-content:space-between;gap:6px;margin-bottom:4px';
     const titleEl=document.createElement('div');titleEl.className='card-title';titleEl.style.cssText='margin-bottom:0;flex:1;min-width:0';titleEl.textContent=game.title;titleRow.appendChild(titleEl);
     body.appendChild(titleRow);
-    const meta=document.createElement('div');meta.className='card-meta';const s=(game.sessions||[]).length;
-    meta.innerHTML=`<span>${sessionCountText(s)}</span><span>${fmtHours(game.playtime||0)}</span>`;body.appendChild(meta);
     const actions=document.createElement('div');actions.className='card-actions';
     if(isActive){const pb=document.createElement('button');pb.className='card-btn card-btn-pause';pb.textContent=t('Pause');pb.onclick=e=>{e.stopPropagation();stopTimer(false);};actions.appendChild(pb);}
     else{const pb=document.createElement('button');pb.className='card-btn card-btn-play';pb.textContent=t(game.steamAppId?'Play in Steam':'Start timer');pb.onclick=e=>{e.stopPropagation();if(!guestBlock())launchAndTrack(game.id);};actions.appendChild(pb);}

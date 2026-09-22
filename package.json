@@ -1,6 +1,6 @@
 {
   "name": "prg-launcher",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "PRGLauncher — Game Launcher & Tracker",
   "main": "src/main/index.js",
   "scripts": {
