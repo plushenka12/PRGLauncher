@@ -1878,10 +1878,11 @@ function bindHltbPanelActions(game){
 }
 async function lookupHltb(id,query,alwaysPick){
   const game=getGame(id);const requestedQuery=String(query||'').trim();const directLink=hltbLinkInfo(requestedQuery);const cleanQuery=hltbSearchTitle(requestedQuery);if(!game||!cleanQuery||hltbLoadingIds.has(id))return;
-  if(!window.launcher?.searchHltb){game.hltb={...(game.hltb||{}),error:'unavailable',checkedAt:Date.now()};hltbPersist(game);return;}
+  if(!window.launcher?.searchHltb&&!directLink?.id){game.hltb={...(game.hltb||{}),error:'unavailable',checkedAt:Date.now()};hltbPersist(game);return;}
   hltbCandidates.delete(id);hltbLoadingIds.add(id);renderHltbPanel(game);
   try{
-    const response=await window.launcher.searchHltb(cleanQuery);
+    if(directLink?.id&&window.launcher?.fetchHltbGame){const detail=await window.launcher.fetchHltbGame(requestedQuery);if(detail?.ok&&detail.result){hltbApplyMatch(game,detail.result,true);return;}}
+    const response=window.launcher?.searchHltb?await window.launcher.searchHltb(cleanQuery):{ok:false,error:'NO_RESULTS',results:[]};
     const candidates=Array.isArray(response?.results)?rankHltbCandidates(game,response.results):[];
     if(!response?.ok||!candidates.length){game.hltb={...(game.hltb||{}),error:response?.error==='NO_RESULTS'?'not-found':'unavailable',checkedAt:Date.now(),hidden:false};hltbPersist(game);return;}
     if(directLink?.id){const linked=candidates.find(candidate=>Number(candidate.id)===directLink.id);if(linked){hltbApplyMatch(game,linked,true);return;}}

@@ -611,6 +611,66 @@ async function searchHltb(query) {
   finally { hltbSearchInFlight = null }
 }
 
+function parseHltbMinutes(value, unit = 'hours') {
+  const number = Number(String(value ?? '').replace(',', '.').replace('½', '.5').replace(/[^\d.].*$/u, ''))
+  if (!Number.isFinite(number) || number <= 0) return null
+  return Math.round(unit.toLowerCase().startsWith('min') ? number : number * 60)
+}
+
+function parseHltbDetailPage(page, id, sourceUrl) {
+  const text = String(page?.text || '')
+  const source = String(page?.html || '') + '\n' + text
+  const readJsonNumber = keys => {
+    for (const key of keys) {
+      const match = source.match(new RegExp("[\\\"']" + key + "[\\\"']\\s*:\\s*[\\\"']?([0-9]+(?:\\.[0-9]+)?)[\\\"']?", 'i'))
+      if (match) return parseHltbMinutes(match[1], 'minutes')
+    }
+    return null
+  }
+  const readLabel = labels => {
+    for (const label of labels) {
+      const match = text.match(new RegExp(label + '[^\\d]{0,80}([0-9]+(?:[.,][0-9]+)?(?:\\s*½)?)\\s*(hours?|hrs?|minutes?|mins?)', 'i'))
+      if (match) return parseHltbMinutes(match[1], match[2])
+    }
+    return null
+  }
+  const titleMatch = source.match(/[\"'](?:game_name|name|title)[\"']\\s*:\\s*[\"']([^\"']{2,240})[\"']/i) || text.match(/^(?:How Long to Beat|HLTB)?\\s*([^\\n]{2,160})/i)
+  const result = {
+    id: Number(id),
+    title: titleMatch?.[1]?.trim() || 'HLTB game #' + id,
+    year: null,
+    mainStoryMinutes: readJsonNumber(['comp_main', 'mainStoryMinutes']) ?? readLabel(['Main Story', 'Main']),
+    mainExtraMinutes: readJsonNumber(['comp_plus', 'mainExtraMinutes']) ?? readLabel(['Main\\s*\\+\\s*Extras', 'Main\\s*Extra', 'Main Plus Extras']),
+    completionistMinutes: readJsonNumber(['comp_100', 'completionistMinutes']) ?? readLabel(['Completionist', '100%']),
+    allStylesMinutes: readJsonNumber(['comp_all', 'allStylesMinutes']) ?? readLabel(['All Styles', 'All Playstyles']),
+    sourceUrl
+  }
+  return result.title && [result.mainStoryMinutes, result.mainExtraMinutes, result.completionistMinutes, result.allStylesMinutes].some(Number.isFinite) ? result : null
+}
+
+function fetchHltbGamePage(url) {
+  return new Promise(resolve => {
+    let pageWindow = null
+    let settled = false
+    const finish = result => { if (settled) return; settled = true; clearTimeout(timeout); if (pageWindow && !pageWindow.isDestroyed()) pageWindow.destroy(); resolve(result || null) }
+    const timeout = setTimeout(() => finish(null), HLTB_SEARCH_TIMEOUT)
+    try {
+      const parsed = new URL(String(url || ''))
+      if (parsed.protocol !== 'https:' || parsed.hostname !== 'howlongtobeat.com' || !/^\/game\/\d+(?:\/[^/]*)?\/?$/i.test(parsed.pathname)) return finish(null)
+      const id = parsed.pathname.match(/^\/game\/(\d+)/i)?.[1]
+      pageWindow = new BrowserWindow({ show: false, skipTaskbar: true, webPreferences: { partition: 'hltb-detail-' + process.pid + '-' + Date.now(), contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: false } })
+      pageWindow.webContents.on('did-fail-load', (_event, code, _description, _url, isMainFrame) => { if (isMainFrame && code !== -3) finish(null) })
+      pageWindow.webContents.on('did-finish-load', async () => {
+        try {
+          const page = await pageWindow.webContents.executeJavaScript('(() => ({ text: document.body?.innerText || \"\", html: [...document.scripts].map(s => s.textContent || \"\").filter(s => /comp_main|Main Story|game_name|completionist/i.test(s)).join(\"\\\\n\").slice(0, 600000) }))()')
+          finish(parseHltbDetailPage(page, id, parsed.toString()))
+        } catch { finish(null) }
+      })
+      pageWindow.loadURL(parsed.toString()).catch(() => finish(null))
+    } catch { finish(null) }
+  })
+}
+
 // ── IPC HANDLERS ──────────────────────────────────────────────────────────
 ipcMain.handle('steam:launchGame', async (_, appId) => {
   const normalizedAppId = String(appId || '')
@@ -730,6 +790,10 @@ ipcMain.handle('gog:launchGame', async (_, payload) => {
 })
 
 ipcMain.handle('hltb:search', async (_, query) => searchHltb(query))
+ipcMain.handle('hltb:fetchGame', async (_, url) => {
+  const result = await fetchHltbGamePage(url)
+  return result ? { ok: true, result } : { ok: false, error: 'HLTB_DETAIL_UNAVAILABLE' }
+})
 ipcMain.handle('hltb:openGame', async (_, url) => {
   try {
     const parsed = new URL(String(url || ''))
