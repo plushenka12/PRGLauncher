@@ -576,7 +576,15 @@ function postHltbSearch(query, credentials) {
 }
 
 async function searchHltb(query) {
-  const normalizedQuery = String(query || '').trim().replace(/\s+/g, ' ')
+  // Storefronts use several visually different apostrophes and trademark
+  // symbols. HLTB's search is token based, so send a stable plain-text query.
+  const normalizedQuery = String(query || '')
+    .normalize('NFKC')
+    .replace(/[®™©]/gu, ' ')
+    .replace(/[’‘`´']/gu, '')
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
+    .trim()
+    .replace(/\s+/g, ' ')
   if (!normalizedQuery || normalizedQuery.length > 160) return { ok: false, error: 'INVALID_QUERY', results: [] }
   if (hltbSearchInFlight) return { ok: false, error: 'BUSY', results: [] }
 

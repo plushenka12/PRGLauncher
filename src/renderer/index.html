@@ -1774,8 +1774,21 @@ function escapeHltbHtml(value){return String(value??'').replace(/[&<>"']/g,char=
 // Storefronts often append a platform/edition bundle after a spaced dash. If
 // that right-hand part explicitly says Switch/PS/Xbox/PC or Edition, discard
 // the whole bundle (including its DLC name) and retain the real game title.
-function hltbSearchTitle(title){const original=String(title||'').trim();const bundle=original.match(/^(.+?)\s+[-–—]\s+(.+)$/u);if(bundle&&/\b(?:nintendo\s+switch|switch\s*2?|playstation|ps\s*[45]|xbox|pc|steam|edition)\b/iu.test(bundle[2]))return bundle[1].trim()||original;const clean=original.replace(/\s*(?:[-–—:]\s*)?(?:nintendo\s+switch\s*2?\s+edition|switch\s*2?\s+edition|playstation\s*[45]\s+edition|ps\s*[45]\s+edition|xbox\s+(?:one|series\s+[xs](?:\|s)?)\s+edition|pc\s+edition|steam\s+edition)\s*$/iu,'').trim();return clean||original;}
-function hltbTitleKey(title){return hltbSearchTitle(title).toLocaleLowerCase().replace(/\([^)]*\)|\[[^\]]*\]/g,' ').replace(/[^\p{L}\p{N}]+/gu,' ').replace(/\b(edition|deluxe|complete|remastered|remake|game of the year|goty)\b/gu,' ').replace(/\s+/g,' ').trim();}
+function hltbInputTitle(value){
+  const raw=String(value||'').trim();
+  if(!raw)return '';
+  try{
+    const url=new URL(raw);
+    if(/(^|\.)howlongtobeat\.com$/iu.test(url.hostname)&&/\/game\//iu.test(url.pathname)){
+      const parts=url.pathname.split('/').filter(Boolean);
+      const slug=parts.slice(2).join(' ');
+      if(slug)return decodeURIComponent(slug).replace(/[-_]+/g,' ');
+    }
+  }catch{}
+  return raw;
+}
+function hltbSearchTitle(title){const original=hltbInputTitle(title);const normalized=original.normalize('NFKC').replace(/[®™©]/gu,' ').replace(/[’‘`´']/gu,'').replace(/\s+/g,' ').trim();const bundle=normalized.match(/^(.+?)\s+[-–—]\s+(.+)$/u);if(bundle&&/\b(?:nintendo\s+switch|switch\s*2?|playstation|ps\s*[45]|xbox|pc|steam|edition)\b/iu.test(bundle[2]))return bundle[1].trim()||normalized;const clean=normalized.replace(/\s*(?:[-–—:]\s*)?(?:nintendo\s+switch\s*2?\s+edition|switch\s*2?\s+edition|playstation\s*[45]\s+edition|ps\s*[45]\s+edition|xbox\s+(?:one|series\s+[xs](?:\|s)?)\s+edition|pc\s+edition|steam\s+edition)\s*$/iu,'').trim();return clean||normalized;}
+function hltbTitleKey(title){return hltbSearchTitle(title).toLocaleLowerCase().normalize('NFKD').replace(/\([^)]*\)|\[[^\]]*\]/g,' ').replace(/[®™©]/gu,' ').replace(/[’‘`´']/gu,'').replace(/[^\p{L}\p{N}]+/gu,' ').replace(/\b(edition|deluxe|complete|remastered|remake|game of the year|goty)\b/gu,' ').replace(/\s+/g,' ').trim();}
 function hltbMatchScore(game,candidate){const gameWords=new Set(hltbTitleKey(game.title).split(' ').filter(Boolean));const candidateWords=new Set(hltbTitleKey(candidate.title).split(' ').filter(Boolean));if(!gameWords.size||!candidateWords.size)return 0;if([...gameWords].every(word=>candidateWords.has(word))&&gameWords.size===candidateWords.size)return 1000;const overlap=[...gameWords].filter(word=>candidateWords.has(word)).length;return Math.round(overlap/gameWords.size*100)-(candidateWords.size-overlap)*3;}
 function rankHltbCandidates(game,candidates){return [...candidates].sort((a,b)=>hltbMatchScore(game,b)-hltbMatchScore(game,a)||a.title.localeCompare(b.title));}
 function hltbDuration(minutes){if(!Number.isFinite(Number(minutes))||Number(minutes)<=0)return t('No data');const total=Math.round(Number(minutes));return `${Math.floor(total/60)}h ${total%60}m`;}
