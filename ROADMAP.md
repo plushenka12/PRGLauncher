@@ -1,5 +1,7 @@
 # PRGLauncher — план наступних покращень
 
+> **Ревізія 23.09.2026:** поточний production-реліз — `1.2.2`. Windows-база, Steam, Nintendo Sync Beta, PRG Account, recap, HLTB MVP, Backloggd Import, merge/timeline та GOG local MVP входять у зроблене. «Очікує перевірки» нижче означає реальний тест на ПК, а не відсутність функції.
+
 Цей список фіксує побажання для наступного етапу розробки. Пункти будемо реалізовувати послідовно, без зміни вже працюючих Steam/Nintendo-синхронізацій.
 
 ## Інтерфейс і локалізація
@@ -31,7 +33,7 @@
 ## Фінальний етап — macOS-версія
 
 18. **У роботі з 12.09.2026:** створити й протестувати окрему macOS-збірку PRGLauncher (`.dmg`). Уже адаптовано безпечний запуск на macOS: шлях до локальних Steam-файлів береться з `~/Library/Application Support/Steam`, Steam запускається через `Steam.app`, Windows Registry/PowerShell не викликаються, а автозапуск використовує Electron API. Інтерфейс, PRG Account, Firebase, статистика, Steam-імпорт за посиланням і Nintendo Sync спільні з Windows. На macOS автоматичне визначення локально запущеної Steam-гри свідомо вимкнено — Apple не має для нього стабільного API без зайвих системних дозволів; ручний таймер лишається.
-19. **У роботі з 12.09.2026:** підготовлено macOS-іконку `.icns`, поведінку головного вікна з нативними macOS traffic lights, universal-команду `npm run build:mac` та ручний GitHub Action **Build macOS test package**. Він створює окремий `.dmg` на macOS-ранері GitHub, тож власний Mac для збірки не потрібен. Ще потрібне реальне тестування tray/mini-bar. **Виявлено на tester build:** іконка PRGLauncher у верхній menu bar macOS рендериться гігантським обрізаним кольоровим фрагментом. Потрібно зробити окремий monochrome template-asset для статус-бару, обмежити його нативний розмір до 16–18 px і перевірити tray menu на реальному Mac, не змінюючи яскраву іконку Dock. **Також виявлено:** після `steam://install` Steam не ховається, бо Windows-метод приховування не має macOS-аналога без Automation/Accessibility доступу. Реалізувати macOS-hide лише для Steam, відкритого PRGLauncher: запросити явну одноразову системну згоду, перевірити нативний macOS Automation-шлях на реальному Mac і не ховати Steam, який користувач відкрив вручну. Для комфортного встановлення іншими людьми у фінальному релізі потрібні Apple code signing і notarization; без них macOS показуватиме попередження Gatekeeper.
+19. **У роботі з 12.09.2026:** підготовлено macOS-іконку `.icns`, поведінку головного вікна з нативними macOS traffic lights, universal-команду `npm run build:mac` та ручний GitHub Action **Build macOS test package**. Він створює окремий `.dmg` на macOS-ранері GitHub, тож власний Mac для збірки не потрібен. У коді вже додано окремий 18px monochrome template-силует menu bar та Automation hide через Steam bundle ID з fallback за назвою. Ще потрібне реальне тестування tray/mini-bar і підтвердження Automation-згоди на Mac. Для комфортного встановлення іншими людьми у фінальному релізі потрібні Apple code signing і notarization; без них macOS показуватиме попередження Gatekeeper.
 
 ## Рекомендований порядок
 
@@ -56,9 +58,14 @@
 3. **Реалізовано 18.09.2026, очікує перевірки у застосунку:** PRG-картка підтримує `sources[]`, об’єднує Steam/Nintendo/Backloggd-джерела без дублювання сесій, у Game Info показує підключені джерела, а в «Налаштування → Дані» є Duplicate Center з ручним підтвердженням злиття та відкатом останньої операції.
 4. **Базово реалізовано 18.09.2026, очікує перевірки:** окрема timeline-вкладка Game Info показує імпорти, статуси, HLTB, об’єднання, редагування часу, видалення сесій та джерела. Повний backup/restore окремих подій і додатковий захист від дублювання delta-sync залишаються для наступного проходу.
 
-## Наступний горизонт — Multi-Launcher Foundation
+## Реалізовано до GOG включно
 
-Проведено технічне дослідження для EGS, GOG Galaxy, Ubisoft Connect, EA app / EA Play та Battle.net: [LAUNCHER_INTEGRATIONS_RESEARCH.md](LAUNCHER_INTEGRATIONS_RESEARCH.md). Після завершення macOS tester-правок пріоритет такий:
+1. **GOG local MVP реалізовано 23.09.2026:** PRGLauncher сканує локальні записи GOG Galaxy у реєстрі Windows без логіну й пароля, показує вибір встановлених ігор, додає їх у `sources[]` та запускає через локальний executable або GOG protocol. Історичний GOG playtime і повна акаунтова бібліотека свідомо не обіцяються.
+2. **Потрібна перевірка:** GOG Galaxy з 32/64-bit встановленням, кількома дисками, відсутнім executable та різними типами інсталяції.
+
+## Дальній беклог — Multi-Launcher Foundation
+
+Проведено технічне дослідження для EGS, GOG Galaxy, Ubisoft Connect, EA app / EA Play та Battle.net: [LAUNCHER_INTEGRATIONS_RESEARCH.md](LAUNCHER_INTEGRATIONS_RESEARCH.md). EGS, Ubisoft Connect, EA app / EA Play та Battle.net навмисно відкладені, поки не стабілізуємо Windows/macOS, безпеку та GOG MVP.
 
 1. Переробити модель джерел гри з одного `steamAppId` на безпечний масив `sources[]`, щоб одна картка могла містити Steam, GOG, Epic тощо без дублювання історії.
 2. Додати Windows-скан встановлених ігор GOG, Epic, Ubisoft Connect, Battle.net і EA app, запуск із PRGLauncher та власний process-based облік майбутніх сесій.
@@ -68,7 +75,7 @@
 
 Не зберігати паролі, 2FA-коди чи токени у Firebase. Неофіційні web-сесії мають лежати тільки в зашифрованому системному credential storage, підтримувати `Від’єднати` й не видаляти вже імпортовані дані при помилці синхронізації.
 
-## Наступний горизонт — Console Activity Sync
+## Дальній беклог — Console Activity Sync
 
 Після Multi-Launcher Foundation дослідити та спроєктувати інтеграції **PlayStation Network** і **Xbox Network** за принципом Nintendo Sync:
 

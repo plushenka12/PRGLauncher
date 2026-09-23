@@ -16,6 +16,10 @@ contextBridge.exposeInMainWorld('launcher', {
   getRunningAppId: ()      => ipcRenderer.invoke('steam:getRunningAppId'),
   onSteamRunningApp: (callback) => ipcRenderer.on('steam:runningApp', (_, status) => callback(status)),
 
+  // GOG Galaxy (local installed-game scan; no account credentials)
+  getGogInstalledGames: () => ipcRenderer.invoke('gog:installedGames'),
+  launchGogGame: (payload) => ipcRenderer.invoke('gog:launchGame', payload),
+
   // HowLongToBeat (keyless, on-demand metadata lookup)
   searchHltb: (query) => ipcRenderer.invoke('hltb:search', query),
   openHltbGame: (url) => ipcRenderer.invoke('hltb:openGame', url),

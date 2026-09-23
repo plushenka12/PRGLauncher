@@ -6,7 +6,7 @@ on:
       tag:
         description: Existing release tag to build and update
         required: true
-        default: '1.2.1'
+        default: '1.2.2'
         type: string
 
 permissions:

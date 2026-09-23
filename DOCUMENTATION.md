@@ -41,6 +41,18 @@ Steam працює як бекенд, а не як головний інтерф
 - Steam не ховається безперервно: ручне відкриття з трею залишається видимим.
 - Після дії, ініційованої лаунчером, Steam автоматично ховається назад.
 
+### GOG Galaxy (Beta)
+
+- `Settings → Integrations → Імпорт встановлених GOG-ігор` читає локальні записи
+  GOG Galaxy з Windows registry.
+- Імпорт не відкриває web-login, не просить пароль і не зберігає cookies.
+- Картка отримує `sources: [{ type: 'gog', id, platform: 'PC' }]`, локальний
+  install path та executable.
+- Запуск виконується напряму з executable, а якщо він недоступний — через
+  `goggalaxy://openGameView/<id>`.
+- Це local MVP: повна акаунтова бібліотека, cloud playtime та live download
+  progress GOG поки не входять у підтримку.
+
 ### Автоматичний трекінг сесій
 
 - Лаунчер стежить за `Running=1` у Steam-реєстрі Windows.
@@ -141,7 +153,7 @@ node --check src/preload/index.js
 
 ## Windows-інсталятор
 
-Готовий файл релізу: `release/PRGLauncher-Setup-1.1.0.exe`.
+Готовий файл релізу: `release/PRGLauncher-Setup-1.2.2.exe`.
 
 Інсталятор створює desktop і Start Menu ярлик з назвою `PRGLauncher`,
 використовує зелену іконку та запускає застосунок після завершення установки.
