@@ -1040,6 +1040,7 @@ UI_COPY.push(...[
 ]);
 UI_COPY.push(['Оновити RAWG-обкладинки','Refresh RAWG covers'],['Оновлюємо…','Refreshing…'],['Немає Backloggd-ігор','No Backloggd games']);
 UI_COPY.push(['Метадані ігор','Game metadata'],['Оновити HLTB всюди','Refresh HLTB everywhere'],['Оновити обкладинки всюди','Refresh covers everywhere'],['Масове оновлення ще не запускалось.','Bulk refresh has not been started yet.'],['Конфлікти та ігри без збігу','Conflicts and unmatched games'],['Оновлено','Updated'],['Не знайдено','Not found'],['Помилка','Error']);
+UI_COPY.push(['Встав URL гри HLTB або введи іншу назву, потім натисни «Пошук у HLTB».','Paste an HLTB game URL or enter another title, then press “Search HLTB”.']);
 UI_COPY.push(['Джерела','Sources']);
 UI_COPY.push(['Скасовано','Undone']);
 UI_COPY.push(['Сесію видалено','Session deleted'],['Сесію відредаговано','Session edited'],['Час гри змінено','Playtime edited']);
@@ -1840,7 +1841,8 @@ function hltbShowPicker(game,candidates,query){
 }
 function hltbRenderMatchPicker(game,state){
   const rows=state.candidates.map((candidate,index)=>`<button class="hltb-match" data-hltb-action="select" data-hltb-index="${index}" title="${escapeHltbHtml(candidate.title)}"><span><span class="hltb-match-name">${escapeHltbHtml(candidate.title)}</span><span class="hltb-match-meta">${candidate.year||'—'} · ${t('Main Story')}: ${hltbDuration(candidate.mainStoryMinutes)}</span></span><span aria-hidden="true">›</span></button>`).join('');
-  return `<div class="hltb-heading"><div><div class="hltb-title">${t('Choose the game version in HLTB')}</div><div class="hltb-subtitle">${t('There are several possible matches. Choose the correct version — it will be saved in your library.')}</div></div></div><div class="hltb-search-row"><input class="form-input" id="hltb-search-input" value="${escapeHltbHtml(state.query||game.title)}" maxlength="160" aria-label="${t('Search HLTB')}"><button class="btn btn-ghost btn-sm" data-hltb-action="search">${t('Search HLTB')}</button></div><div class="hltb-match-list">${rows}</div>`;
+  const empty=rows?'':`<div class="hltb-message">${t('Встав URL гри HLTB або введи іншу назву, потім натисни «Пошук у HLTB».')}</div>`;
+  return `<div class="hltb-heading"><div><div class="hltb-title">${t('Choose the game version in HLTB')}</div><div class="hltb-subtitle">${t('There are several possible matches. Choose the correct version — it will be saved in your library.')}</div></div></div><div class="hltb-search-row"><input class="form-input" id="hltb-search-input" value="${escapeHltbHtml(state.query||game.title)}" maxlength="300" aria-label="${t('Search HLTB')}" placeholder="https://howlongtobeat.com/game/…"><button class="btn btn-ghost btn-sm" data-hltb-action="search">${t('Search HLTB')}</button></div>${empty}<div class="hltb-match-list">${rows}</div>`;
 }
 function renderHltbPanel(game){
   const panel=document.getElementById('d-hltb');if(!panel||!game)return;
@@ -1871,7 +1873,7 @@ function bindHltbPanelActions(game){
     if(action==='show'){game.hltb={...(game.hltb||{}),hidden:false};hltbPersist(game);return;}
     if(action==='clear'){delete game.hltb;hltbCandidates.delete(game.id);hltbPersist(game);return;}
     if(action==='refresh'){await lookupHltb(game.id,game.title,false);return;}
-    if(action==='change'){await lookupHltb(game.id,game.title,true);return;}
+    if(action==='change'){hltbShowPicker(game,[],game.title);return;}
     if(action==='search'){const query=panel.querySelector('#hltb-search-input')?.value?.trim();await lookupHltb(game.id,query,true);return;}
     if(action==='select'){const picker=hltbCandidates.get(game.id);const candidate=picker?.candidates?.[Number(button.dataset.hltbIndex)];if(candidate)hltbApplyMatch(game,candidate,true);}
   });
