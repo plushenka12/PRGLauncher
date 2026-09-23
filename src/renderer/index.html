@@ -1847,7 +1847,7 @@ function renderHltbPanel(game){
   const stored=game.hltb||{};const picker=hltbCandidates.get(game.id);const isLoading=hltbLoadingIds.has(game.id);
   if(picker){panel.innerHTML=hltbRenderMatchPicker(game,picker);bindHltbPanelActions(game);return;}
   if(stored.hidden){
-    panel.innerHTML=`<div class="hltb-heading"><div><div class="hltb-title">${t('HLTB completion times')}</div><div class="hltb-subtitle">${t('HLTB data is hidden for this game.')}</div></div></div><div class="hltb-actions"><button class="btn btn-ghost btn-sm" data-hltb-action="show">${t('Show HLTB')}</button></div>`;
+    panel.innerHTML=`<div class="hltb-heading"><div><div class="hltb-title">${t('HLTB completion times')}</div><div class="hltb-subtitle">${t('HLTB data is hidden for this game.')}</div></div></div><div class="hltb-actions"><button class="btn btn-ghost btn-sm" data-hltb-action="show">${t('Show HLTB')}</button><button class="btn btn-ghost btn-sm" data-hltb-action="change">${t('Change match')}</button></div>`;
     bindHltbPanelActions(game);return;
   }
   if(isLoading){
@@ -1858,7 +1858,7 @@ function renderHltbPanel(game){
     bindHltbPanelActions(game);return;
   }
   const unavailable=stored.error==='unavailable';
-  panel.innerHTML=`<div class="hltb-heading"><div><div class="hltb-title">${t('HLTB completion times')}</div><div class="hltb-subtitle">${unavailable?t('HLTB is temporarily unavailable. Try again a little later.'):t('HLTB has not been found for this game yet.')}</div></div></div><div class="hltb-actions"><button class="btn btn-ghost btn-sm" data-hltb-action="refresh">${t('Refresh HLTB')}</button><button class="btn btn-ghost btn-sm" data-hltb-action="hide">${t('Hide HLTB')}</button></div>`;
+  panel.innerHTML=`<div class="hltb-heading"><div><div class="hltb-title">${t('HLTB completion times')}</div><div class="hltb-subtitle">${unavailable?t('HLTB is temporarily unavailable. Try again a little later.'):t('HLTB has not been found for this game yet.')}</div></div></div><div class="hltb-actions"><button class="btn btn-ghost btn-sm" data-hltb-action="change">${t('Change match')}</button><button class="btn btn-ghost btn-sm" data-hltb-action="refresh">${t('Refresh HLTB')}</button><button class="btn btn-ghost btn-sm" data-hltb-action="hide">${t('Hide HLTB')}</button></div>`;
   bindHltbPanelActions(game);
 }
 function bindHltbPanelActions(game){
