@@ -40,6 +40,7 @@ let steamRunningAppId = null
 let steamCollectionTimer = null
 let lastBacklogSignature = null
 const steamStoreCache = new Map()
+const gogGameCache = new Map()
 let hltbSearchInFlight = null
 let hltbLastRequestAt = 0
 let hltbCredentials = null
@@ -134,6 +135,55 @@ function getSteamLibraries() {
   return libraries
 }
 
+// ── GOG GALAXY (local, password-free MVP) ───────────────────────────────
+// GOG Galaxy keeps installed-game registration in the Windows registry. We
+// only read local install metadata; no GOG login, cookie or password is used.
+function readGogRegistryGames(root) {
+  if (process.platform !== 'win32') return []
+  let output = ''
+  try { output = execSync(`reg query "${root}" /s`, { encoding: 'utf8', windowsHide: true }) } catch { return [] }
+  const result = []
+  let key = null
+  let values = {}
+  const flush = () => {
+    if (!key || !values.path) return
+    const installPath = String(values.path).trim().replace(/^"|"$/g, '')
+    if (!installPath || !fs.existsSync(installPath)) return
+    const id = String(values.gameid || values.gameID || key.split('\\').pop() || installPath)
+    const title = String(values.gamename || values.name || `GOG game ${id}`).trim()
+    const rawExe = String(values.exe || values.executable || '').trim().replace(/^"|"$/g, '')
+    const executable = rawExe ? (path.isAbsolute(rawExe) ? rawExe : path.join(installPath, rawExe)) : null
+    result.push({ id, title, installPath, executable: executable && fs.existsSync(executable) ? executable : null, platform: 'PC', source: 'gog' })
+  }
+  for (const line of output.split(/\r?\n/)) {
+    const trimmed = line.trim()
+    if (/^HKEY_LOCAL_MACHINE\\|^HKEY_CURRENT_USER\\/i.test(trimmed)) {
+      flush(); key = trimmed; values = {}; continue
+    }
+    const match = line.match(/^\s+([^\s]+)\s+REG_\w+\s+(.*)$/i)
+    if (match) values[match[1].toLocaleLowerCase()] = match[2].trim()
+  }
+  flush()
+  return result
+}
+
+function getGogInstalledGames() {
+  if (process.platform !== 'win32') return []
+  const roots = [
+    'HKCU\\Software\\GOG.com\\Games',
+    'HKLM\\Software\\GOG.com\\Games',
+    'HKLM\\Software\\WOW6432Node\\GOG.com\\Games',
+  ]
+  const seen = new Set()
+  const games = roots.flatMap(readGogRegistryGames).filter(game => {
+    const key = `${game.id}:${game.installPath}`.toLocaleLowerCase()
+    if (seen.has(key)) return false
+    seen.add(key); return true
+  })
+  games.forEach(game => gogGameCache.set(game.id, game))
+  return games
+}
+
 function readVdfNumber(contents, key) {
   const match = contents.match(new RegExp(`"${key}"\\s+"(\\d+)"`))
   return match ? Number(match[1]) : null
@@ -225,12 +275,23 @@ function startSteamSilent() {
 
 function hideSteamWindow() {
   if (process.platform === 'darwin') {
-    // macOS requires the user to grant Automation access the first time this
-    // runs. We only call this from launcher-initiated Steam flows, so manually
-    // opened Steam is never hidden by background polling.
-    execFile('/usr/bin/osascript', ['-e', 'tell application "Steam" to hide'], { windowsHide: true }, error => {
-      if (error) console.warn('[Steam] macOS hide unavailable:', error.message)
-    })
+    // macOS requires Automation access the first time this runs. Use Steam's
+    // bundle id first (the display name can be localized), then fall back to
+    // the name used by older Steam builds. This is called only from a
+    // launcher-initiated flow after Steam has started its operation.
+    const scripts = [
+      'tell application id "com.valvesoftware.steam" to hide',
+      'tell application "Steam" to hide',
+    ]
+    const tryHide = index => {
+      if (index >= scripts.length) return
+      execFile('/usr/bin/osascript', ['-e', scripts[index]], { windowsHide: true }, error => {
+        if (!error) return
+        if (index + 1 < scripts.length) return tryHide(index + 1)
+        console.warn('[Steam] macOS hide unavailable:', error.message)
+      })
+    }
+    tryHide(0)
     return
   }
   // macOS needs Accessibility permission for controlling another app's window.
@@ -641,6 +702,23 @@ ipcMain.handle('steam:getStoreGames', async (_, appIds) => {
 
 ipcMain.handle('steam:getRunningAppId', async () => {
   return { appId: getRunningSteamAppId() }
+})
+
+ipcMain.handle('gog:installedGames', async () => ({ ok: true, games: getGogInstalledGames() }))
+ipcMain.handle('gog:launchGame', async (_, payload) => {
+  const id = String(payload?.id || '')
+  const cached = gogGameCache.get(id)
+  const executable = String(payload?.executable || cached?.executable || '')
+  if (executable && path.isAbsolute(executable) && fs.existsSync(executable)) {
+    const child = spawn(executable, [], { detached: true, stdio: 'ignore', windowsHide: true })
+    child.unref()
+    return { action: 'requested', id }
+  }
+  if (/^[\w.-]+$/.test(id)) {
+    await shell.openExternal(`goggalaxy://openGameView/${encodeURIComponent(id)}`)
+    return { action: 'requested', id }
+  }
+  return { action: 'error', message: 'GOG executable was not found' }
 })
 
 ipcMain.handle('hltb:search', async (_, query) => searchHltb(query))
@@ -1106,10 +1184,12 @@ function createWindow() {
 function createTray() {
   const iconPath = path.join(__dirname, '..', '..', 'assets', 'icon.png')
   let icon = fs.existsSync(iconPath) ? nativeImage.createFromPath(iconPath) : nativeImage.createEmpty()
-  if (process.platform === 'darwin' && !icon.isEmpty()) {
-    // Menu-bar icons must be small template images. Keep the colorful source
-    // for Dock/app branding, but use a crisp 18px monochrome status icon.
-    icon = icon.resize({ width: 18, height: 18 })
+  if (process.platform === 'darwin') {
+    // Do not reuse the colorful Dock artwork in the menu bar. macOS template
+    // images must be a small monochrome silhouette; otherwise the system can
+    // render a cropped, oversized fragment of the source bitmap.
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18"><g fill="#fff"><circle cx="9" cy="5" r="3.6"/><circle cx="13" cy="9" r="3.6"/><circle cx="9" cy="13" r="3.6"/><circle cx="5" cy="9" r="3.6"/><circle cx="9" cy="9" r="2.2"/><path d="M8.3 11.7h1.4v5.1c0 .6-.7.9-1.1.5l-.9-.8c-.4-.3-.2-.9.3-1.1l.3-.1z"/></g></svg>'
+    icon = nativeImage.createFromDataURL(`data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`).resize({ width: 18, height: 18 })
     icon.setTemplateImage(true)
   }
   tray = new Tray(icon)

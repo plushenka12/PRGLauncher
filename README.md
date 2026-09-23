@@ -17,7 +17,7 @@
   <a href="DOCUMENTATION.md">Детальна документація</a>
 </p>
 
-> **Поточний стабільний реліз:** [PRGLauncher 1.2.0](https://github.com/plushenka12/PRGLauncher/releases/tag/1.2.0) для Windows 10/11 x64.
+> **Поточний стабільний реліз:** [PRGLauncher 1.2.2](https://github.com/plushenka12/PRGLauncher/releases/tag/1.2.2) для Windows 10/11 x64.
 
 ## Що це таке
 
@@ -47,6 +47,13 @@ PRGLauncher — це не заміна магазину Steam. Steam залиш�
 - У Settings можна від’єднати Steam-профіль і підключити інший без видалення вже імпортованих ігор.
 
 > Для профільного імпорту Steam-профіль і список ігор мають бути публічними. Деякі приватні або shared-ігри Steam API може не віддати.
+
+### GOG Galaxy — Beta
+
+- Локальний скан встановлених GOG-ігор через Windows registry без логіну, пароля або cookies.
+- Вибір ігор картками, пошук, масове додавання та призначення статусу.
+- Запуск через локальний executable або GOG Galaxy protocol.
+- Історичний GOG playtime і повний акаунтовий імпорт поки не обіцяються.
 
 ### Трекінг часу й mini-bar
 
@@ -100,6 +107,7 @@ PRGLauncher — це не заміна магазину Steam. Steam залиш�
 ### macOS
 
 macOS-версія перебуває у тестуванні. Окремий universal `.dmg` збирається через GitHub Actions для тестерів; інструкція тут: [MACOS_TESTER_GUIDE.md](MACOS_TESTER_GUIDE.md).
+Чекліст перевірки: [MACOS_TEST_CHECKLIST.md](MACOS_TEST_CHECKLIST.md).
 
 Фінальний публічний macOS-реліз буде потребувати тестування на реальному Mac, Apple code signing і notarization.
 
@@ -121,6 +129,8 @@ macOS-версія перебуває у тестуванні. Окремий un
 - Дані PRG Account розділені за Firebase UID; веб-сторінка читає лише опублікований статистичний snapshot.
 
 Детальніше: [SECURITY_AND_MULTIUSER.md](SECURITY_AND_MULTIUSER.md) та [NINTENDO_SYNC.md](NINTENDO_SYNC.md).
+
+Чекліст Windows-перевірки: [WINDOWS_TEST_CHECKLIST.md](WINDOWS_TEST_CHECKLIST.md).
 
 ## Розробка
 

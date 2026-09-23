@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+- Додано GOG Galaxy local MVP: скан встановлених ігор Windows без авторизації,
+  вибір карток, статуси та запуск через executable/GOG protocol.
+- Інші launcher- і console-інтеграції перенесено у дальній беклог до стабілізації
+  Windows, macOS та multi-user security.
+- Додано окремі [Windows](WINDOWS_TEST_CHECKLIST.md) і
+  [macOS](MACOS_TEST_CHECKLIST.md) чеклісти.
+- macOS menu bar тепер використовує окремий 18px monochrome template-силует,
+  а приховування Steam пробує стабільний bundle ID та fallback за назвою.
+
 ## 1.2.1 — 18.09.2026
 
 - Додано Duplicate Center для ручного об’єднання ігор із підтвердженням та відкатом останньої операції.
