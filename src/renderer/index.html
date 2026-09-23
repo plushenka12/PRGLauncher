@@ -1799,17 +1799,20 @@ function escapeHltbHtml(value){return String(value??'').replace(/[&<>"']/g,char=
 // Storefronts often append a platform/edition bundle after a spaced dash. If
 // that right-hand part explicitly says Switch/PS/Xbox/PC or Edition, discard
 // the whole bundle (including its DLC name) and retain the real game title.
+function hltbLinkInfo(value){
+  const raw=String(value||'').trim();
+  try{
+    const url=new URL(raw);if(!/(^|\.)howlongtobeat\.com$/iu.test(url.hostname))return null;
+    const parts=url.pathname.split('/').filter(Boolean),gameIndex=parts.findIndex(part=>part.toLowerCase()==='game');
+    if(gameIndex<0)return null;
+    const id=Number(parts[gameIndex+1]),slug=parts.slice(gameIndex+2).join(' ');
+    return Number.isInteger(id)&&id>0?{id,slug:slug?decodeURIComponent(slug).replace(/[-_]+/g,' '):''}:null;
+  }catch{return null;}
+}
 function hltbInputTitle(value){
   const raw=String(value||'').trim();
   if(!raw)return '';
-  try{
-    const url=new URL(raw);
-    if(/(^|\.)howlongtobeat\.com$/iu.test(url.hostname)&&/\/game\//iu.test(url.pathname)){
-      const parts=url.pathname.split('/').filter(Boolean);
-      const slug=parts.slice(2).join(' ');
-      if(slug)return decodeURIComponent(slug).replace(/[-_]+/g,' ');
-    }
-  }catch{}
+  const link=hltbLinkInfo(raw);if(link?.slug)return link.slug;
   return raw;
 }
 function hltbSearchTitle(title){const original=hltbInputTitle(title);const normalized=original.normalize('NFKC').replace(/[®™©]/gu,' ').replace(/[’‘`´']/gu,'').replace(/\s+/g,' ').trim();const bundle=normalized.match(/^(.+?)\s+[-–—]\s+(.+)$/u);if(bundle&&/\b(?:nintendo\s+switch|switch\s*2?|playstation|ps\s*[45]|xbox|pc|steam|edition)\b/iu.test(bundle[2]))return bundle[1].trim()||normalized;const clean=normalized.replace(/\s*(?:[-–—:]\s*)?(?:nintendo\s+switch\s*2?\s+edition|switch\s*2?\s+edition|playstation\s*[45]\s+edition|ps\s*[45]\s+edition|xbox\s+(?:one|series\s+[xs](?:\|s)?)\s+edition|pc\s+edition|steam\s+edition)\s*$/iu,'').trim();return clean||normalized;}
@@ -1874,13 +1877,14 @@ function bindHltbPanelActions(game){
   });
 }
 async function lookupHltb(id,query,alwaysPick){
-  const game=getGame(id);const requestedQuery=String(query||'').trim();const cleanQuery=hltbSearchTitle(requestedQuery);if(!game||!cleanQuery||hltbLoadingIds.has(id))return;
+  const game=getGame(id);const requestedQuery=String(query||'').trim();const directLink=hltbLinkInfo(requestedQuery);const cleanQuery=hltbSearchTitle(requestedQuery);if(!game||!cleanQuery||hltbLoadingIds.has(id))return;
   if(!window.launcher?.searchHltb){game.hltb={...(game.hltb||{}),error:'unavailable',checkedAt:Date.now()};hltbPersist(game);return;}
   hltbCandidates.delete(id);hltbLoadingIds.add(id);renderHltbPanel(game);
   try{
     const response=await window.launcher.searchHltb(cleanQuery);
     const candidates=Array.isArray(response?.results)?rankHltbCandidates(game,response.results):[];
     if(!response?.ok||!candidates.length){game.hltb={...(game.hltb||{}),error:response?.error==='NO_RESULTS'?'not-found':'unavailable',checkedAt:Date.now(),hidden:false};hltbPersist(game);return;}
+    if(directLink?.id){const linked=candidates.find(candidate=>Number(candidate.id)===directLink.id);if(linked){hltbApplyMatch(game,linked,true);return;}}
     const exact=candidates.filter(candidate=>hltbTitleKey(candidate.title)===hltbTitleKey(game.title));
     if(exact.length===1&&!alwaysPick)hltbApplyMatch(game,exact[0]);
     else hltbShowPicker(game,candidates,cleanQuery);
