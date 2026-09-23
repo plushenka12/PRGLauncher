@@ -1826,9 +1826,9 @@ function hltbPersonalSummary(game,mainStoryMinutes){
   return `<div class="hltb-personal">${parts.join('')}</div>`;
 }
 function hltbPersist(game){save();pushToFb();renderGrid();if(detailId===game.id)renderHltbPanel(game);}
-function hltbApplyMatch(game,candidate){
+function hltbApplyMatch(game,candidate,manual=false){
   if(!game||!candidate)return;
-  game.hltb={id:candidate.id,title:candidate.title,year:candidate.year||null,mainStoryMinutes:candidate.mainStoryMinutes||null,mainExtraMinutes:candidate.mainExtraMinutes||null,completionistMinutes:candidate.completionistMinutes||null,allStylesMinutes:candidate.allStylesMinutes||null,sourceUrl:candidate.sourceUrl,checkedAt:Date.now(),fetchedAt:Date.now(),manualMatch:true,hidden:false};
+  game.hltb={id:candidate.id,title:candidate.title,year:candidate.year||null,mainStoryMinutes:candidate.mainStoryMinutes||null,mainExtraMinutes:candidate.mainExtraMinutes||null,completionistMinutes:candidate.completionistMinutes||null,allStylesMinutes:candidate.allStylesMinutes||null,sourceUrl:candidate.sourceUrl,checkedAt:Date.now(),fetchedAt:Date.now(),manualMatch:Boolean(manual),hidden:false};
   addGameHistory(game,'hltb',candidate.title,'HowLongToBeat');
   hltbCandidates.delete(game.id);hltbPersist(game);
 }
@@ -1870,7 +1870,7 @@ function bindHltbPanelActions(game){
     if(action==='refresh'){await lookupHltb(game.id,game.title,false);return;}
     if(action==='change'){await lookupHltb(game.id,game.title,true);return;}
     if(action==='search'){const query=panel.querySelector('#hltb-search-input')?.value?.trim();await lookupHltb(game.id,query,true);return;}
-    if(action==='select'){const picker=hltbCandidates.get(game.id);const candidate=picker?.candidates?.[Number(button.dataset.hltbIndex)];if(candidate)hltbApplyMatch(game,candidate);}
+    if(action==='select'){const picker=hltbCandidates.get(game.id);const candidate=picker?.candidates?.[Number(button.dataset.hltbIndex)];if(candidate)hltbApplyMatch(game,candidate,true);}
   });
 }
 async function lookupHltb(id,query,alwaysPick){
@@ -2610,6 +2610,7 @@ async function refreshAllHltb(){
   metadataRefreshBusy=true;metadataConflicts=[];setMetadataRefreshButtons(true);const conflicts=[];let updated=0;setMetadataRefreshLog([`HLTB: 0 / ${targets.length}`]);
   for(let index=0;index<targets.length;index++){
     const game=targets[index];
+    if(game.hltb?.id&&game.hltb?.manualMatch){updated++;setMetadataRefreshLog([`HLTB: ${index+1} / ${targets.length}`,`Оновлено: ${updated}`,`Конфлікти: ${conflicts.length}`,...(conflicts.length?['',...conflicts.map(metadataConflictLabel)]:[]) ]);continue;}
     try{
       const response=await window.launcher?.searchHltb?.(hltbSearchTitle(game.title));
       const candidates=Array.isArray(response?.results)?rankHltbCandidates(game,response.results):[];
@@ -2628,6 +2629,7 @@ async function refreshAllRawgCovers(){
   metadataRefreshBusy=true;metadataConflicts=[];setMetadataRefreshButtons(true);const conflicts=[];let updated=0;setMetadataRefreshLog([`RAWG: 0 / ${targets.length}`]);
   for(let index=0;index<targets.length;index++){
     const game=targets[index];
+    if(game.rawgId&&game.cover){updated++;setMetadataRefreshLog([`RAWG: ${index+1} / ${targets.length}`,`Оновлено: ${updated}`,`Конфлікти: ${conflicts.length}`,...(conflicts.length?['',...conflicts.map(metadataConflictLabel)]:[]) ]);continue;}
     try{const data=await searchRAWG(game.title),match=bestRawgMatch(game.title,data?.results);if(match?.background_image&&rawgMatchScore(game.title,match)>=70){game.cover=match.background_image;game.rawgId=match.id;updated++;}else conflicts.push({source:'RAWG',game,reason:match?.name?`можливий збіг: ${match.name}`:'не знайдено',candidates:match?[match]:[]});}catch{conflicts.push({source:'RAWG',game,reason:'помилка',candidates:[]});}
     setMetadataRefreshLog([`RAWG: ${index+1} / ${targets.length}`,`Оновлено: ${updated}`,`Конфлікти: ${conflicts.length}`,...(conflicts.length?['',...conflicts.map(metadataConflictLabel)]:[]) ]);
     await new Promise(resolve=>setTimeout(resolve,180));
