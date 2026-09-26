@@ -2350,7 +2350,7 @@ document.querySelectorAll('[data-add-source]').forEach(button=>button.addEventLi
   if(source==='rawg'){openAddModal();return;}
   if(source==='device'){
     const result=await window.launcher?.chooseExecutable?.();if(!result||result.canceled||!result.path)return;
-    openAddModal();const input=document.getElementById('f-executable');input.value=result.path;document.getElementById('local-executable-group').style.display='block';const base=result.path.split(/[\\/]/).pop().replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ');document.getElementById('f-search').value=base;document.getElementById('f-title').value=base;document.getElementById('f-search').dispatchEvent(new Event('input',{bubbles:true}));return;
+    openAddModal();const input=document.getElementById('f-executable');input.value=result.path;document.getElementById('local-executable-group').style.display='block';const base=result.path.split(/[\\/]/).pop().replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ');document.getElementById('f-search').value=base;document.getElementById('f-title').value=base;try{const rawg=await searchRAWG(base);const match=bestRawgMatch(base,rawg?.results);if(match){document.getElementById('f-title').value=match.name||base;document.getElementById('f-search').value=match.name||base;if(match.background_image){document.getElementById('f-cover').value=match.background_image;showCoverPreview(match.background_image);}}}catch(error){console.warn('[RAWG] Local game lookup failed',error);}return;
   }
 }));
 document.getElementById('modal-cancel').onclick=closeModal;
