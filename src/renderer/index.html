@@ -432,6 +432,7 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 
 .login-kicker{font:700 10px var(--fm);letter-spacing:.15em;color:var(--green);margin-bottom:9px}.login-copy{font-size:13px;line-height:1.5;color:var(--text2);margin:-12px 0 22px}.login-box input+input{margin-top:-10px}.login-google,.login-reset{width:100%;padding:11px;border-radius:10px;font:600 13px var(--fb);cursor:pointer;transition:.15s}.login-google{margin-top:11px;border:1px solid var(--border2);background:var(--bg3);color:var(--text)}.login-google:hover{border-color:var(--accent);background:var(--bg4)}.login-reset{margin-top:5px;border:0;background:transparent;color:var(--text3)}.login-reset:hover{color:var(--text2)}
 .steam-onboarding{max-width:560px;text-align:center}.steam-onboarding-icon{font-size:42px;margin-bottom:8px}.steam-onboarding-copy{color:var(--text2);font-size:13px;line-height:1.55;margin:-8px 0 20px}.steam-onboarding-actions{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}.steam-onboarding-skip{border:0;background:transparent;color:var(--text3);font:12px var(--fb);cursor:pointer}.steam-onboarding-skip:hover{color:var(--text2)}
+.add-source-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:15px}.add-source-btn{display:flex;align-items:center;gap:10px;text-align:left;border:1px solid var(--border);border-radius:11px;background:var(--bg3);color:var(--text);padding:13px;cursor:pointer;font:700 13px var(--fb);transition:.15s}.add-source-btn:hover{border-color:var(--accent);background:var(--bg4);transform:translateY(-1px)}.add-source-btn .source-icon{font-size:25px;width:30px;text-align:center}.add-source-btn small{display:block;color:var(--text3);font:11px var(--fb);margin-top:3px}
 </style>
 <style>.recap-month{border:0;background:transparent;padding:0;color:inherit;font:inherit}</style>
 </head>
@@ -578,6 +579,20 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
     <input class="form-input" id="steam-onboarding-url" placeholder="https://steamcommunity.com/id/твій-профіль" autocomplete="off">
     <div class="steam-onboarding-actions"><button class="btn btn-primary" id="steam-onboarding-import">Завантажити бібліотеку</button><button class="steam-onboarding-skip" id="steam-onboarding-skip">Зробити це пізніше</button></div>
     <p id="steam-onboarding-error" style="color:var(--coral);font-size:12px;min-height:18px;margin-top:10px"></p>
+  </div>
+</div>
+<div class="modal-overlay hidden" id="add-source-modal">
+  <div class="modal steam-onboarding" role="dialog" aria-modal="true" aria-labelledby="add-source-title">
+    <div class="steam-onboarding-icon">➕</div>
+    <div class="modal-title" id="add-source-title">Додати гру</div>
+    <p class="steam-onboarding-copy">Обери джерело. PRGLauncher покаже тільки підключені акаунти, а сторонню гру можна знайти через RAWG.</p>
+    <div class="add-source-grid" id="add-source-grid">
+      <button class="add-source-btn" data-add-source="steam"><span class="source-icon">🎮</span><span>Додати зі Steam<small>Вибір із бібліотеки</small></span></button>
+      <button class="add-source-btn" data-add-source="nintendo"><span class="source-icon">🕹️</span><span>Додати з Nintendo<small>Play activity</small></span></button>
+      <button class="add-source-btn" data-add-source="rawg"><span class="source-icon">🔎</span><span>Стороння гра<small>Пошук у RAWG</small></span></button>
+      <button class="add-source-btn" data-add-source="device"><span class="source-icon">📁</span><span>Гра з пристрою<small>Вибрати виконуваний файл</small></span></button>
+    </div>
+    <button class="steam-onboarding-skip" id="add-source-cancel">Скасувати</button>
   </div>
 </div>
 
@@ -819,6 +834,10 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
     <div class="form-group">
       <label class="form-label">Steam App ID <span style="color:var(--text3);font-weight:400;font-size:12px">— авто або вручну</span></label>
       <input class="form-input" id="f-steam-appid" type="number" placeholder="напр. 1245620 (Elden Ring)">
+    </div>
+    <div class="form-group" id="local-executable-group" style="display:none">
+      <label class="form-label">Виконуваний файл</label>
+      <input class="form-input" id="f-executable" type="text" readonly>
     </div>
     <div class="form-group">
       <label class="form-label">Cover URL</label>
@@ -1364,6 +1383,10 @@ async function launchAndTrack(gameId){
   const game=getGame(gameId);
   if(!game)return;
 
+  if(game.localExecutable&&window.launcher?.launchLocalGame){
+    try{const result=await window.launcher.launchLocalGame(game.localExecutable);if(result?.action==='requested'){startTimer(gameId,'local');return;}alert(result?.message||'Не вдалося запустити гру з пристрою.');}catch(error){console.error('[Local] Launch failed:',error);alert('Не вдалося запустити гру з пристрою.');}return;
+  }
+
   if(game.gogGameId&&window.launcher?.launchGogGame){
     try{const result=await window.launcher.launchGogGame({id:String(game.gogGameId),executable:game.gogExecutable||null});if(result?.action==='requested'){startTimer(gameId,'gog');return;}alert(result?.message||'Не вдалося запустити гру через GOG Galaxy.');}catch(error){console.error('[GOG] Launch failed:',error);alert('Не вдалося запустити гру через GOG Galaxy.');}return;
   }
@@ -1727,6 +1750,7 @@ function openAddModal(){
   document.getElementById('rawg-chips').style.display='none';
   document.getElementById('rawg-chips').dataset.genres='[]';
   document.getElementById('rawg-chips').dataset.tags='[]';
+  document.getElementById('local-executable-group').style.display='none';document.getElementById('f-executable').value='';
   showCoverPreview(''); setPlatformUI('PC'); setRatingUI(0);
   populateYearSelect(THIS_YEAR);
   document.getElementById('game-modal').classList.remove('hidden');
@@ -1742,6 +1766,7 @@ function openEditModal(id,returnToDetail=false){
   document.getElementById('f-backlog-priority').value=game.backlogPriority||'Later';
   document.getElementById('f-cover').value=game.cover||'';
   document.getElementById('f-notes').value=game.notes||'';
+  document.getElementById('f-executable').value=game.localExecutable||'';document.getElementById('local-executable-group').style.display=game.localExecutable?'block':'none';
   const chips=document.getElementById('rawg-chips');
   chips.dataset.genres=JSON.stringify(game.genres||[]);
   chips.dataset.tags=JSON.stringify(game.tags||[]);
@@ -1773,7 +1798,8 @@ function saveModal(){
   const steamAppId=manualAppId||(chips.dataset.steamAppId?parseInt(chips.dataset.steamAppId)||null:null);
   const yr=parseInt(document.getElementById('f-year').value)||THIS_YEAR;
   const status=document.getElementById('f-status').value;
-  const d={title,status,platform:selectedPlatform,cover:document.getElementById('f-cover').value.trim()||null,notes:document.getElementById('f-notes').value.trim()||null,genres,tags,rating:selectedRating||null,steamAppId,backlogPriority:status==='Backlog'?document.getElementById('f-backlog-priority').value:'Later'};
+  const localExecutable=document.getElementById('f-executable')?.value.trim()||null;
+  const d={title,status,platform:selectedPlatform,cover:document.getElementById('f-cover').value.trim()||null,notes:document.getElementById('f-notes').value.trim()||null,genres,tags,rating:selectedRating||null,steamAppId,localExecutable,backlogPriority:status==='Backlog'?document.getElementById('f-backlog-priority').value:'Later'};
   let savedGameId=editingId;
   if(editingId){
     const g=getGame(editingId);
@@ -2307,7 +2333,26 @@ function guestBlock() {
 }
 
 // EVENTS
-document.getElementById('add-game-btn').onclick=()=>{if(!guestBlock())openAddModal();};
+function openAddSourceModal(){
+  if(guestBlock())return;
+  const steamConnected=Boolean(localStorage.getItem(profileStorageKey('gv-steam-profile-url'))||document.getElementById('steam-profile-url')?.value.trim());
+  const nintendoConnected=Boolean(nintendoProfileReady);
+  const steamButton=document.querySelector('[data-add-source="steam"]');const nintendoButton=document.querySelector('[data-add-source="nintendo"]');
+  if(steamButton)steamButton.style.display=steamConnected?'flex':'none';if(nintendoButton)nintendoButton.style.display=nintendoConnected?'flex':'none';
+  document.getElementById('add-source-modal').classList.remove('hidden');
+}
+document.getElementById('add-game-btn').onclick=openAddSourceModal;
+document.getElementById('add-source-cancel').onclick=()=>document.getElementById('add-source-modal').classList.add('hidden');
+document.querySelectorAll('[data-add-source]').forEach(button=>button.addEventListener('click',async()=>{
+  const source=button.dataset.addSource;document.getElementById('add-source-modal').classList.add('hidden');
+  if(source==='steam'){await openSteamImport('profile');return;}
+  if(source==='nintendo'){document.getElementById('settings-modal').classList.remove('hidden');requestAnimationFrame(()=>document.getElementById('settings-modal')?.querySelector('.settings-modal')?.focus());await loadNintendoHistory(true);return;}
+  if(source==='rawg'){openAddModal();return;}
+  if(source==='device'){
+    const result=await window.launcher?.chooseExecutable?.();if(!result||result.canceled||!result.path)return;
+    openAddModal();const input=document.getElementById('f-executable');input.value=result.path;document.getElementById('local-executable-group').style.display='block';const base=result.path.split(/[\\/]/).pop().replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ');document.getElementById('f-search').value=base;document.getElementById('f-title').value=base;document.getElementById('f-search').dispatchEvent(new Event('input',{bubbles:true}));return;
+  }
+}));
 document.getElementById('modal-cancel').onclick=closeModal;
 document.getElementById('modal-save').onclick=()=>{if(!guestBlock())saveModal();};
 document.getElementById('d-close').onclick=closeDetail;
@@ -2727,8 +2772,8 @@ document.getElementById('backlog-import-clear-all').onclick=()=>setBacklogImport
 document.getElementById('backlog-import-skip').onclick=()=>document.getElementById('backlog-import-modal').classList.add('hidden');
 function mergeSteamPlaytime(game,source,wasSteamLinked){const minutes=Number(source?.minutes);if(!Number.isFinite(minutes)||minutes<0)return;if(game.steamLastSeenMinutes===undefined||game.steamLastSeenMinutes===null){game.steamLastSeenMinutes=minutes;if(!wasSteamLinked)game.playtime=Math.max(0,Number(game.playtime||0))+minutes*60000;return;}const previous=Number(game.steamLastSeenMinutes||0);if(minutes>previous){game.playtime=Math.max(0,Number(game.playtime||0))+(minutes-previous)*60000;game.steamLastSeenMinutes=minutes;}}
 document.getElementById('backlog-import-add').onclick=()=>{const rows=[...document.querySelectorAll('#backlog-import-list .backlog-import-row')];let added=0,merged=0;rows.forEach(row=>{const checkbox=row.querySelector('input[type="checkbox"]');if(!checkbox?.checked)return;const appId=Number(checkbox.dataset.appid);const source=backlogImportGames.find(game=>game.appId===appId);if(!source)return;const sourceTitle=String(source.title||'');const canMatchTitle=sourceTitle&&!/^Steam game #\d+$/i.test(sourceTitle);const titleKey=canMatchTitle?normalizeBackloggdTitle(sourceTitle):'';const existing=games.find(game=>Number(game.steamAppId)===appId||(titleKey&&normalizeBackloggdTitle(game.title)===titleKey));const selectedStatus=row.querySelector('select')?.value||'Backlog';if(existing){const wasSteamLinked=Boolean(existing.steamAppId);existing.steamAppId=appId;existing.steamLastSeenMinutes=existing.steamLastSeenMinutes===undefined&&wasSteamLinked?Number(source.minutes||0):existing.steamLastSeenMinutes;existing.platforms=Array.isArray(existing.platforms)?existing.platforms:['PC'];if(!existing.platforms.includes('PC'))existing.platforms.push('PC');addGameSource(existing,{type:'steam',id:String(appId),platform:'PC'});if(!existing.cover&&source.cover)existing.cover=source.cover;mergeSteamPlaytime(existing,source,wasSteamLinked);if(existing.status!==selectedStatus){const previous=existing.status;existing.status=selectedStatus;addGameHistory(existing,'status',{from:previous,to:selectedStatus},'Steam Import');}addGameHistory(existing,'import',null,'Steam Import');merged++;return;}const now=Date.now();const created={id:uid(),title:sourceTitle||`Steam game #${appId}`,status:selectedStatus,platform:'PC',platforms:['PC'],cover:source.cover||null,notes:null,genres:[],tags:['Steam Import'],rating:null,steamAppId:appId,steamLastSeenMinutes:Number.isFinite(Number(source.minutes))?Number(source.minutes):null,sources:[{type:'steam',id:String(appId),platform:'PC'}],playtime:Math.max(0,Number(source.minutes)||0)*60000,sessions:[],lastPlayed:null,added:now};games.unshift(created);addGameHistory(created,'added',null,'Steam Import',now);added++;});if(added||merged){save();pushToFb();buildFilterBar();renderGrid();updateStats();}document.getElementById('backlog-import-modal').classList.add('hidden');};
-['game-modal','detail-modal','time-modal','refetch-modal','backlog-import-modal','backloggd-import-modal','gog-import-modal','steam-discovered-modal','settings-modal','steam-onboarding-modal'].forEach(id=>{document.getElementById(id).addEventListener('click',e=>{if(e.target===e.currentTarget)document.getElementById(id).classList.add('hidden');});});
-document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(document.getElementById('quick-status-menu')){closeQuickStatusMenu();return;}['game-modal','detail-modal','time-modal','refetch-modal','backlog-import-modal','backloggd-import-modal','gog-import-modal','steam-discovered-modal','settings-modal','steam-onboarding-modal'].forEach(id=>document.getElementById(id).classList.add('hidden'));});
+['game-modal','detail-modal','time-modal','refetch-modal','backlog-import-modal','backloggd-import-modal','gog-import-modal','steam-discovered-modal','settings-modal','steam-onboarding-modal','add-source-modal'].forEach(id=>document.getElementById(id).addEventListener('click',e=>{if(e.target===e.currentTarget)document.getElementById(id).classList.add('hidden');}));
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(document.getElementById('quick-status-menu')){closeQuickStatusMenu();return;}['game-modal','detail-modal','time-modal','refetch-modal','backlog-import-modal','backloggd-import-modal','gog-import-modal','steam-discovered-modal','settings-modal','steam-onboarding-modal','add-source-modal'].forEach(id=>document.getElementById(id).classList.add('hidden'));});
 document.addEventListener('visibilitychange',()=>{ if(!document.hidden&&activeGameId&&activeStart){clearInterval(timerInterval);tickTimer();timerInterval=setInterval(tickTimer,500);} });
 window.addEventListener('beforeunload',()=>{if(activeGameId)stopTimer(false);});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&nintendoPendingNotice.length){showNintendoToast(nintendoPendingNotice);nintendoPendingNotice=[];localStorage.removeItem(profileStorageKey('gv-nintendo-pending-notice-v1'));}});

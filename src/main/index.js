@@ -773,6 +773,29 @@ ipcMain.handle('steam:getRunningAppId', async () => {
 })
 
 ipcMain.handle('gog:installedGames', async () => ({ ok: true, games: getGogInstalledGames() }))
+ipcMain.handle('local:chooseExecutable', async () => {
+  const filters = process.platform === 'win32'
+    ? [{ name: 'Executable', extensions: ['exe', 'bat', 'cmd'] }]
+    : process.platform === 'darwin'
+      ? [{ name: 'Application', extensions: ['app'] }]
+      : []
+  const result = await dialog.showOpenDialog(mainWindow, { title: 'Choose game executable', properties: ['openFile'], filters })
+  if (result.canceled || !result.filePaths[0]) return { canceled: true }
+  return { canceled: false, path: result.filePaths[0] }
+})
+
+ipcMain.handle('local:launchGame', async (_, executablePath) => {
+  const executable = String(executablePath || '')
+  if (!executable || !path.isAbsolute(executable) || !fs.existsSync(executable)) return { action: 'error', message: 'Executable was not found' }
+  if (process.platform === 'darwin' && executable.toLowerCase().endsWith('.app')) {
+    const error = await shell.openPath(executable)
+    return error ? { action: 'error', message: error } : { action: 'requested' }
+  }
+  const child = spawn(executable, [], { detached: true, stdio: 'ignore', windowsHide: true })
+  child.unref()
+  return { action: 'requested' }
+})
+
 ipcMain.handle('gog:launchGame', async (_, payload) => {
   const id = String(payload?.id || '')
   const cached = gogGameCache.get(id)

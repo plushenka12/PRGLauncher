@@ -19,6 +19,8 @@ contextBridge.exposeInMainWorld('launcher', {
   // GOG Galaxy (local installed-game scan; no account credentials)
   getGogInstalledGames: () => ipcRenderer.invoke('gog:installedGames'),
   launchGogGame: (payload) => ipcRenderer.invoke('gog:launchGame', payload),
+  chooseExecutable: () => ipcRenderer.invoke('local:chooseExecutable'),
+  launchLocalGame: (executable) => ipcRenderer.invoke('local:launchGame', executable),
 
   // HowLongToBeat (keyless, on-demand metadata lookup)
   searchHltb: (query) => ipcRenderer.invoke('hltb:search', query),
