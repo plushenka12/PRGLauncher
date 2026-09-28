@@ -19,12 +19,12 @@ jobs:
 
     steps:
       - name: Check out the release tag
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ inputs.tag }}
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 20
           cache: npm
@@ -36,7 +36,7 @@ jobs:
         run: npm run build -- --publish never
 
       - name: Create or update GitHub Release
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         env:
           RELEASE_TAG: ${{ inputs.tag }}
         with:
@@ -92,6 +92,11 @@ jobs:
               `PRGLauncher-Setup-${tag}.exe.blockmap`,
               'latest.yml',
             ];
+            const contentTypes = {
+              '.exe': 'application/vnd.microsoft.portable-executable',
+              '.blockmap': 'application/octet-stream',
+              '.yml': 'text/yaml',
+            };
             const existing = new Map(release.assets.map(asset => [asset.name, asset]));
             for (const name of files) {
               const asset = existing.get(name);
@@ -100,6 +105,6 @@ jobs:
               const data = fs.readFileSync(filePath);
               await github.rest.repos.uploadReleaseAsset({
                 owner, repo, release_id: release.id, name, data,
-                headers: { 'content-type': 'application/octet-stream', 'content-length': data.length },
+                headers: { 'content-type': contentTypes[path.extname(name)] || 'application/octet-stream', 'content-length': data.length },
               });
             }
