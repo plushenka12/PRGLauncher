@@ -480,7 +480,7 @@ function hltbHeader(headers, name) {
 }
 
 function createHltbPayload(query, credentials) {
-  return {
+  const payload = {
     searchType: 'games',
     searchTerms: query.toLowerCase().split(/\s+/),
     searchPage: 1,
@@ -489,9 +489,10 @@ function createHltbPayload(query, credentials) {
       games: { userId: 0, platform: '', sortCategory: 'popular', rangeCategory: 'main', rangeTime: { min: null, max: null }, gameplay: { perspective: '', flow: '', genre: '', difficulty: '' }, rangeYear: { min: '', max: '' }, modifier: '' },
       users: { sortCategory: 'postcount' }, lists: { sortCategory: 'follows' }, filter: '', sort: 0, randomizer: 0
     },
-    useCache: true,
-    [credentials.hpKey]: credentials.hpValue
+    useCache: true
   }
+  if (credentials.hpKey && credentials.hpValue) payload[credentials.hpKey] = credentials.hpValue
+  return payload
 }
 
 function captureHltbCredentials() {
@@ -534,7 +535,7 @@ function captureHltbCredentials() {
         const authToken = hltbHeader(details.requestHeaders, 'x-auth-token')
         const hpKey = hltbHeader(details.requestHeaders, 'x-hp-key')
         const hpValue = hltbHeader(details.requestHeaders, 'x-hp-val')
-        if (!authToken || !hpKey || !hpValue) return
+        if (!authToken) return
         finish({ authToken, hpKey, hpValue, userAgent: hltbHeader(details.requestHeaders, 'user-agent') || '' }, String(details.url || '').split('?')[0])
       })
       lookupWindow.webContents.on('did-fail-load', (_event, code, _description, _url, isMainFrame) => {
@@ -560,9 +561,7 @@ function postHltbSearch(query, credentials) {
         Origin: HLTB_ORIGIN,
         Referer: `${HLTB_ORIGIN}/`,
         'User-Agent': credentials.userAgent,
-        'x-auth-token': credentials.authToken,
-        'x-hp-key': credentials.hpKey,
-        'x-hp-val': credentials.hpValue
+        'x-auth-token': credentials.authToken
       }
     }, response => {
       let text = ''
@@ -574,6 +573,8 @@ function postHltbSearch(query, credentials) {
         resolve({ status: response.statusCode || 0, payload })
       })
     })
+    if (credentials.hpKey) request.setHeader('x-hp-key', credentials.hpKey)
+    if (credentials.hpValue) request.setHeader('x-hp-val', credentials.hpValue)
     request.setTimeout(15000, () => request.destroy())
     request.on('error', () => resolve({ status: 0, payload: null }))
     request.end(body)
