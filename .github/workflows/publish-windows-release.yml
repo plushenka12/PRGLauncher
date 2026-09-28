@@ -6,7 +6,7 @@ on:
       tag:
         description: Existing release tag to build and publish
         required: true
-        default: '1.2.2'
+        default: '1.2.3'
         type: string
 
 permissions:
@@ -45,7 +45,7 @@ jobs:
             const path = require('path');
             const { owner, repo } = context.repo;
             const tag = process.env.RELEASE_TAG;
-            const title = `PRGLauncher ${tag} — великий UI та акаунт-апдейт`;
+            const title = `PRGLauncher ${tag} — unified game adding, recap та HLTB`;
             const body = [
               `## PRGLauncher ${tag}`,
               '',
@@ -63,6 +63,10 @@ jobs:
               '- macOS universal DMG з коректною template-іконкою menu bar та launcher-ініційованим приховуванням Steam.',
               '- Виправлено встановлення через Steam: лаунчер не забирає фокус до вибору бібліотеки, а Steam ховається лише після початку завантаження.',
               '- На картках прибрано дубльовану статистику при наведенні; кількість сесій показується на обкладинці, а шрифти фільтрів уніфіковано.',
+              '- Єдиний центр «Додати гру» для Steam, Nintendo, RAWG та локальних executable-файлів.',
+              '- Локальні `.exe`/`.app`-ігри автоматично отримують RAWG-метадані та запускаються з таймером.',
+              '- Оновлено PRG Recap: чіткий грід, топ із міні-обкладинками, найдовша сесія та місячна активність.',
+              '- HLTB адаптовано до динамічних endpoint-ів і нового token flow.',
               '',
               '### Встановлення',
               `Завантаж **PRGLauncher-Setup-${tag}.exe**, запусти інсталятор і залиш стандартні опції. Надалі PRGLauncher зможе запропонувати оновлення сам.`,
