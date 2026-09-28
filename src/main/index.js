@@ -45,6 +45,7 @@ let hltbSearchInFlight = null
 let hltbLastRequestAt = 0
 let hltbCredentials = null
 let hltbCredentialsExpiry = 0
+let hltbSearchEndpoint = null
 let backloggdImportWindow = null
 const launchedAtLogin = process.argv.includes('--hidden')
 const opacityAnimations = new Map()
@@ -494,12 +495,12 @@ function createHltbPayload(query, credentials) {
 }
 
 function captureHltbCredentials() {
-  if (hltbCredentials && Date.now() < hltbCredentialsExpiry) return Promise.resolve(hltbCredentials)
+  if (hltbCredentials && hltbSearchEndpoint && Date.now() < hltbCredentialsExpiry) return Promise.resolve(hltbCredentials)
   return new Promise(resolve => {
     let lookupWindow = null
     let lookupSession = null
     let settled = false
-    const finish = credentials => {
+    const finish = (credentials, endpoint = null) => {
       if (settled) return
       settled = true
       clearTimeout(timeout)
@@ -507,6 +508,7 @@ function captureHltbCredentials() {
       if (lookupWindow && !lookupWindow.isDestroyed()) lookupWindow.destroy()
       if (credentials) {
         hltbCredentials = credentials
+        if (endpoint) hltbSearchEndpoint = endpoint
         hltbCredentialsExpiry = Date.now() + HLTB_CREDENTIAL_CACHE_MS
       }
       resolve(credentials || null)
@@ -523,14 +525,17 @@ function captureHltbCredentials() {
         webPreferences: { partition, contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: false }
       })
       lookupSession = lookupWindow.webContents.session
-      lookupSession.webRequest.onBeforeSendHeaders({ urls: [`${HLTB_ORIGIN}/api/search/site*`] }, (details, callback) => {
+      // HLTB periodically renames its search endpoint (/api/search/site,
+      // /api/find, /api/locate, ...). Watch the actual authenticated POST
+      // instead of hard-coding one historical path.
+      lookupSession.webRequest.onBeforeSendHeaders({ urls: [`${HLTB_ORIGIN}/api/*`] }, (details, callback) => {
         callback({ cancel: false, requestHeaders: details.requestHeaders })
         if (details.method !== 'POST') return
         const authToken = hltbHeader(details.requestHeaders, 'x-auth-token')
         const hpKey = hltbHeader(details.requestHeaders, 'x-hp-key')
         const hpValue = hltbHeader(details.requestHeaders, 'x-hp-val')
         if (!authToken || !hpKey || !hpValue) return
-        finish({ authToken, hpKey, hpValue, userAgent: hltbHeader(details.requestHeaders, 'user-agent') || '' })
+        finish({ authToken, hpKey, hpValue, userAgent: hltbHeader(details.requestHeaders, 'user-agent') || '' }, String(details.url || '').split('?')[0])
       })
       lookupWindow.webContents.on('did-fail-load', (_event, code, _description, _url, isMainFrame) => {
         if (isMainFrame && code !== -3) finish(null)
@@ -545,7 +550,7 @@ function captureHltbCredentials() {
 function postHltbSearch(query, credentials) {
   return new Promise(resolve => {
     const body = JSON.stringify(createHltbPayload(query, credentials))
-    const request = https.request(`${HLTB_ORIGIN}/api/search/site`, {
+    const request = https.request(hltbSearchEndpoint || `${HLTB_ORIGIN}/api/search/site`, {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -603,6 +608,7 @@ async function searchHltb(query) {
       if (![401, 403, 404].includes(response.status) || attempt === 1) return { ok: false, error: 'HLTB_UNAVAILABLE', results: [] }
       hltbCredentials = null
       hltbCredentialsExpiry = 0
+      hltbSearchEndpoint = null
     }
     return { ok: false, error: 'HLTB_UNAVAILABLE', results: [] }
   })()
