@@ -434,7 +434,17 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 .steam-onboarding{max-width:560px;text-align:center}.steam-onboarding-icon{font-size:42px;margin-bottom:8px}.steam-onboarding-copy{color:var(--text2);font-size:13px;line-height:1.55;margin:-8px 0 20px}.steam-onboarding-actions{display:flex;gap:8px;justify-content:center;margin-top:12px;flex-wrap:wrap}.steam-onboarding-skip{border:0;background:transparent;color:var(--text3);font:12px var(--fb);cursor:pointer}.steam-onboarding-skip:hover{color:var(--text2)}
 .add-source-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:15px}.add-source-btn{display:flex;align-items:center;gap:10px;text-align:left;border:1px solid var(--border);border-radius:11px;background:var(--bg3);color:var(--text);padding:13px;cursor:pointer;font:700 13px var(--fb);transition:.15s}.add-source-btn:hover{border-color:var(--accent);background:var(--bg4);transform:translateY(-1px)}.add-source-btn .source-icon{font-size:25px;width:30px;text-align:center}.add-source-btn small{display:block;color:var(--text3);font:11px var(--fb);margin-top:3px}
 </style>
-<style>.recap-month{border:0;background:transparent;padding:0;color:inherit;font:inherit}</style>
+<style>
+.recap-month{border:0;background:transparent;padding:0;color:inherit;font:inherit}
+.recap-row{grid-template-columns:30px 42px minmax(0,1fr) 58px;padding:5px 0;gap:9px}
+.recap-row-rank{font:900 19px var(--fh);color:var(--accent2);text-align:center}
+.recap-row:first-child .recap-row-rank{color:var(--green)}
+.recap-row-cover{width:42px;height:42px;border-radius:6px;object-fit:cover;background:var(--bg4);border:1px solid var(--border)}
+.recap-row-name{font-weight:700}
+.recap-row-track{height:7px;margin-top:6px}
+.recap-row-time{color:var(--text);font-weight:700}
+.recap-fun-line{margin-top:14px;padding:10px 12px;border:1px solid color-mix(in srgb,var(--accent) 35%,var(--border));border-radius:9px;background:color-mix(in srgb,var(--accent) 10%,transparent);color:var(--text2);font-size:12px;line-height:1.45}
+</style>
 </head>
 <body>
 <div id="login-overlay">
@@ -587,10 +597,10 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
     <div class="modal-title" id="add-source-title">Додати гру</div>
     <p class="steam-onboarding-copy">Обери джерело. PRGLauncher покаже тільки підключені акаунти, а сторонню гру можна знайти через RAWG.</p>
     <div class="add-source-grid" id="add-source-grid">
-      <button class="add-source-btn" data-add-source="steam"><span class="source-icon">🎮</span><span>Додати зі Steam<small>Вибір із бібліотеки</small></span></button>
-      <button class="add-source-btn" data-add-source="nintendo"><span class="source-icon">🕹️</span><span>Додати з Nintendo<small>Play activity</small></span></button>
-      <button class="add-source-btn" data-add-source="rawg"><span class="source-icon">🔎</span><span>Стороння гра<small>Пошук у RAWG</small></span></button>
-      <button class="add-source-btn" data-add-source="device"><span class="source-icon">📁</span><span>Гра з пристрою<small>Вибрати виконуваний файл</small></span></button>
+      <button class="add-source-btn" data-add-source="steam" data-tooltip="Вибрати ігри з підключеного Steam-профілю"><span class="source-icon" aria-hidden="true">🎮</span><span>Додати зі Steam<small>Вибір із бібліотеки</small></span></button>
+      <button class="add-source-btn" data-add-source="nintendo" data-tooltip="Вибрати ігри з Nintendo Play Activity"><span class="source-icon" aria-hidden="true">🕹️</span><span>Додати з Nintendo<small>Play activity</small></span></button>
+      <button class="add-source-btn" data-add-source="rawg" data-tooltip="Знайти сторонню гру в RAWG"><span class="source-icon" aria-hidden="true">🔎</span><span>Стороння гра<small>Пошук у RAWG</small></span></button>
+      <button class="add-source-btn" data-add-source="device" data-tooltip="Вибрати виконуваний файл на цьому пристрої"><span class="source-icon" aria-hidden="true">📁</span><span>Гра з пристрою<small>Вибрати виконуваний файл</small></span></button>
     </div>
     <button class="steam-onboarding-skip" id="add-source-cancel">Скасувати</button>
   </div>
@@ -837,7 +847,11 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
     </div>
     <div class="form-group" id="local-executable-group" style="display:none">
       <label class="form-label">Виконуваний файл</label>
-      <input class="form-input" id="f-executable" type="text" readonly>
+      <div style="display:flex;gap:8px"><input class="form-input" id="f-executable" type="text" readonly><button class="btn btn-ghost btn-sm" id="f-executable-choose" type="button">Змінити</button></div>
+      <label class="form-label" for="f-working-directory" style="margin-top:10px">Робоча папка <span style="color:var(--text3);font-weight:400">— необов’язково</span></label>
+      <input class="form-input" id="f-working-directory" type="text" placeholder="За замовчуванням — папка гри">
+      <label class="form-label" for="f-launch-arguments" style="margin-top:10px">Параметри запуску <span style="color:var(--text3);font-weight:400">— необов’язково</span></label>
+      <input class="form-input" id="f-launch-arguments" type="text" placeholder="Напр. --fullscreen">
     </div>
     <div class="form-group">
       <label class="form-label">Cover URL</label>
@@ -1384,7 +1398,7 @@ async function launchAndTrack(gameId){
   if(!game)return;
 
   if(game.localExecutable&&window.launcher?.launchLocalGame){
-    try{const result=await window.launcher.launchLocalGame(game.localExecutable);if(result?.action==='requested'){startTimer(gameId,'local');return;}alert(result?.message||'Не вдалося запустити гру з пристрою.');}catch(error){console.error('[Local] Launch failed:',error);alert('Не вдалося запустити гру з пристрою.');}return;
+    try{const result=await window.launcher.launchLocalGame({executable:game.localExecutable,workingDirectory:game.workingDirectory||'',arguments:game.launchArguments||''});if(result?.action==='requested'){startTimer(gameId,'local');return;}alert(result?.message||'Не вдалося запустити гру з пристрою.');}catch(error){console.error('[Local] Launch failed:',error);alert('Не вдалося запустити гру з пристрою.');}return;
   }
 
   if(game.gogGameId&&window.launcher?.launchGogGame){
@@ -1695,7 +1709,7 @@ function renderGrid(){
     const coverDiv=document.createElement('div');coverDiv.className='card-cover';coverDiv.appendChild(coverEl(game));
     coverDiv.appendChild(createStatusButton(game));
     if(totalMs>0||isActive){const tb=document.createElement('span');tb.className='card-timer-badge';tb.textContent=fmtTime(totalMs);coverDiv.appendChild(tb);}
-    if(game.platform){const pb=document.createElement('span');pb.className='card-platform-badge';pb.textContent=(PLATFORM_ICONS[game.platform]||'')+' '+game.platform;coverDiv.appendChild(pb);}
+    if(game.platform){const pb=document.createElement('span');pb.className='card-platform-badge';pb.textContent=(PLATFORM_ICONS[game.platform]||'')+' '+game.platform;pb.title=t('Платформа гри: ')+game.platform;pb.dataset.tooltip=t('Платформа гри: ')+game.platform;coverDiv.appendChild(pb);}
     const sessionCount=(game.sessions||[]).length;
     const sb=document.createElement('span');sb.className='card-session-badge';sb.textContent=sessionCountText(sessionCount);if(game.rating)sb.classList.add('has-rating');coverDiv.appendChild(sb);
     if(game.rating){const rb=document.createElement('span');rb.className='card-rating';rb.innerHTML='★ '+game.rating+'/10';coverDiv.appendChild(rb);}
@@ -1750,7 +1764,7 @@ function openAddModal(){
   document.getElementById('rawg-chips').style.display='none';
   document.getElementById('rawg-chips').dataset.genres='[]';
   document.getElementById('rawg-chips').dataset.tags='[]';
-  document.getElementById('local-executable-group').style.display='none';document.getElementById('f-executable').value='';
+  document.getElementById('local-executable-group').style.display='none';document.getElementById('f-executable').value='';document.getElementById('f-working-directory').value='';document.getElementById('f-launch-arguments').value='';
   showCoverPreview(''); setPlatformUI('PC'); setRatingUI(0);
   populateYearSelect(THIS_YEAR);
   document.getElementById('game-modal').classList.remove('hidden');
@@ -1766,7 +1780,7 @@ function openEditModal(id,returnToDetail=false){
   document.getElementById('f-backlog-priority').value=game.backlogPriority||'Later';
   document.getElementById('f-cover').value=game.cover||'';
   document.getElementById('f-notes').value=game.notes||'';
-  document.getElementById('f-executable').value=game.localExecutable||'';document.getElementById('local-executable-group').style.display=game.localExecutable?'block':'none';
+  document.getElementById('f-executable').value=game.localExecutable||'';document.getElementById('f-working-directory').value=game.workingDirectory||'';document.getElementById('f-launch-arguments').value=game.launchArguments||'';document.getElementById('local-executable-group').style.display=game.localExecutable?'block':'none';
   const chips=document.getElementById('rawg-chips');
   chips.dataset.genres=JSON.stringify(game.genres||[]);
   chips.dataset.tags=JSON.stringify(game.tags||[]);
@@ -1799,7 +1813,9 @@ function saveModal(){
   const yr=parseInt(document.getElementById('f-year').value)||THIS_YEAR;
   const status=document.getElementById('f-status').value;
   const localExecutable=document.getElementById('f-executable')?.value.trim()||null;
-  const d={title,status,platform:selectedPlatform,cover:document.getElementById('f-cover').value.trim()||null,notes:document.getElementById('f-notes').value.trim()||null,genres,tags,rating:selectedRating||null,steamAppId,localExecutable,backlogPriority:status==='Backlog'?document.getElementById('f-backlog-priority').value:'Later'};
+  const workingDirectory=document.getElementById('f-working-directory')?.value.trim()||null;
+  const launchArguments=document.getElementById('f-launch-arguments')?.value.trim()||null;
+  const d={title,status,platform:selectedPlatform,cover:document.getElementById('f-cover').value.trim()||null,notes:document.getElementById('f-notes').value.trim()||null,genres,tags,rating:selectedRating||null,steamAppId,localExecutable,workingDirectory,launchArguments,backlogPriority:status==='Backlog'?document.getElementById('f-backlog-priority').value:'Later'};
   let savedGameId=editingId;
   if(editingId){
     const g=getGame(editingId);
@@ -2149,13 +2165,15 @@ function renderStatsPage(){
   const yearTop=yearGames[0];const yearTopGame=yearTop?.game||null;
   const monthMs=Array.from({length:12},()=>0);const monthSessions=Array.from({length:12},()=>0);yearSessions.forEach(session=>{const month=new Date(session.start).getMonth();monthMs[month]+=Number(session.dur||0);monthSessions[month]++;});games.forEach(game=>{if(yearByGame.has(game.id)&&!yearSessions.some(session=>session.game.id===game.id)&&Number(game.playtime)>0&&game.lastPlayed){const month=new Date(game.lastPlayed);if(month.getFullYear()===recapYear)monthMs[month.getMonth()]+=Number(game.playtime||0);}});
   const maxMonth=Math.max(...monthMs,1);const monthNames=currentLanguage==='en'?['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']:['Січ','Лют','Бер','Кві','Тра','Чер','Лип','Сер','Вер','Жов','Лис','Гру'];
+  const maxMonthIndex=monthMs.indexOf(Math.max(...monthMs));const averageSession=yearSessions.length?yearMs/yearSessions.length:0;
   const platformMs=new Map();yearGames.forEach(({game,ms})=>{const platform=game.platform||'Other';platformMs.set(platform,(platformMs.get(platform)||0)+ms);});
   const esc=value=>escapeHltbHtml(value??'');
-  const topRows=yearGames.slice(0,5).map(({game,ms},index)=>`<div class="recap-row"><div><div class="recap-row-name"><span style="color:var(--text3);margin-right:6px">${index+1}</span>${esc(game.title)}</div><div class="recap-row-track"><div class="recap-row-fill" style="width:${Math.max(5,Math.round(ms/(yearTop?.ms||1)*100))}%"></div></div></div><div class="recap-row-time">${fmtHours(ms)}</div></div>`).join('')||`<div class="year-recap-sub">${t('Ще немає сесій')}</div>`;
+  const topRows=yearGames.slice(0,5).map(({game,ms},index)=>`<div class="recap-row"><div class="recap-row-rank">${index+1}</div>${game.cover?`<img class="recap-row-cover" src="${esc(game.cover)}" alt="" loading="lazy">`:'<div class="recap-row-cover"></div>'}<div><div class="recap-row-name" title="${esc(game.title)}">${esc(game.title)}</div><div class="recap-row-track"><div class="recap-row-fill" style="width:${Math.max(5,Math.round(ms/(yearTop?.ms||1)*100))}%"></div></div></div><div class="recap-row-time">${fmtHours(ms)}</div></div>`).join('')||`<div class="year-recap-sub">${t('Ще немає сесій')}</div>`;
   const platformRows=[...platformMs.entries()].sort((a,b)=>b[1]-a[1]).slice(0,4).map(([platform,ms])=>`<div class="recap-row"><div><div class="recap-row-name">${esc(platform)}</div><div class="recap-row-track"><div class="recap-row-fill" style="width:${Math.max(5,Math.round(ms/(yearMs||1)*100))}%"></div></div></div><div class="recap-row-time">${fmtHours(ms)}</div></div>`).join('')||`<div class="year-recap-sub">—</div>`;
-  const maxMonthIndex=monthMs.indexOf(Math.max(...monthMs));const monthRows=monthMs.map((ms,index)=>`<button class="recap-month ${index===maxMonthIndex?'active':''}" type="button" data-month-index="${index}" title="${monthNames[index]}: ${fmtHours(ms)}"><div class="recap-month-bar" style="height:${Math.max(3,Math.round(ms/maxMonth*82))}px"></div><div class="recap-month-label">${index===maxMonthIndex?'★ ':''}${monthNames[index]}</div></button>`).join('');
+  const monthRows=monthMs.map((ms,index)=>`<button class="recap-month ${index===maxMonthIndex?'active':''}" type="button" data-month-index="${index}" title="${monthNames[index]}: ${fmtHours(ms)}"><div class="recap-month-bar" style="height:${Math.max(3,Math.round(ms/maxMonth*82))}px"></div><div class="recap-month-label">${index===maxMonthIndex?'★ ':''}${monthNames[index]}</div></button>`).join('');
   const yearGameCards=yearGames.map(({game,ms})=>`<article class="recap-year-game">${game.cover?`<img class="recap-year-game-cover" src="${esc(game.cover)}" alt="" loading="lazy">`:'<div class="recap-year-game-cover"></div>'}<div class="recap-year-game-body"><div class="recap-year-game-name">${esc(game.title)}</div><div class="recap-year-game-meta">${fmtHours(ms)} · ${(game.sessions||[]).filter(session=>new Date(session.start).getFullYear()===recapYear).length} ${t('сесій')} · ${esc(game.status||'Backlog')}</div></div></article>`).join('');
-  document.getElementById('year-recap').innerHTML=`<div class="year-recap-head"><div><div class="year-recap-sub">PRG RECAP · ${t('Активність')} ${recapYear}</div><div class="year-recap-title">${t('Твій рік у іграх')}</div><div class="year-recap-sub">${t('Твоя особиста історія гри за рік')}${importedYearMs?` · ${t('Імпортований час без підтвердженої дати')}: ${fmtHours(importedYearMs)}`:''}</div></div><div class="year-recap-actions"><select class="filter-select" id="recap-year-select" aria-label="${t('Рік recap')}">${recapYears.map(year=>`<option value="${year}" ${year===recapYear?'selected':''}>${year}</option>`).join('')}</select><button class="btn btn-ghost btn-sm" id="recap-share-btn">${t('Поділитися recap')}</button></div></div><div class="year-recap-grid"><div class="year-recap-stat"><div class="year-recap-label">${t('Награно')}</div><div class="year-recap-value">${fmtHours(yearMs)}</div></div><div class="year-recap-stat"><div class="year-recap-label">${t('Сесій')}</div><div class="year-recap-value">${yearSessions.length}</div></div><div class="year-recap-stat"><div class="year-recap-label">${t('Активних днів')}</div><div class="year-recap-value">${activeDays.length}</div></div><div class="year-recap-stat"><div class="year-recap-label">${t('Найдовша серія')}</div><div class="year-recap-value">${longestStreak} ${t('дн.')}</div></div><div class="year-recap-stat"><div class="year-recap-label">Найдовша сесія</div><div class="year-recap-value">${longestYearSession?fmtHours(longestYearSession.dur):'—'}</div></div><div class="year-recap-stat"><div class="year-recap-label">${t('Ігор зіграно')}</div><div class="year-recap-value">${yearGames.length}</div></div></div><div class="recap-section"><div class="recap-section-title">${t('Гра року')}</div><div class="recap-top-layout"><div class="recap-featured">${yearTopGame?.cover?`<img class="recap-featured-cover" src="${esc(yearTopGame.cover)}" alt="" loading="lazy">`:''}<div><div class="recap-featured-name">${esc(yearTopGame?.title||'—')}</div><div class="recap-featured-time">${yearTop?fmtHours(yearTop.ms):'—'}</div></div></div><div><div class="recap-section-title">${t('Топ ігор за часом')}</div><div class="recap-list">${topRows}</div></div></div></div><div class="recap-section"><div class="recap-section-title">${t('Активність по місяцях')}</div><div class="recap-months">${monthRows}</div><div class="recap-month-detail" id="recap-month-detail">Натисни на місяць, щоб побачити деталі</div></div><div class="recap-section"><div class="recap-section-title">${t('Час за платформами')}</div><div class="recap-list">${platformRows}</div></div><div class="recap-section"><div class="recap-section-title">${t('Усі ігри року')}</div><div class="recap-year-games">${yearGameCards||`<div class="year-recap-sub">${t('Ще немає сесій')}</div>`}</div></div>`;
+  const funLine=yearSessions.length?`${t('Твій середній ігровий вечір')}: <strong>${fmtHours(averageSession)}</strong> · ${t('найактивніший місяць')}: <strong>${monthNames[maxMonthIndex]}</strong>`:`${t('Додай першу сесію, щоб побачити персональні інсайти')}`;
+  document.getElementById('year-recap').innerHTML=`<div class="year-recap-head"><div><div class="year-recap-sub">PRG RECAP · ${t('Активність')} ${recapYear}</div><div class="year-recap-title">${t('Твій рік у іграх')}</div><div class="year-recap-sub">${t('Твоя особиста історія гри за рік')}${importedYearMs?` · ${t('Імпортований час без підтвердженої дати')}: ${fmtHours(importedYearMs)}`:''}</div></div><div class="year-recap-actions"><select class="filter-select" id="recap-year-select" aria-label="${t('Рік recap')}">${recapYears.map(year=>`<option value="${year}" ${year===recapYear?'selected':''}>${year}</option>`).join('')}</select><button class="btn btn-ghost btn-sm" id="recap-share-btn">${t('Поділитися recap')}</button></div></div><div class="year-recap-grid"><div class="year-recap-stat"><div class="year-recap-label">${t('Награно')}</div><div class="year-recap-value">${fmtHours(yearMs)}</div></div><div class="year-recap-stat"><div class="year-recap-label">${t('Сесій')}</div><div class="year-recap-value">${yearSessions.length}</div></div><div class="year-recap-stat"><div class="year-recap-label">${t('Активних днів')}</div><div class="year-recap-value">${activeDays.length}</div></div><div class="year-recap-stat"><div class="year-recap-label">${t('Найдовша серія')}</div><div class="year-recap-value">${longestStreak} ${t('дн.')}</div></div><div class="year-recap-stat"><div class="year-recap-label">Найдовша сесія</div><div class="year-recap-value">${longestYearSession?fmtHours(longestYearSession.dur):'—'}</div></div><div class="year-recap-stat"><div class="year-recap-label">${t('Ігор зіграно')}</div><div class="year-recap-value">${yearGames.length}</div></div></div><div class="recap-fun-line">✦ ${funLine}</div><div class="recap-section"><div class="recap-section-title">${t('Гра року')}</div><div class="recap-top-layout"><div class="recap-featured">${yearTopGame?.cover?`<img class="recap-featured-cover" src="${esc(yearTopGame.cover)}" alt="" loading="lazy">`:''}<div><div class="recap-featured-name">${esc(yearTopGame?.title||'—')}</div><div class="recap-featured-time">${yearTop?fmtHours(yearTop.ms):'—'}</div></div></div><div><div class="recap-section-title">${t('Топ ігор за часом')}</div><div class="recap-list">${topRows}</div></div></div></div><div class="recap-section"><div class="recap-section-title">${t('Активність по місяцях')}</div><div class="recap-months">${monthRows}</div><div class="recap-month-detail" id="recap-month-detail">Натисни на місяць, щоб побачити деталі</div></div><div class="recap-section"><div class="recap-section-title">${t('Час за платформами')}</div><div class="recap-list">${platformRows}</div></div><div class="recap-section"><div class="recap-section-title">${t('Усі ігри року')}</div><div class="recap-year-games">${yearGameCards||`<div class="year-recap-sub">${t('Ще немає сесій')}</div>`}</div></div>`;
   document.getElementById('recap-share-btn')?.insertAdjacentHTML('afterend',`<button class="btn btn-ghost btn-sm" id="recap-image-btn">${t('Завантажити картинку')}</button>`);
   document.getElementById('recap-image-btn')?.addEventListener('click',()=>shareRecapImage({year:recapYear,playtime:yearMs,sessions:yearSessions.length,activeDays:activeDays.length,streak:longestStreak,longestSession:longestYearSession?.dur||0,topGame:yearTopGame?.title,topTime:yearTop?.ms,topGames:yearGames,monthly:monthMs}));
   document.getElementById('recap-share-btn')?.addEventListener('click',async()=>{const text=`PRG Recap ${recapYear}\n${t('Награно')}: ${fmtHours(yearMs)}\n${t('Сесій')}: ${yearSessions.length}\n${t('Активних днів')}: ${activeDays.length}\n${t('Гра року')}: ${yearTopGame?.title||'—'}`;const recapUrl=currentUser?`https://prgtracker.netlify.app/?u=${encodeURIComponent(currentUser.uid)}&year=${recapYear}`:'';try{if(navigator.share)await navigator.share({title:`PRG Recap ${recapYear}`,text,url:recapUrl||undefined});else await navigator.clipboard.writeText(`${text}${recapUrl?`\n${recapUrl}`:''}`);const button=document.getElementById('recap-share-btn');if(button){button.textContent=t('Скопійовано');setTimeout(()=>button.textContent=t('Поділитися recap'),1600);}}catch(error){if(error?.name!=='AbortError')console.warn('[Recap] Share failed',error);}});
@@ -2350,9 +2368,16 @@ document.querySelectorAll('[data-add-source]').forEach(button=>button.addEventLi
   if(source==='rawg'){openAddModal();return;}
   if(source==='device'){
     const result=await window.launcher?.chooseExecutable?.();if(!result||result.canceled||!result.path)return;
-    openAddModal();const input=document.getElementById('f-executable');input.value=result.path;document.getElementById('local-executable-group').style.display='block';const base=result.path.split(/[\\/]/).pop().replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ');document.getElementById('f-search').value=base;document.getElementById('f-title').value=base;try{const rawg=await searchRAWG(base);const match=bestRawgMatch(base,rawg?.results);if(match){document.getElementById('f-title').value=match.name||base;document.getElementById('f-search').value=match.name||base;if(match.background_image){document.getElementById('f-cover').value=match.background_image;showCoverPreview(match.background_image);}}}catch(error){console.warn('[RAWG] Local game lookup failed',error);}return;
+    openAddModal();const input=document.getElementById('f-executable');input.value=result.path;document.getElementById('f-working-directory').value=result.path.replace(/[\\/][^\\/]+$/,'');document.getElementById('local-executable-group').style.display='block';const base=result.path.split(/[\\/]/).pop().replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ');document.getElementById('f-search').value=base;document.getElementById('f-title').value=base;try{const rawg=await searchRAWG(base);const match=bestRawgMatch(base,rawg?.results);if(match){document.getElementById('f-title').value=match.name||base;document.getElementById('f-search').value=match.name||base;if(match.background_image){document.getElementById('f-cover').value=match.background_image;showCoverPreview(match.background_image);}}}catch(error){console.warn('[RAWG] Local game lookup failed',error);}return;
   }
 }));
+document.getElementById('f-executable-choose')?.addEventListener('click',async()=>{
+  const result=await window.launcher?.chooseExecutable?.();
+  if(!result||result.canceled||!result.path)return;
+  document.getElementById('f-executable').value=result.path;
+  document.getElementById('local-executable-group').style.display='block';
+  if(!document.getElementById('f-working-directory').value)document.getElementById('f-working-directory').value=result.path.replace(/[\\/][^\\/]+$/,'');
+});
 document.getElementById('modal-cancel').onclick=closeModal;
 document.getElementById('modal-save').onclick=()=>{if(!guestBlock())saveModal();};
 document.getElementById('d-close').onclick=closeDetail;

@@ -803,14 +803,28 @@ ipcMain.handle('local:chooseExecutable', async () => {
   return { canceled: false, path: result.filePaths[0] }
 })
 
-ipcMain.handle('local:launchGame', async (_, executablePath) => {
-  const executable = String(executablePath || '')
+function parseLaunchArguments(value) {
+  const input = String(value || '').trim()
+  if (!input) return []
+  const args = []
+  input.replace(/"([^"\\]*(?:\\.[^"\\]*)*)"|'([^']*)'|([^\s]+)/g, (_match, quoted, single, bare) => {
+    args.push(String(quoted ?? single ?? bare ?? '').replace(/\\([\\"'])/g, '$1'))
+    return _match
+  })
+  return args.slice(0, 32)
+}
+
+ipcMain.handle('local:launchGame', async (_, payload) => {
+  const data = typeof payload === 'string' ? { executable: payload } : (payload || {})
+  const executable = String(data.executable || '')
   if (!executable || !path.isAbsolute(executable) || !fs.existsSync(executable)) return { action: 'error', message: 'Executable was not found' }
   if (process.platform === 'darwin' && executable.toLowerCase().endsWith('.app')) {
     const error = await shell.openPath(executable)
     return error ? { action: 'error', message: error } : { action: 'requested' }
   }
-  const child = spawn(executable, [], { detached: true, stdio: 'ignore', windowsHide: true })
+  const cwd = String(data.workingDirectory || '').trim()
+  const workingDirectory = cwd && path.isAbsolute(cwd) && fs.existsSync(cwd) ? cwd : path.dirname(executable)
+  const child = spawn(executable, parseLaunchArguments(data.arguments), { cwd: workingDirectory, detached: true, stdio: 'ignore', windowsHide: true })
   child.unref()
   return { action: 'requested' }
 })
