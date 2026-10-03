@@ -20,7 +20,7 @@ contextBridge.exposeInMainWorld('launcher', {
   getGogInstalledGames: () => ipcRenderer.invoke('gog:installedGames'),
   launchGogGame: (payload) => ipcRenderer.invoke('gog:launchGame', payload),
   chooseExecutable: () => ipcRenderer.invoke('local:chooseExecutable'),
-  launchLocalGame: (executable) => ipcRenderer.invoke('local:launchGame', executable),
+  launchLocalGame: (payload) => ipcRenderer.invoke('local:launchGame', payload),
 
   // HowLongToBeat (keyless, on-demand metadata lookup)
   searchHltb: (query) => ipcRenderer.invoke('hltb:search', query),
