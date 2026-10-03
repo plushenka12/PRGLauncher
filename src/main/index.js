@@ -1126,12 +1126,23 @@ ipcMain.handle('app:exportBackup', async (_, payload) => {
   try { fs.writeFileSync(result.filePath, JSON.stringify(payload, null, 2), 'utf8'); return { ok: true, filePath: result.filePath } } catch (error) { return { ok: false, error: error.message } }
 })
 
+ipcMain.handle('app:exportDiagnostics', async (_, payload) => {
+  const result = await dialog.showSaveDialog(mainWindow, { title: 'Export PRGLauncher diagnostics', defaultPath: `PRGLauncher-diagnostics-${new Date().toISOString().slice(0,10)}.json`, filters: [{ name: 'JSON diagnostics', extensions: ['json'] }] })
+  if (result.canceled || !result.filePath) return { ok: false, canceled: true }
+  try {
+    const safe = payload && typeof payload === 'object' ? payload : {}
+    fs.writeFileSync(result.filePath, JSON.stringify({ ...safe, exportedAt: Date.now(), appVersion: app.getVersion(), platform: process.platform, arch: process.arch }, null, 2), 'utf8')
+    return { ok: true, filePath: result.filePath }
+  } catch (error) { return { ok: false, error: error.message } }
+})
+
 ipcMain.handle('app:importBackup', async () => {
   const result = await dialog.showOpenDialog(mainWindow, { title: 'Import PRGLauncher backup', properties: ['openFile'], filters: [{ name: 'JSON backup', extensions: ['json'] }] })
   if (result.canceled || !result.filePaths[0]) return { ok: false, canceled: true }
   try {
     const data = JSON.parse(fs.readFileSync(result.filePaths[0], 'utf8'))
-    if (!data || !Array.isArray(data.games)) throw new Error('Це не backup PRGLauncher')
+    if (!data || !Array.isArray(data.games) || data.games.some(game => !game || typeof game !== 'object' || !String(game.id || '').trim() || !String(game.title || '').trim())) throw new Error('Це не backup PRGLauncher або файл пошкоджено')
+    if (data.games.length > 100000) throw new Error('Backup перевищує безпечний ліміт ігор')
     return { ok: true, data }
   } catch (error) { return { ok: false, error: error.message } }
 })

@@ -50,6 +50,7 @@ contextBridge.exposeInMainWorld('launcher', {
   quit:        () => ipcRenderer.invoke('app:quit'),
   setSize:     (w, h) => ipcRenderer.invoke('app:setSize', w, h),
   exportBackup: (payload) => ipcRenderer.invoke('app:exportBackup', payload),
+  exportDiagnostics: (payload) => ipcRenderer.invoke('app:exportDiagnostics', payload),
   importBackup: () => ipcRenderer.invoke('app:importBackup'),
   checkForUpdates: () => ipcRenderer.invoke('app:checkForUpdates'),
   downloadUpdate: () => ipcRenderer.invoke('app:downloadUpdate'),
