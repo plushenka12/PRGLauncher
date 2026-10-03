@@ -30,6 +30,8 @@ let nintendoAuthState = null
 let nintendoPlayHistory = null
 let updateState = { status: 'idle', version: null, error: null }
 let automaticUpdateCheck = false
+let isQuitting = false
+let updateInstallInProgress = false
 let miniBarStandby = false
 let tray       = null
 let steamPath  = null
@@ -599,17 +601,27 @@ async function searchHltb(query) {
     if (remainingGap > 0) await wait(remainingGap)
     hltbLastRequestAt = Date.now()
 
-    for (let attempt = 0; attempt < 2; attempt++) {
+    for (let attempt = 0; attempt < 3; attempt++) {
       const credentials = await captureHltbCredentials()
-      if (!credentials) return { ok: false, error: 'HLTB_UNAVAILABLE', results: [] }
+      if (!credentials) {
+        if (attempt < 2) {
+          await wait(1200 * (attempt + 1))
+          continue
+        }
+        return { ok: false, error: 'HLTB_UNAVAILABLE', results: [] }
+      }
       const response = await postHltbSearch(normalizedQuery, credentials)
       const results = normalizeHltbResults(response.payload)
       if (response.status >= 200 && response.status < 300) return results.length ? { ok: true, results } : { ok: false, error: 'NO_RESULTS', results: [] }
       // HLTB uses these status codes when its short-lived credentials rotated.
-      if (![401, 403, 404].includes(response.status) || attempt === 1) return { ok: false, error: 'HLTB_UNAVAILABLE', results: [] }
-      hltbCredentials = null
-      hltbCredentialsExpiry = 0
-      hltbSearchEndpoint = null
+      if ([401, 403, 404].includes(response.status)) {
+        hltbCredentials = null
+        hltbCredentialsExpiry = 0
+        hltbSearchEndpoint = null
+      } else if (![0, 408, 425, 429, 500, 502, 503, 504].includes(response.status) || attempt === 2) {
+        return { ok: false, error: 'HLTB_UNAVAILABLE', results: [] }
+      }
+      if (attempt < 2) await wait(900 * (attempt + 1))
     }
     return { ok: false, error: 'HLTB_UNAVAILABLE', results: [] }
   })()
@@ -1116,7 +1128,28 @@ ipcMain.handle('app:checkForUpdates', async () => {
   catch (error) { updateState = { status: 'error', version: null, error: error.message }; return { status: 'error', error: error.message } }
 })
 ipcMain.handle('app:downloadUpdate', async () => { try { await autoUpdater.downloadUpdate(); return { ok: true } } catch (error) { return { ok: false, error: error.message } } })
-ipcMain.handle('app:installUpdate', () => { if (updateState.status === 'downloaded') autoUpdater.quitAndInstall(); return { ok: updateState.status === 'downloaded' } })
+function prepareForUpdateInstall() {
+  if (updateInstallInProgress) return
+  updateInstallInProgress = true
+  isQuitting = true
+  updateState = { ...updateState, status: 'installing', error: null }
+  mainWindow?.webContents.send('app:updateStatus', updateState)
+  if (steamMonitorTimer) { clearInterval(steamMonitorTimer); steamMonitorTimer = null }
+  if (steamCollectionTimer) { clearInterval(steamCollectionTimer); steamCollectionTimer = null }
+  if (miniBar && !miniBar.isDestroyed()) miniBar.hide()
+  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.hide()
+}
+
+ipcMain.handle('app:installUpdate', () => {
+  const ready = updateState.status === 'downloaded'
+  if (ready) {
+    prepareForUpdateInstall()
+    // Give the renderer one event-loop turn to persist any pending changes
+    // before electron-updater closes the process and runs the installer.
+    setImmediate(() => autoUpdater.quitAndInstall(false, true))
+  }
+  return { ok: ready }
+})
 
 function checkForUpdatesAfterLaunch() {
   if (!app.isPackaged) return
@@ -1277,6 +1310,7 @@ function createWindow() {
   })
 
   mainWindow.on('close', (e) => {
+    if (isQuitting) return
     e.preventDefault()
     mainWindow.hide()      // minimize to tray instead of closing
   })
@@ -1342,6 +1376,12 @@ app.whenReady().then(() => {
   createWindow()
   createTray()
   checkForUpdatesAfterLaunch()
+})
+
+app.on('before-quit', () => {
+  isQuitting = true
+  if (steamMonitorTimer) { clearInterval(steamMonitorTimer); steamMonitorTimer = null }
+  if (steamCollectionTimer) { clearInterval(steamCollectionTimer); steamCollectionTimer = null }
 })
 
 app.on('window-all-closed', (e) => {
