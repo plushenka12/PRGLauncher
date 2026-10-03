@@ -436,6 +436,7 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 </style>
 <style>
 .recap-month{border:0;background:transparent;padding:0;color:inherit;font:inherit}
+.settings-switch{display:flex;align-items:center;gap:8px;color:var(--text2);font-size:12px;white-space:nowrap}.settings-switch input{accent-color:var(--accent);width:17px;height:17px}
 .recap-row{grid-template-columns:30px 42px minmax(0,1fr) 58px;padding:5px 0;gap:9px}
 .recap-row-rank{font:900 19px var(--fh);color:var(--accent2);text-align:center}
 .recap-row:first-child .recap-row-rank{color:var(--green)}
@@ -618,7 +619,8 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
       </div>
       <section class="settings-pane active" data-settings-pane="general">
       <div class="settings-section-title">PRG Account</div>
-      <div class="settings-data-row"><div><div class="settings-data-title" id="profile-email-label">PRG Account не підключено</div><div class="nintendo-manual-help" id="profile-link">Увійди, щоб створити персональне посилання</div></div><div class="settings-data-actions"><button class="btn btn-ghost btn-sm" id="copy-profile-link-btn">Копіювати сайт</button><button class="btn btn-danger btn-sm" id="sign-out-btn">Вийти</button></div></div>
+    <div class="settings-data-row"><div><div class="settings-data-title" id="profile-email-label">PRG Account не підключено</div><div class="nintendo-manual-help" id="profile-link">Увійди, щоб створити персональне посилання</div></div><div class="settings-data-actions"><button class="btn btn-ghost btn-sm" id="copy-profile-link-btn">Копіювати сайт</button><button class="btn btn-danger btn-sm" id="sign-out-btn">Вийти</button></div></div>
+      <div class="settings-data-row"><div><div class="settings-data-title">Публічний PRG Recap</div><div class="nintendo-manual-help">Дозволяє сайту показувати агреговану статистику за твоїм персональним посиланням.</div></div><label class="settings-switch"><input type="checkbox" id="public-recap-toggle" checked><span>Показувати</span></label></div>
       <div class="settings-section-title">Мова</div>
       <div class="settings-scale-row"><select id="language-select" class="filter-select" aria-label="Мова інтерфейсу"><option value="uk">Українська</option><option value="en">English</option></select><span class="nintendo-manual-help">Застосовується одразу та зберігається для наступних запусків.</span></div>
       </section>
@@ -679,6 +681,7 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
     <div class="settings-section-title">Дані</div>
     <div class="settings-data-row"><div><div class="settings-data-title">Резервна копія</div><div class="nintendo-manual-help">Зберігає каталог, сесії, тему та списки ігнорування.</div></div><div class="settings-data-actions"><button class="btn btn-ghost btn-sm" id="export-backup-btn">Export JSON</button><button class="btn btn-ghost btn-sm" id="import-backup-btn">Import JSON</button></div></div>
     <div class="settings-data-row"><div><div class="settings-data-title">Діагностика</div><div class="nintendo-manual-help">Експортує технічний стан без нотаток, Steam ID, токенів і повної бібліотеки.</div></div><div class="settings-data-actions"><button class="btn btn-ghost btn-sm" id="export-diagnostics-btn">Export diagnostics</button></div></div>
+    <div class="settings-data-row"><div><div class="settings-data-title">Видалення даних</div><div class="nintendo-manual-help">Окремо очищає локальну копію або хмарний профіль цього PRG Account.</div></div><div class="settings-data-actions"><button class="btn btn-ghost btn-sm" id="clear-local-data-btn">Очистити локальні</button><button class="btn btn-danger btn-sm" id="delete-cloud-data-btn">Видалити хмарні</button></div></div>
     <div class="settings-section-title">Оновлення</div>
     <div class="settings-data-row"><div><div class="settings-data-title">PRGLauncher <span id="app-version-label"></span></div><div class="nintendo-manual-help" id="update-status-label">Перевірка доступна для встановленої версії.</div></div><div class="settings-data-actions"><button class="btn btn-ghost btn-sm" id="check-update-btn">Перевірити оновлення</button><button class="btn btn-primary btn-sm" id="download-update-btn" style="display:none">Завантажити</button><button class="btn btn-primary btn-sm" id="install-update-btn" style="display:none">Встановити</button></div></div>
     <div class="settings-section-title">Обслуговування бібліотеки</div>
@@ -1009,9 +1012,9 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-import { getFirestore, doc, setDoc, onSnapshot, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getFirestore, doc, setDoc, onSnapshot, getDoc, deleteDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-window._fbImports = { initializeApp, getFirestore, doc, setDoc, onSnapshot, getDoc, getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, sendPasswordResetEmail };
+window._fbImports = { initializeApp, getFirestore, doc, setDoc, onSnapshot, getDoc, deleteDoc, getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, signOut, sendPasswordResetEmail };
 window.dispatchEvent(new Event('fb-ready'));
 </script>
 
@@ -1091,6 +1094,7 @@ UI_COPY.push(['Усі ігри року','All games of the year']);
 UI_COPY.push(['Завантажити картинку','Download image'],['Поділитися картинкою','Share image']);
 UI_COPY.push(['Джерела','Sources']);
 UI_COPY.push(['Діагностика','Diagnostics'],['Export diagnostics','Export diagnostics'],['Експортує технічний стан без нотаток, Steam ID, токенів і повної бібліотеки.','Exports technical state without notes, Steam IDs, tokens or the full library.'],['Backup має неправильну структуру.','Backup has an invalid structure.'],['Backup містить пошкоджену або дубльовану гру.','Backup contains a damaged or duplicate game.'],['Backup містить пошкоджений журнал сесій.','Backup contains a damaged session log.'],['Конфлікт синхронізації','Sync conflict'],['Є локальні зміни та новіші дані в хмарі. Обери, що залишити.','There are local changes and newer cloud data. Choose what to keep.'],['Взяти хмарні дані','Keep cloud data'],['Залишити мої дані','Keep my data'],['Backup збережено','Backup saved'],['Backup імпортовано','Backup imported'],['Діагностику збережено','Diagnostics saved']);
+UI_COPY.push(['Публічний PRG Recap','Public PRG Recap'],['Дозволяє сайту показувати агреговану статистику за твоїм персональним посиланням.','Allows the website to show aggregated statistics through your personal link.'],['Показувати','Show'],['Видалення даних','Data deletion'],['Окремо очищає локальну копію або хмарний профіль цього PRG Account.','Clears the local copy or cloud profile for this PRG Account separately.'],['Очистити локальні','Clear local'],['Видалити хмарні','Delete cloud'],['Хмарні дані видалено','Cloud data deleted']);
 UI_COPY.push(['Скасовано','Undone']);
 UI_COPY.push(['Сесію видалено','Session deleted'],['Сесію відредаговано','Session edited'],['Час гри змінено','Playtime edited']);
 UI_COPY.push(['Об’єднано з','Merged with'],['іншою карткою','another game card']);
@@ -1243,7 +1247,7 @@ function updateSteamProfileUI(){
   if(status)status.textContent=t(profile?'Профіль використовується для імпорту бібліотеки.':'Встав посилання нижче, щоб підключити профіль для імпорту.');
   if(disconnect){disconnect.disabled=!profile;disconnect.title=t(profile?'Від’єднати Steam-профіль':'Немає підключеного Steam-профілю');}
 }
-function updateProfileUI(){const email=currentUser?.email||t('PRG Account не підключено');const label=document.getElementById('profile-email-label'),link=document.getElementById('profile-link');if(label)label.textContent=email;if(link)link.textContent=currentUser?`prgtracker.netlify.app/?u=${currentUser.uid}`:'Увійди, щоб створити персональне посилання';updateSteamProfileUI();const backloggdInput=document.getElementById('backloggd-profile-url');if(backloggdInput)backloggdInput.value=currentUser?localStorage.getItem(profileStorageKey('gv-backloggd-profile-url'))||'':'';}
+function updateProfileUI(){const email=currentUser?.email||t('PRG Account не підключено');const label=document.getElementById('profile-email-label'),link=document.getElementById('profile-link');if(label)label.textContent=email;if(link)link.textContent=currentUser?`prgtracker.netlify.app/?u=${currentUser.uid}`:'Увійди, щоб створити персональне посилання';const publicToggle=document.getElementById('public-recap-toggle');if(publicToggle)publicToggle.checked=localStorage.getItem(profileStorageKey('gv-public-recap-v1'))!=='0';updateSteamProfileUI();const backloggdInput=document.getElementById('backloggd-profile-url');if(backloggdInput)backloggdInput.value=currentUser?localStorage.getItem(profileStorageKey('gv-backloggd-profile-url'))||'':'';}
 function closeSyncConflict(){syncConflictRemote=null;document.getElementById('sync-conflict-modal')?.classList.add('hidden');}
 function renderLocalLibrary(){save({publish:false});buildFilterBar();renderGrid();updateStats();updateSessionBar();}
 function openSyncConflict(remoteGames,remoteTs){
@@ -1357,8 +1361,10 @@ function makeStatsDashboard(){
 }
 async function publishStatsDashboard(ts){
   if(!fbDb||!syncActive||!currentUser)return;
-  const {doc,setDoc}=window._fbImports;
-  await setDoc(doc(fbDb,'public-dashboard',currentUser.uid),{...makeStatsDashboard(),updatedAt:ts||Date.now(),profileId:currentUser.uid});
+  const {doc,setDoc,deleteDoc}=window._fbImports;
+  const ref=doc(fbDb,'public-dashboard',currentUser.uid);
+  if(localStorage.getItem(profileStorageKey('gv-public-recap-v1'))==='0'){await deleteDoc(ref);return;}
+  await setDoc(ref,{...makeStatsDashboard(),updatedAt:ts||Date.now(),profileId:currentUser.uid});
 }
 
 // RAWG
@@ -2872,7 +2878,10 @@ document.getElementById('auth-google-btn').onclick=loginWithGoogle;
 document.getElementById('auth-reset-btn').onclick=resetAuthPassword;
 ['auth-email','auth-password'].forEach(id=>document.getElementById(id).addEventListener('keydown',event=>{if(event.key==='Enter')submitAuth();}));
 document.getElementById('sync-badge')?.addEventListener('click',openStatsReport);
+document.getElementById('public-recap-toggle')?.addEventListener('change',async event=>{if(!currentUser)return;localStorage.setItem(profileStorageKey('gv-public-recap-v1'),event.target.checked?'1':'0');try{await publishStatsDashboard();}catch(error){console.warn('[Privacy] Could not update public recap:',error);event.target.checked=!event.target.checked;localStorage.setItem(profileStorageKey('gv-public-recap-v1'),event.target.checked?'1':'0');}});
 document.getElementById('copy-profile-link-btn').onclick=async()=>{if(!currentUser){showAuthError('Увійди в PRG Account, щоб отримати персональне посилання.');showLogin();return;}const url=`https://prgtracker.netlify.app/?u=${currentUser.uid}`;try{await navigator.clipboard.writeText(url);document.getElementById('profile-link').textContent='Посилання скопійовано';}catch{document.getElementById('profile-link').textContent=url;}};
+document.getElementById('clear-local-data-btn')?.addEventListener('click',()=>{if(!currentUser||!confirm('Очистити локальну копію бібліотеки на цьому ПК? Хмарні дані залишаться.'))return;games=[];localStorage.removeItem(profileStorageKey('gv-games'));localStorage.removeItem(profileStorageKey('gv-local-ts'));renderLocalLibrary();});
+document.getElementById('delete-cloud-data-btn')?.addEventListener('click',async()=>{if(!currentUser||!confirm('Видалити хмарну бібліотеку та публічний Recap цього акаунта? Це незворотно.'))return;try{const{doc,deleteDoc}=window._fbImports;await Promise.all([deleteDoc(userLibraryRef()),deleteDoc(doc(fbDb,'public-dashboard',currentUser.uid))]);games=[];localStorage.removeItem(profileStorageKey('gv-games'));localStorage.removeItem(profileStorageKey('gv-local-ts'));syncPendingDirty=false;renderLocalLibrary();setSyncBadge('off');setNintendoSyncStatus('Хмарні дані видалено',true);}catch(error){setNintendoSyncStatus(`Delete error: ${error?.message||'невідома помилка'}`);}});
 document.getElementById('sign-out-btn').onclick=async()=>{if(!currentUser)return;if(!confirm('Вийти з PRG Account на цьому ПК? Локальна копія бібліотеки залишиться.'))return;clearUserSyncRetry();clearInterval(statsPublishTimer);clearTimeout(syncDebounceTimer);syncDebounceTimer=null;if(fbUnsub)fbUnsub();syncActive=false;await window._fbImports.signOut(fbAuth);};
 
 </script>

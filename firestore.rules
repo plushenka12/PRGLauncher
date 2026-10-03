@@ -1,0 +1,27 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Every private profile document is owned by the authenticated UID in its
+    // path. No anonymous or cross-account reads/writes are allowed.
+    match /users/{uid}/{document=**} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Recap is intentionally public only when the launcher has published it.
+    // The client can write only its own dashboard document.
+    match /public-dashboard/{uid} {
+      allow read: if true;
+      allow create, update, delete: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // Legacy shared storage is closed; migration must use the UID-scoped path.
+    match /gamevault/{document=**} {
+      allow read, write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
