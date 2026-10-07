@@ -32,6 +32,7 @@ let updateState = { status: 'idle', version: null, error: null }
 let automaticUpdateCheck = false
 let isQuitting = false
 let updateInstallInProgress = false
+let updateInstallTimer = null
 let miniBarStandby = false
 let tray       = null
 let steamPath  = null
@@ -436,6 +437,8 @@ const HLTB_ORIGIN = 'https://howlongtobeat.com'
 const HLTB_MIN_REQUEST_GAP = 1200
 const HLTB_SEARCH_TIMEOUT = 18000
 const HLTB_CREDENTIAL_CACHE_MS = 30 * 60 * 1000
+const HLTB_SUCCESS_CACHE_MS = 24 * 60 * 60 * 1000
+const hltbSearchCache = new Map()
 
 function hltbMinutes(value) {
   const seconds = Number(value)
@@ -595,6 +598,11 @@ async function searchHltb(query) {
     .replace(/\s+/g, ' ')
   if (!normalizedQuery || normalizedQuery.length > 160) return { ok: false, error: 'INVALID_QUERY', results: [] }
   if (hltbSearchInFlight) return { ok: false, error: 'BUSY', results: [] }
+  const cacheKey = normalizedQuery.toLocaleLowerCase()
+  const cached = hltbSearchCache.get(cacheKey)
+  if (cached && Date.now() - cached.savedAt < HLTB_SUCCESS_CACHE_MS) {
+    return { ok: true, cached: true, results: cached.results.map(result => ({ ...result })) }
+  }
 
   hltbSearchInFlight = (async () => {
     const remainingGap = HLTB_MIN_REQUEST_GAP - (Date.now() - hltbLastRequestAt)
@@ -608,22 +616,34 @@ async function searchHltb(query) {
           await wait(1200 * (attempt + 1))
           continue
         }
-        return { ok: false, error: 'HLTB_UNAVAILABLE', results: [] }
+        const fallback = hltbSearchCache.get(cacheKey)
+        return fallback
+          ? { ok: true, cached: true, stale: true, results: fallback.results.map(result => ({ ...result })) }
+          : { ok: false, error: 'HLTB_UNAVAILABLE', results: [] }
       }
       const response = await postHltbSearch(normalizedQuery, credentials)
       const results = normalizeHltbResults(response.payload)
-      if (response.status >= 200 && response.status < 300) return results.length ? { ok: true, results } : { ok: false, error: 'NO_RESULTS', results: [] }
+      if (response.status >= 200 && response.status < 300) {
+        if (!results.length) return { ok: false, error: 'NO_RESULTS', results: [] }
+        hltbSearchCache.set(cacheKey, { savedAt: Date.now(), results: results.map(result => ({ ...result })) })
+        return { ok: true, results }
+      }
       // HLTB uses these status codes when its short-lived credentials rotated.
       if ([401, 403, 404].includes(response.status)) {
         hltbCredentials = null
         hltbCredentialsExpiry = 0
         hltbSearchEndpoint = null
       } else if (![0, 408, 425, 429, 500, 502, 503, 504].includes(response.status) || attempt === 2) {
+        const fallback = hltbSearchCache.get(cacheKey)
+        if (fallback) return { ok: true, cached: true, stale: true, results: fallback.results.map(result => ({ ...result })) }
         return { ok: false, error: 'HLTB_UNAVAILABLE', results: [] }
       }
       if (attempt < 2) await wait(900 * (attempt + 1))
     }
-    return { ok: false, error: 'HLTB_UNAVAILABLE', results: [] }
+    const fallback = hltbSearchCache.get(cacheKey)
+    return fallback
+      ? { ok: true, cached: true, stale: true, results: fallback.results.map(result => ({ ...result })) }
+      : { ok: false, error: 'HLTB_UNAVAILABLE', results: [] }
   })()
 
   try { return await hltbSearchInFlight }
@@ -1163,15 +1183,32 @@ function prepareForUpdateInstall() {
   if (steamCollectionTimer) { clearInterval(steamCollectionTimer); steamCollectionTimer = null }
   if (miniBar && !miniBar.isDestroyed()) miniBar.hide()
   if (mainWindow && !mainWindow.isDestroyed()) mainWindow.hide()
+  // Remove the tray entry immediately so the updater can replace the app
+  // without leaving a stale PRGLauncher process/menu item behind.
+  if (tray) {
+    try { tray.destroy() } catch {}
+    tray = null
+  }
 }
 
 ipcMain.handle('app:installUpdate', () => {
   const ready = updateState.status === 'downloaded'
   if (ready) {
     prepareForUpdateInstall()
-    // Give the renderer one event-loop turn to persist any pending changes
-    // before electron-updater closes the process and runs the installer.
-    setImmediate(() => autoUpdater.quitAndInstall(false, true))
+    // Give the renderer a short final turn to flush synchronous localStorage
+    // writes, then destroy every window before electron-updater starts the
+    // installer. This avoids the Windows "please close PRGLauncher" prompt.
+    updateInstallTimer = setTimeout(() => {
+      updateInstallTimer = null
+      for (const window of [mainWindow, miniBar, nintendoAuthWindow]) {
+        if (!window || window.isDestroyed()) continue
+        try { window.destroy() } catch {}
+      }
+      mainWindow = null
+      miniBar = null
+      nintendoAuthWindow = null
+      autoUpdater.quitAndInstall(false, true)
+    }, 250)
   }
   return { ok: ready }
 })

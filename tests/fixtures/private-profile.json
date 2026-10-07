@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 3,
+  "ownerUid": "user-a",
+  "profile": {
+    "language": "uk",
+    "theme": "neon",
+    "scale": "1"
+  },
+  "games": [
+    {
+      "id": "fixture-game-1",
+      "title": "Fixture Game",
+      "status": "Playing",
+      "platform": "PC",
+      "sessions": [{ "start": 1735689600000, "end": 1735693200000, "dur": 3600000, "source": "steam" }]
+    }
+  ],
+  "sessions": {
+    "fixture-game-1": [{ "start": 1735689600000, "end": 1735693200000, "dur": 3600000, "source": "steam" }]
+  },
+  "integrations": {
+    "steamProfile": "https://steamcommunity.com/id/fixture"
+  }
+}

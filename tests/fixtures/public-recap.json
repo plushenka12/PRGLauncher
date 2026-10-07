@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "profileId": "user-a",
+  "updatedAt": 1735693200000,
+  "totals": {
+    "games": 1,
+    "playtime": 3600000,
+    "sessions": 1,
+    "completed": 0,
+    "backlog": 0,
+    "playing": 1
+  },
+  "yearly": {
+    "2025": {
+      "year": 2025,
+      "playtime": 3600000,
+      "sessions": 1,
+      "activeDays": 1,
+      "games": [{ "title": "Fixture Game", "playtime": 3600000, "sessions": 1 }]
+    }
+  }
+}
