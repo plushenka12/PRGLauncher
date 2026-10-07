@@ -6,6 +6,9 @@
   "scripts": {
     "start": "electron . --enable-logging",
     "dev": "electron . --enable-logging",
+    "test": "node --test tests/*.test.cjs",
+    "test:emulator": "set FIRESTORE_EMULATOR_HOST=127.0.0.1:8080&& node --test tests/firestore-emulator.test.cjs",
+    "release:check": "node scripts/release-gate.cjs",
     "build": "electron-builder --win --x64",
     "build:mac": "electron-builder --mac --universal"
   },
@@ -54,8 +57,10 @@
     ]
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "^3.0.4",
     "electron": "^29.0.0",
-    "electron-builder": "^24.0.0"
+    "electron-builder": "^24.0.0",
+    "firebase-tools": "^15.32.1"
   },
   "dependencies": {
     "electron-updater": "^6.8.9",
