@@ -1,6 +1,6 @@
 {
   "name": "prg-launcher",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "PRGLauncher — Game Launcher & Tracker",
   "main": "src/main/index.js",
   "scripts": {
@@ -58,15 +58,18 @@
     ]
   },
   "devDependencies": {
-    "@firebase/rules-unit-testing": "^3.0.4",
-    "electron": "^29.0.0",
-    "electron-builder": "^24.0.0",
-    "firebase-tools": "^15.32.1",
+    "@firebase/rules-unit-testing": "6.0.0",
+    "electron": "44.9.0",
+    "electron-builder": "26.15.3",
+    "firebase-tools": "15.34.0",
     "markdownlint-cli2": "^0.23.3",
     "playwright-core": "^1.64.0"
   },
   "dependencies": {
     "electron-updater": "^6.8.9",
-    "firebase": "^10.0.0"
+    "firebase": "13.0.0"
+  },
+  "overrides": {
+    "@grpc/grpc-js": "1.14.6"
   }
 }

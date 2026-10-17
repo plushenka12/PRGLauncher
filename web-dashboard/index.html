@@ -21,8 +21,8 @@
   </main><section class="empty hidden" id="error"><h1>Статистика поки недоступна</h1><p>Відкрий PRGLauncher на ПК — він опублікує перший статистичний знімок.</p></section>
   <div class="modal-backdrop hidden" id="modal"><div class="modal"><button class="modal-close" id="modal-close" type="button">Закрити</button><div id="modal-body"></div></div></div>
   <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
-    import { getFirestore, doc, onSnapshot, getDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js';
+    import { getFirestore, doc, onSnapshot, getDoc } from 'https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js';
     const cfg={apiKey:'AIzaSyBL-IHjUiSlmJ2N_caWx_MWAI8v2RL4Rpw',authDomain:'gametracker-30c93.firebaseapp.com',projectId:'gametracker-30c93',storageBucket:'gametracker-30c93.appspot.com',appId:'1:982157495201:web:950a69a05274c04f1899e0'};
     const $=id=>document.getElementById(id),esc=value=>{const node=document.createElement('span');node.textContent=value??'';return node.innerHTML};
     const hours=ms=>{const h=Number(ms||0)/3600000;return h<1?`${Math.round(Number(ms||0)/60000)} хв`:`${h.toFixed(h>=10?0:1)} год`};
