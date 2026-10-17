@@ -4,11 +4,26 @@
   function renderGameHistory(events, options) {
     const { list, emptyText, formatEvent, formatDate } = options;
     if (!list) return;
+    const makeItem = (titleText, timeText) => {
+      const item = document.createElement('div');
+      item.className = 'history-item';
+      const title = document.createElement('div');
+      title.className = 'history-item-title';
+      title.textContent = titleText;
+      item.appendChild(title);
+      if (timeText) {
+        const time = document.createElement('div');
+        time.className = 'history-item-time';
+        time.textContent = timeText;
+        item.appendChild(time);
+      }
+      return item;
+    };
     if (!events.length) {
-      list.innerHTML = `<div class="history-item"><div class="history-item-title">${emptyText}</div></div>`;
+      list.replaceChildren(makeItem(emptyText));
       return;
     }
-    list.innerHTML = events.map(event => `<div class="history-item"><div class="history-item-title">${formatEvent(event)}</div><div class="history-item-time">${formatDate(event.at)}</div></div>`).join('');
+    list.replaceChildren(...events.map(event => makeItem(formatEvent(event), formatDate(event.at))));
   }
   global.createGameHistoryUi = () => ({ renderGameHistory });
 })(window);

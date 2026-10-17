@@ -6,6 +6,7 @@ const fs = require('fs')
 const https = require('https')
 const { execSync, execFile, spawn } = require('child_process')
 const crypto = require('crypto')
+const { STEAM_STARTUP_HIDE_SCRIPT, scheduleSteamStartupHide } = require('./steam-startup-window')
 
 // Keep the Windows app identity and packaged process name discoverable.
 if (process.platform === 'win32') app.setAppUserModelId('com.prgtracker.launcher')
@@ -1437,6 +1438,14 @@ app.whenReady().then(() => {
 
   createWindow()
   createTray()
+  if (process.platform === 'win32' && launchedAtLogin) {
+    scheduleSteamStartupHide({
+      runHide: () => execFile('powershell.exe', ['-NoProfile', '-NonInteractive', '-WindowStyle', 'Hidden', '-Command', STEAM_STARTUP_HIDE_SCRIPT], { windowsHide: true }, error => {
+        if (error) console.warn('[Steam] Startup hide unavailable:', error.message)
+      }),
+      shouldContinue: () => !isQuitting && mainWindow && !mainWindow.isDestroyed() && !mainWindow.isVisible(),
+    })
+  }
   checkForUpdatesAfterLaunch()
 })
 

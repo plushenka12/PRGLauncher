@@ -20,7 +20,17 @@
       if (!container) return;
       const safeTitle = String(title || (state === 'loading' ? 'Завантаження…' : state === 'error' ? 'Щось пішло не так' : 'Поки порожньо'));
       const safeDetail = String(detail || '');
-      container.innerHTML = `<div class="ui-state ui-state-${state}"><span class="ui-state-icon" aria-hidden="true">${icon}</span><strong>${safeTitle}</strong>${safeDetail ? `<small>${safeDetail}</small>` : ''}</div>`;
+      const wrapper = documentRef.createElement('div');
+      wrapper.className = `ui-state ui-state-${['loading', 'error', 'empty', 'success'].includes(state) ? state : 'empty'}`;
+      const symbol = documentRef.createElement('span');
+      symbol.className = 'ui-state-icon';
+      symbol.setAttribute('aria-hidden', 'true');
+      symbol.textContent = icon;
+      const heading = documentRef.createElement('strong');
+      heading.textContent = safeTitle;
+      wrapper.append(symbol, heading);
+      if (safeDetail) { const description = documentRef.createElement('small'); description.textContent = safeDetail; wrapper.appendChild(description); }
+      container.replaceChildren(wrapper);
       container.dataset.state = state;
     }
 

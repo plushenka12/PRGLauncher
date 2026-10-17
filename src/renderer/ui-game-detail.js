@@ -48,5 +48,49 @@
     renderGameHistory(game);
   }
 
-  global.createGameDetailUi = () => ({ renderGameDetail });
+  function scrollWheel(event, overlay) {
+    if (overlay.classList.contains('hidden')) return;
+    const body = overlay.querySelector('.detail-body');
+    const canScroll = element => element && element.scrollHeight > element.clientHeight + 1;
+    const target = canScroll(body) ? body : canScroll(overlay) ? overlay : null;
+    if (!target) return;
+    const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? target.clientHeight : 1;
+    const delta = event.deltaY * unit;
+    if (!Number.isFinite(delta) || delta === 0) return;
+    event.preventDefault();
+    target.scrollTop = Math.max(0, Math.min(target.scrollTop + delta, target.scrollHeight - target.clientHeight));
+  }
+
+  function createFocusController() {
+    let returnFocusTo = null;
+    function open(overlay) {
+      if (overlay.classList.contains('hidden') && !returnFocusTo) returnFocusTo = document.activeElement;
+      overlay.classList.remove('hidden');
+      overlay.querySelector('.detail-modal-inner')?.focus({ preventScroll: true });
+    }
+    function close(overlay, restoreFocus = true) {
+      overlay.classList.add('hidden');
+      if (!restoreFocus) return;
+      const target = returnFocusTo?.isConnected ? returnFocusTo
+        : document.querySelector('#game-grid .game-card, #add-game-btn');
+      returnFocusTo = null;
+      target?.focus({ preventScroll: true });
+    }
+    function onKeydown(event, overlay) {
+      if (event.key !== 'Tab' || overlay.classList.contains('hidden')) return;
+      const dialog = overlay.querySelector('.detail-modal-inner');
+      const controls = [...overlay.querySelectorAll('button, input, select, textarea, a[href], [tabindex]:not([tabindex="-1"])')]
+        .filter(node => !node.disabled && node.getClientRects().length);
+      if (!controls.length) { event.preventDefault(); dialog?.focus(); return; }
+      const first = controls[0], last = controls[controls.length - 1];
+      if (event.shiftKey && (document.activeElement === first || document.activeElement === dialog)) {
+        event.preventDefault(); last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || document.activeElement === dialog)) {
+        event.preventDefault(); first.focus();
+      }
+    }
+    return { open, close, onKeydown };
+  }
+
+  global.createGameDetailUi = () => ({ renderGameDetail, scrollWheel, createFocusController });
 })(window);

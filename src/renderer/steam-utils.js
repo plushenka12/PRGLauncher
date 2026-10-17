@@ -1,6 +1,16 @@
 // Pure Steam data helpers. IPC, network requests and DOM rendering remain in
 // the renderer; this module only normalizes payloads and playtime deltas.
 (function exposeSteamUtils(global) {
+  function isValidSteamProfileUrl(value) {
+    if (typeof value !== 'string' || value.length > 300) return false;
+    try {
+      const url = new URL(value.trim());
+      const match = url.pathname.match(/^\/(profiles|id)\/([A-Za-z0-9_-]+)\/?$/);
+      return url.protocol === 'https:' && url.hostname === 'steamcommunity.com' && !url.port
+        && !url.username && !url.password && Boolean(match)
+        && (match[1] === 'id' || /^7656119\d{10}$/.test(match[2]));
+    } catch { return false; }
+  }
   function normalizeSteamGame(raw = {}) {
     const appId = Number(raw.appId ?? raw.steamAppId);
     const minutes = Number(raw.minutes ?? raw.playtimeMinutes ?? 0);
@@ -43,5 +53,5 @@
     })[code] || 'Не вдалося завантажити Steam.';
   }
 
-  global.createSteamUtils = () => ({ normalizeSteamGame, mergeSteamPlaytime, importErrorMessage });
+  global.createSteamUtils = () => ({ isValidSteamProfileUrl, normalizeSteamGame, mergeSteamPlaytime, importErrorMessage });
 })(window);

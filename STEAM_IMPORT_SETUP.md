@@ -16,7 +16,7 @@ are fabricated from that total.
 
 ## One-time server setup
 
-1. Obtain a Steam Web API key at https://steamcommunity.com/dev/apikey using the
+1. Obtain a Steam Web API key at [Steam Web API Key](https://steamcommunity.com/dev/apikey) using the
    project owner's Steam account. Never paste it into chat or commit it.
 2. In the Netlify project's environment variables, set `STEAM_WEB_API_KEY` for
    Functions (production). Optional `FIREBASE_WEB_API_KEY` overrides this project's

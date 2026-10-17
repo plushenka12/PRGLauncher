@@ -7,6 +7,7 @@
     "start": "electron . --enable-logging",
     "dev": "electron . --enable-logging",
     "test": "node --test tests/*.test.cjs",
+    "lint:md": "markdownlint-cli2 \"*.md\" \"web-dashboard/*.md\" \"src/**/AGENTS.md\"",
     "test:emulator": "set FIRESTORE_EMULATOR_HOST=127.0.0.1:8080&& node --test tests/firestore-emulator.test.cjs",
     "release:check": "node scripts/release-gate.cjs",
     "build": "electron-builder --win --x64",
@@ -60,7 +61,9 @@
     "@firebase/rules-unit-testing": "^3.0.4",
     "electron": "^29.0.0",
     "electron-builder": "^24.0.0",
-    "firebase-tools": "^15.32.1"
+    "firebase-tools": "^15.32.1",
+    "markdownlint-cli2": "^0.23.3",
+    "playwright-core": "^1.64.0"
   },
   "dependencies": {
     "electron-updater": "^6.8.9",

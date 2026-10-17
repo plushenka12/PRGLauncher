@@ -40,4 +40,3 @@
 - [ ] Report відкриває правильний dashboard.
 - [ ] Застосунок не залишає завислий процес після Quit.
 - [ ] Зафіксувати macOS version, chip (Intel/Apple Silicon), macOS version і всі console errors.
-

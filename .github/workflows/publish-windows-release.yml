@@ -6,7 +6,6 @@ on:
       tag:
         description: Existing release tag to build and publish
         required: true
-        default: '1.2.3'
         type: string
 
 permissions:
@@ -29,11 +28,30 @@ jobs:
           node-version: 22
           cache: npm
 
+      - name: Check release tag against package version
+        shell: pwsh
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          $packageVersion = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          if ($env:RELEASE_TAG -ne $packageVersion) {
+            throw "Tag $env:RELEASE_TAG does not match package version $packageVersion"
+          }
+
       - name: Install dependencies
         run: npm ci
 
+      - name: Run tests
+        run: npm test
+
+      - name: Lint Markdown
+        run: npm run lint:md
+
       - name: Build Windows installer
         run: npm run build -- --publish never
+
+      - name: Run release gate
+        run: npm run release:check
 
       - name: Create or update GitHub Release
         uses: actions/github-script@v8
@@ -45,32 +63,15 @@ jobs:
             const path = require('path');
             const { owner, repo } = context.repo;
             const tag = process.env.RELEASE_TAG;
-            const title = `PRGLauncher ${tag} — unified game adding, recap та HLTB`;
-            const body = [
-              `## PRGLauncher ${tag}`,
-              '',
-              'Велике оновлення інтерфейсу, Steam-імпорту та PRG Account.',
-              '',
-              '### Головне',
-              '- Повна українська й англійська локалізація, п’ять тем і масштаб інтерфейсу 90–120%.',
-              '- Контрастніші картки, клікабельні статуси Backlog / Playing / Completed та швидка зміна статусу.',
-              '- Steam-імпорт із пошуком, картками-обкладинками, масовим вибором і можливістю від’єднати або замінити Steam-профіль.',
-              '- PRG Account замість локального режиму: окремі бібліотека, синхронізація та статистична сторінка для кожного користувача.',
-              '- Mini-bar із плавним переходом, Stand By, закріпленням поверх вікон і підказками на іконках.',
-              '- Автоматична перевірка оновлень при старті та новий брендинг із клевером.',
-              '- Duplicate Center для ручного об’єднання ігор, джерела в Game Info та відкат останнього merge.',
-              '- Річний PRG Recap із вибором року, імпортованим playtime та поширенням підсумку.',
-              '- macOS universal DMG з коректною template-іконкою menu bar та launcher-ініційованим приховуванням Steam.',
-              '- Виправлено встановлення через Steam: лаунчер не забирає фокус до вибору бібліотеки, а Steam ховається лише після початку завантаження.',
-              '- На картках прибрано дубльовану статистику при наведенні; кількість сесій показується на обкладинці, а шрифти фільтрів уніфіковано.',
-              '- Єдиний центр «Додати гру» для Steam, Nintendo, RAWG та локальних executable-файлів.',
-              '- Локальні `.exe`/`.app`-ігри автоматично отримують RAWG-метадані та запускаються з таймером.',
-              '- Оновлено PRG Recap: чіткий грід, топ із міні-обкладинками, найдовша сесія та місячна активність.',
-              '- HLTB адаптовано до динамічних endpoint-ів і нового token flow.',
-              '',
-              '### Встановлення',
-              `Завантаж **PRGLauncher-Setup-${tag}.exe**, запусти інсталятор і залиш стандартні опції. Надалі PRGLauncher зможе запропонувати оновлення сам.`,
-            ].join('\n');
+            const title = `PRGLauncher ${tag}`;
+            const changelogLines = fs.readFileSync('CHANGELOG.md', 'utf8').split(/\r?\n/);
+            const start = changelogLines.findIndex(line => line === `## ${tag}` || line.startsWith(`## ${tag} —`));
+            if (start < 0) throw new Error(`Missing CHANGELOG.md section for ${tag}`);
+            const endOffset = changelogLines.slice(start + 1).findIndex(line => line.startsWith('## '));
+            const end = endOffset < 0 ? changelogLines.length : start + 1 + endOffset;
+            const notes = changelogLines.slice(start + 1, end).join('\n').trim();
+            if (!notes) throw new Error(`Empty CHANGELOG.md section for ${tag}`);
+            const body = `## PRGLauncher ${tag}\n\n${notes}`;
 
             let release;
             try {

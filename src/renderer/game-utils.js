@@ -24,6 +24,30 @@
       .trim();
   }
 
+  function findExistingDuplicateGames(games, addedId) {
+    const added = (games || []).find(game => game.id === addedId);
+    const key = normalizeBackloggdTitle(added?.title);
+    if (!key) return [];
+    return games.filter(game => game.id !== addedId && normalizeBackloggdTitle(game.title) === key);
+  }
+
+  function preserveManualMergeFields(primary, duplicate) {
+    if (!primary?.localExecutable && duplicate?.localExecutable) {
+      primary.localExecutable = duplicate.localExecutable;
+      primary.workingDirectory = duplicate.workingDirectory || null;
+      primary.launchArguments = duplicate.launchArguments || null;
+    }
+    if (duplicate?.notes && duplicate.notes !== primary.notes) {
+      primary.notes = primary.notes ? `${primary.notes}\n\n${duplicate.notes}` : duplicate.notes;
+    }
+    for (const field of ['genres', 'tags']) {
+      primary[field] = [...new Set([...(primary[field] || []), ...(duplicate?.[field] || [])])];
+    }
+    return primary;
+  }
+
   global.normalizeRawgSearchTitle = normalizeRawgSearchTitle;
   global.normalizeBackloggdTitle = normalizeBackloggdTitle;
+  global.findExistingDuplicateGames = findExistingDuplicateGames;
+  global.preserveManualMergeFields = preserveManualMergeFields;
 })(window);

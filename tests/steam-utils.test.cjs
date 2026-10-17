@@ -4,9 +4,18 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 
 const source = fs.readFileSync('src/renderer/steam-utils.js', 'utf8');
-const context = { window: {} };
+const context = { window: {}, URL };
 vm.runInNewContext(source, context, { filename: 'steam-utils.js' });
 const steam = context.window.createSteamUtils();
+
+test('accepts only valid Steam profile links for inline connection', () => {
+  assert.equal(steam.isValidSteamProfileUrl('https://steamcommunity.com/id/player_name/'), true);
+  assert.equal(steam.isValidSteamProfileUrl('https://steamcommunity.com/profiles/76561197960287930'), true);
+  assert.equal(steam.isValidSteamProfileUrl('http://steamcommunity.com/id/player'), false);
+  assert.equal(steam.isValidSteamProfileUrl('https://steamcommunity.com.evil.test/id/player'), false);
+  assert.equal(steam.isValidSteamProfileUrl('https://steamcommunity.com/id/'), false);
+  assert.equal(steam.isValidSteamProfileUrl('https://steamcommunity.com/profiles/123'), false);
+});
 
 test('normalizes Steam payloads and rejects invalid playtime', () => {
   assert.deepEqual(JSON.parse(JSON.stringify(steam.normalizeSteamGame({ appId: '10', name: ' Test ', playtimeMinutes: -2 }))), { appId: 10, title: 'Test', cover: null, minutes: 0, installed: false });

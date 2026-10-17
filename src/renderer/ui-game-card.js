@@ -49,7 +49,7 @@
     if (game.rating) {
       const rating = document.createElement('span');
       rating.className = 'card-rating';
-      rating.innerHTML = '★ ' + game.rating + '/10';
+      rating.textContent = '★ ' + game.rating + '/10';
       coverDiv.appendChild(rating);
     }
     card.appendChild(coverDiv);

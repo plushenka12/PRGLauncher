@@ -1,0 +1,135 @@
+<div id="prg-thor-v2" class="viz-dotted-background">
+  <style>
+    #prg-thor-v2{padding:12px 0 28px}
+    #prg-thor-v2 .thor-stage{min-height:856px;display:grid;place-items:start center;padding:2px 5px 24px}
+    #prg-thor-v2 .thor{width:min(100%,788px);color:#f6f7fb;font-family:Inter,ui-sans-serif,system-ui,sans-serif}
+    #prg-thor-v2 .lid{padding:13px;background:#171923;border-radius:28px 28px 13px 13px;box-shadow:0 22px 50px #070a18a6}
+    #prg-thor-v2 .top-display{aspect-ratio:16/9;overflow:hidden;border-radius:17px;background:#090d19;position:relative}
+    #prg-thor-v2 .display-glow{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 70% 18%,#5b218b35,transparent 52%),radial-gradient(ellipse at 25% 100%,#0ad8891a,transparent 45%)}
+    #prg-thor-v2 .top-ui{position:relative;height:100%;display:grid;grid-template-rows:auto 1fr auto;padding:17px 22px 18px}
+    #prg-thor-v2 .topbar{display:flex;align-items:center;gap:18px;min-width:0}
+    #prg-thor-v2 .brand{font-weight:800;letter-spacing:-.03em;font-size:17px;white-space:nowrap}
+    #prg-thor-v2 .brand-mark{display:inline-block;background:radial-gradient(circle at 34% 34%,#70ff92 0 20%,transparent 21%),radial-gradient(circle at 66% 34%,#70ff92 0 20%,transparent 21%),radial-gradient(circle at 34% 66%,#70ff92 0 20%,transparent 21%),radial-gradient(circle at 66% 66%,#70ff92 0 20%,transparent 21%),#b134ea;width:25px;height:25px;border-radius:8px;margin-right:8px;vertical-align:middle}
+    #prg-thor-v2 .topnav{display:flex;gap:17px;color:#aab4cb;font-size:12px;min-width:0}
+    #prg-thor-v2 .topnav span{white-space:nowrap}
+    #prg-thor-v2 .topnav .on{color:#fff;font-weight:700}
+    #prg-thor-v2 .account{margin-left:auto;display:flex;align-items:center;gap:7px;color:#cfd5e7;font-size:11px;white-space:nowrap}
+    #prg-thor-v2 .account-dot{width:8px;height:8px;background:#43e996;border-radius:50%}
+    #prg-thor-v2 .library-body{min-height:0;display:flex;flex-direction:column;justify-content:center}
+    #prg-thor-v2 .lead{display:grid;grid-template-columns:minmax(0,1fr) 36%;gap:22px;align-items:center;margin-top:8px}
+    #prg-thor-v2 .lead-text{min-width:0}
+    #prg-thor-v2 .eyeline{color:#65f0ab;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px}
+    #prg-thor-v2 .lead-title{font-size:clamp(25px,4vw,37px);font-weight:900;line-height:1.06;letter-spacing:-.035em;max-width:11ch}
+    #prg-thor-v2 .lead-meta{font-size:12px;color:#bac4da;margin-top:12px;display:flex;gap:12px;flex-wrap:wrap}
+    #prg-thor-v2 .lead-meta strong{color:#fff}
+    #prg-thor-v2 .lead-actions{display:flex;gap:9px;margin-top:17px}
+    #prg-thor-v2 .product-button{font:inherit;font-size:12px;font-weight:800;border:0;border-radius:10px;padding:10px 15px;background:#a52bfa;color:#fff;white-space:nowrap}
+    #prg-thor-v2 .product-button.subtle{background:#1c2637;color:#dce9ee}
+    #prg-thor-v2 .lead-art{height:190px;align-self:stretch;border-radius:14px;display:flex;align-items:end;padding:16px;overflow:hidden;position:relative;background:linear-gradient(142deg,#ddb569 0%,#7a6c8e 31%,#203b56 69%,#0b1028 100%)}
+    #prg-thor-v2 .lead-art:before{content:"";position:absolute;inset:auto -20% -58% -30%;height:110%;border-radius:50%;background:linear-gradient(170deg,#082d45,#0b1226);transform:rotate(-12deg)}
+    #prg-thor-v2 .lead-art:after{content:"";position:absolute;right:13%;bottom:7%;width:17%;height:62%;background:linear-gradient(#182938,#070d18);clip-path:polygon(45% 0,75% 8%,88% 41%,67% 45%,87% 100%,28% 100%,47% 42%,22% 29%);filter:drop-shadow(0 0 8px #050609)}
+    #prg-thor-v2 .lead-art[data-game="death"]{background:linear-gradient(150deg,#7eaa9c,#2b4f5a 57%,#0c1821)}
+    #prg-thor-v2 .lead-art[data-game="hades"]{background:linear-gradient(145deg,#e6a84e,#8a413f 54%,#171321)}
+    #prg-thor-v2 .lead-art span{position:relative;z-index:1;font-size:10px;color:#eaf9f4;font-weight:700}
+    #prg-thor-v2 .shelf{display:flex;gap:8px;align-items:center;margin-top:8px}
+    #prg-thor-v2 .shelf-label{font-size:11px;color:#8d99b4;white-space:nowrap;margin-right:5px}
+    #prg-thor-v2 .game-pick{min-width:0;display:flex;align-items:center;gap:7px;border:1px solid #263747;background:#131e2c;color:#e9f3ee;border-radius:9px;padding:7px 10px;font-size:11px;white-space:nowrap}
+    #prg-thor-v2 .game-pick.selected{border-color:#a53afa;background:#2a1c45}
+    #prg-thor-v2 .pick-thumb{display:block;width:17px;height:17px;border-radius:4px;background:linear-gradient(140deg,#e6b96c,#1c6680);flex:0 0 auto}
+    #prg-thor-v2 .pick-thumb.two{background:linear-gradient(140deg,#84acaa,#163448)}
+    #prg-thor-v2 .pick-thumb.three{background:linear-gradient(140deg,#e18f44,#334061)}
+    #prg-thor-v2 .hinge{height:22px;background:linear-gradient(#11141b,#333740 48%,#11131b);border-radius:3px 3px 9px 9px;margin:0 6px;position:relative}
+    #prg-thor-v2 .hinge:after{content:"";position:absolute;left:50%;top:5px;width:90px;height:7px;background:#0b0d12;border-radius:20px;transform:translateX(-50%)}
+    #prg-thor-v2 .base{min-height:323px;background:linear-gradient(145deg,#1d202a,#10131b);border-radius:15px 15px 36px 36px;display:grid;grid-template-columns:1fr minmax(0,58%) 1fr;gap:12px;align-items:center;padding:18px 21px 25px;box-shadow:0 25px 50px #050712b8}
+    #prg-thor-v2 .controls{display:flex;flex-direction:column;gap:31px;align-items:center;color:#b8bed2}
+    #prg-thor-v2 .stick{width:53px;height:53px;background:radial-gradient(circle at 42% 38%,#3b4251,#151821 62%);border:5px solid #07090f;border-radius:50%;box-shadow:inset 0 0 0 2px #5b6272}
+    #prg-thor-v2 .dpad{display:grid;grid-template-columns:repeat(3,13px);grid-template-rows:repeat(3,13px);gap:1px;transform:rotate(-2deg)}
+    #prg-thor-v2 .dpad i{background:#0a0c13;border-radius:3px}
+    #prg-thor-v2 .dpad i:nth-child(1),#prg-thor-v2 .dpad i:nth-child(3),#prg-thor-v2 .dpad i:nth-child(7),#prg-thor-v2 .dpad i:nth-child(9){visibility:hidden}
+    #prg-thor-v2 .abxy{display:grid;grid-template-columns:repeat(3,21px);grid-template-rows:repeat(3,21px);align-items:center;justify-items:center}
+    #prg-thor-v2 .abxy span{width:21px;height:21px;border:2px solid #090b12;background:#30374a;border-radius:50%;display:grid;place-items:center;font-size:9px}
+    #prg-thor-v2 .abxy span:nth-child(1){grid-column:2;grid-row:1}#prg-thor-v2 .abxy span:nth-child(2){grid-column:3;grid-row:2}#prg-thor-v2 .abxy span:nth-child(3){grid-column:2;grid-row:3}#prg-thor-v2 .abxy span:nth-child(4){grid-column:1;grid-row:2}
+    #prg-thor-v2 .lower-display{aspect-ratio:1240/1080;background:#0b101d;border:3px solid #05070c;border-radius:13px;overflow:hidden;box-shadow:0 0 0 1px #424b59}
+    #prg-thor-v2 .lower-ui{height:100%;padding:15px;display:flex;flex-direction:column;gap:12px}
+    #prg-thor-v2 .lower-label{font-size:11px;color:#69e7ac;font-weight:800;display:flex;align-items:center;justify-content:space-between}
+    #prg-thor-v2 .lower-label span{color:#a0adc7;font-weight:500}
+    #prg-thor-v2 .lower-title{font-size:20px;font-weight:900;line-height:1.08;letter-spacing:-.025em}
+    #prg-thor-v2 .lower-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+    #prg-thor-v2 .metric{background:#161c2d;padding:9px;border-radius:9px;color:#b5bfd3;font-size:10px;min-width:0}
+    #prg-thor-v2 .metric strong{display:block;color:#fff;font-size:16px;margin-top:2px}
+    #prg-thor-v2 .lower-line{border-top:1px solid #2b3348;padding-top:10px;color:#b5c4d3;font-size:11px;display:flex;justify-content:space-between;gap:10px}
+    #prg-thor-v2 .lower-line strong{color:#d6f9e8;white-space:nowrap}
+    #prg-thor-v2 .lower-actions{margin-top:auto;display:flex;gap:7px}
+    #prg-thor-v2 .lower-actions .product-button{flex:1;padding:12px 7px;font-size:12px}
+    #prg-thor-v2 .focus-note{font-size:10px;text-align:center;color:#8997ad}
+    #prg-thor-v2 .grid-top .top-ui{grid-template-rows:auto auto 1fr auto}
+    #prg-thor-v2 .grid-head{display:flex;justify-content:space-between;align-items:end;margin:25px 0 10px}
+    #prg-thor-v2 .grid-head h3{font-size:27px;line-height:1;margin:0}
+    #prg-thor-v2 .grid-head span{font-size:11px;color:#a4b4c6}
+    #prg-thor-v2 .library-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;min-height:0;align-content:center}
+    #prg-thor-v2 .cover-tile{position:relative;aspect-ratio:16/9;border:2px solid transparent;border-radius:10px;overflow:hidden;min-width:0;display:flex;align-items:end;padding:10px;background:linear-gradient(0deg,#07111feb,transparent 68%),linear-gradient(155deg,#b98665,#1a4a55 52%,#111726);font-size:12px;font-weight:800;line-height:1.15;color:#fff;text-align:left;text-shadow:0 1px 5px #07101c}
+    #prg-thor-v2 .cover-tile:nth-child(2){background:linear-gradient(0deg,#07111feb,transparent 68%),linear-gradient(145deg,#e4b89c,#345454 55%,#101722)}
+    #prg-thor-v2 .cover-tile:nth-child(3){background:linear-gradient(0deg,#07111feb,transparent 68%),linear-gradient(150deg,#e2b050,#6f4139 60%,#151626)}
+    #prg-thor-v2 .cover-tile:nth-child(4){background:linear-gradient(0deg,#07111feb,transparent 68%),linear-gradient(150deg,#858bdb,#534e85 50%,#151626)}
+    #prg-thor-v2 .cover-tile:nth-child(5){background:linear-gradient(0deg,#07111feb,transparent 68%),linear-gradient(150deg,#75b9c6,#26365c 55%,#121829)}
+    #prg-thor-v2 .cover-tile:nth-child(6){background:linear-gradient(0deg,#07111feb,transparent 68%),linear-gradient(150deg,#c9b986,#526641 55%,#142429)}
+    #prg-thor-v2 .cover-tile.active{border-color:#b34bff}
+    #prg-thor-v2 .grid-footer{font-size:11px;color:#96a6b8;display:flex;justify-content:space-between;margin-top:12px}
+    #prg-thor-v2 .shortcut{font-weight:700;color:#e5f5ec}
+    #prg-thor-v2 .grid-detail .lower-title{font-size:18px}
+    #prg-thor-v2 .grid-detail .mini-art{height:32%;border-radius:9px;background:linear-gradient(140deg,#be8b66,#38505a 55%,#17263b);position:relative;overflow:hidden}
+    #prg-thor-v2 .grid-detail .mini-art:after{content:"";position:absolute;inset:auto -20% -50%;height:90%;border-radius:50%;background:#11243b;transform:rotate(-12deg)}
+    #prg-thor-v2 .grid-detail .mini-art[data-game="death"]{background:linear-gradient(135deg,#b7b5a5,#4f756a 55%,#182534)}
+    #prg-thor-v2 .grid-detail .mini-art[data-game="hades"]{background:linear-gradient(135deg,#efae58,#884246 55%,#1a192b)}
+    #prg-thor-v2 .grid-detail .mini-art[data-game="ff"]{background:linear-gradient(135deg,#9aaad0,#4a5687 55%,#19192e)}
+    #prg-thor-v2 .grid-detail .lower-actions{margin-top:auto}
+    #prg-thor-v2 .variant-intro{max-width:788px;margin:0 auto 14px;color:var(--muted-foreground);font-size:13px;line-height:1.4}
+    @media(max-width:620px){#prg-thor-v2 .thor-stage{min-height:0}#prg-thor-v2 .lid{padding:7px;border-radius:18px 18px 8px 8px}#prg-thor-v2 .top-ui{padding:10px 12px 11px}#prg-thor-v2 .brand{font-size:12px}#prg-thor-v2 .brand-mark{width:18px;height:18px;font-size:12px;margin-right:4px}#prg-thor-v2 .topbar{gap:8px}#prg-thor-v2 .topnav{gap:7px;font-size:9px}#prg-thor-v2 .account{display:none}#prg-thor-v2 .lead{gap:8px}#prg-thor-v2 .lead-title{font-size:19px}#prg-thor-v2 .eyeline{font-size:8px;margin-bottom:2px}#prg-thor-v2 .lead-meta{font-size:9px;gap:6px;margin-top:4px}#prg-thor-v2 .lead-actions{margin-top:6px}#prg-thor-v2 .lead-actions .product-button{padding:6px 8px;font-size:9px}#prg-thor-v2 .lead-art{height:100%;min-height:82px;padding:6px}#prg-thor-v2 .lead-art span{font-size:7px}#prg-thor-v2 .shelf{margin-top:4px;gap:3px}#prg-thor-v2 .shelf-label{display:none}#prg-thor-v2 .game-pick{font-size:8px;padding:4px 5px;gap:3px}#prg-thor-v2 .pick-thumb{width:9px;height:9px}#prg-thor-v2 .base{padding:10px 6px 14px;gap:4px;min-height:0;grid-template-columns:14% minmax(0,72%) 14%}#prg-thor-v2 .controls{gap:16px}#prg-thor-v2 .stick{width:25px;height:25px;border-width:3px}#prg-thor-v2 .dpad{grid-template-columns:repeat(3,7px);grid-template-rows:repeat(3,7px)}#prg-thor-v2 .abxy{grid-template-columns:repeat(3,11px);grid-template-rows:repeat(3,11px)}#prg-thor-v2 .abxy span{width:11px;height:11px;font-size:6px;border-width:1px}#prg-thor-v2 .lower-ui{padding:9px;gap:5px}#prg-thor-v2 .lower-label{font-size:8px}#prg-thor-v2 .lower-label span{font-size:7px}#prg-thor-v2 .lower-title{font-size:13px}#prg-thor-v2 .metric{padding:5px;font-size:7px}#prg-thor-v2 .metric strong{font-size:11px}#prg-thor-v2 .lower-line{font-size:8px;padding-top:5px}#prg-thor-v2 .lower-actions .product-button{padding:6px 3px;font-size:9px}#prg-thor-v2 .focus-note{display:none}#prg-thor-v2 .grid-head{margin:8px 0 4px}#prg-thor-v2 .grid-head h3{font-size:14px}#prg-thor-v2 .grid-head span{font-size:8px}#prg-thor-v2 .library-grid{gap:4px}#prg-thor-v2 .cover-tile{font-size:7px;padding:4px;border-radius:5px}#prg-thor-v2 .grid-footer{font-size:8px;margin-top:3px}#prg-thor-v2 .grid-detail .lower-title{font-size:12px}#prg-thor-v2 .grid-detail .mini-art{height:23%}}
+  </style>
+  <div class="viz-carousel" aria-label="Два варіанти інтерфейсу PRGLauncher для AYN Thor" data-previous-label="Назад" data-next-label="Далі">
+    <section data-variant="Фокус на грі" aria-label="Велика обкладинка нагорі, інформація внизу">
+      <div class="thor-stage"><div class="thor">
+        <div class="lid"><div class="top-display"><div class="display-glow"></div><div class="top-ui">
+          <div class="topbar"><div class="brand"><span class="brand-mark" aria-hidden="true"></span>PRGLauncher</div><div class="topnav"><span class="on">Ігри</span><span>Сесії</span><span>Рекап</span></div><div class="account"><span class="account-dot"></span> Synced</div></div>
+          <div class="library-body"><div class="lead"><div class="lead-text"><div class="eyeline">Продовжити гру</div><div class="lead-title">The Legend of Zelda: Breath of the Wild</div><div class="lead-meta"><span><strong>153.9 год</strong> у грі</span><span>2 сесії</span><span>Nintendo Switch</span></div><div class="lead-actions"><button class="product-button" type="button">Інформація</button><button class="product-button subtle" type="button">Змінити статус</button></div></div><div class="lead-art"><span>THE LEGEND OF ZELDA</span></div></div></div>
+          <div class="shelf"><span class="shelf-label">Останні</span><button class="game-pick selected cursor-interaction" data-game="zelda" type="button"><span class="pick-thumb"></span>Zelda</button><button class="game-pick cursor-interaction" data-game="death" type="button"><span class="pick-thumb two"></span>Death Stranding</button><button class="game-pick cursor-interaction" data-game="hades" type="button"><span class="pick-thumb three"></span>Hades</button></div>
+        </div></div></div><div class="hinge"></div>
+        <div class="base"><div class="controls"><div class="stick"></div><div class="dpad" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div><div class="lower-display"><div class="lower-ui"><div class="lower-label">ВИБРАНА ГРА <span>Playing</span></div><div class="lower-title">The Legend of Zelda: Breath of the Wild</div><div class="lower-metrics"><div class="metric">Мій час<strong>153.9h</strong></div><div class="metric">HLTB<strong>50h</strong></div><div class="metric">Сесії<strong>2</strong></div></div><div class="lower-line"><span>Остання сесія</span><strong>3 травня · 1:26</strong></div><div class="lower-actions"><button class="product-button" type="button">Почати таймер</button><button class="product-button subtle" type="button">Історія</button></div><div class="focus-note">Стік — вибір · A — відкрити · B — назад</div></div></div><div class="controls"><div class="abxy" aria-hidden="true"><span>X</span><span>A</span><span>B</span><span>Y</span></div><div class="stick"></div></div></div>
+      </div></div>
+    </section>
+    <section data-variant="Бібліотека" aria-label="Сітка ігор нагорі, швидка картка внизу" hidden>
+      <div class="thor-stage"><div class="thor">
+        <div class="lid"><div class="top-display grid-top"><div class="display-glow"></div><div class="top-ui"><div class="topbar"><div class="brand"><span class="brand-mark" aria-hidden="true"></span>PRGLauncher</div><div class="topnav"><span class="on">Ігри</span><span>Сесії</span><span>Рекап</span></div><div class="account"><span class="account-dot"></span> Synced</div></div><div class="grid-head"><h3>Моя бібліотека</h3><span>138 ігор · 4 Playing</span></div><div class="library-grid"><button class="cover-tile active cursor-interaction" data-game="zelda" type="button">The Legend of Zelda: Breath of the Wild</button><button class="cover-tile cursor-interaction" data-game="death" type="button">Death Stranding Director’s Cut</button><button class="cover-tile cursor-interaction" data-game="hades" type="button">Hades</button><button class="cover-tile cursor-interaction" data-game="ff" type="button">Final Fantasy VII Remake</button><button class="cover-tile cursor-interaction" data-game="farcry" type="button">Far Cry 5</button><button class="cover-tile cursor-interaction" data-game="mario" type="button">Super Mario Bros. Wonder</button></div><div class="grid-footer"><span>Playing · Backlog · Completed · QuickPlay</span><span class="shortcut">Y · Фільтри</span></div></div></div></div><div class="hinge"></div>
+        <div class="base"><div class="controls"><div class="stick"></div><div class="dpad" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div><div class="lower-display"><div class="lower-ui grid-detail"><div class="lower-label">ШВИДКА КАРТКА <span>Nintendo Switch</span></div><div class="mini-art"></div><div class="lower-title">The Legend of Zelda: Breath of the Wild</div><div class="lower-metrics"><div class="metric">Мій час<strong>153.9h</strong></div><div class="metric">HLTB<strong>50h</strong></div><div class="metric">Статус<strong>Playing</strong></div></div><div class="lower-actions"><button class="product-button" type="button">Відкрити</button><button class="product-button subtle" type="button">Змінити статус</button></div></div></div><div class="controls"><div class="abxy" aria-hidden="true"><span>X</span><span>A</span><span>B</span><span>Y</span></div><div class="stick"></div></div></div>
+      </div></div>
+    </section>
+  </div>
+  <script>
+    (() => {
+      const root = document.getElementById('prg-thor-v2');
+      const games = {
+        zelda: { title: 'The Legend of Zelda: Breath of the Wild', short: 'THE LEGEND OF ZELDA', hours: '153.9h', sessions: '2', hltb: '50h', platform: 'Nintendo Switch', last: '3 травня · 1:26', status: 'Playing' },
+        death: { title: 'Death Stranding Director’s Cut', short: 'DEATH STRANDING', hours: '36.8h', sessions: '12', hltb: '40h', platform: 'PC', last: '18 вересня · 2:10', status: 'Playing' },
+        hades: { title: 'Hades', short: 'HADES', hours: '19.7h', sessions: '8', hltb: '22h', platform: 'PC', last: '21 вересня · 0:48', status: 'QuickPlay' },
+        ff: { title: 'Final Fantasy VII Remake Intergrade', short: 'FINAL FANTASY VII', hours: '37.8h', sessions: '18', hltb: '36h', platform: 'PC', last: '9 вересня · 1:45', status: 'Completed' },
+        farcry: { title: 'Far Cry 5', short: 'FAR CRY 5', hours: '13h', sessions: '3', hltb: '—', platform: 'PC', last: 'Недавно', status: 'Playing' },
+        mario: { title: 'Super Mario Bros. Wonder', short: 'SUPER MARIO BROS. WONDER', hours: '4.3h', sessions: '1', hltb: '—', platform: 'Nintendo Switch', last: 'Недавно', status: 'QuickPlay' }
+      };
+      root.querySelectorAll('[data-variant]').forEach(section => {
+        section.querySelectorAll('button[data-game]').forEach(button => button.addEventListener('click', () => {
+          const key = button.dataset.game;
+          const game = games[key];
+          section.querySelectorAll('button[data-game]').forEach(peer => peer.classList.toggle(peer.classList.contains('game-pick') ? 'selected' : 'active', peer === button));
+          section.querySelectorAll('.lower-title').forEach(el => el.textContent = game.title);
+          section.querySelectorAll('.lower-metrics').forEach(el => { const values = el.querySelectorAll('strong'); values[0].textContent = game.hours; values[1].textContent = game.hltb; values[2].textContent = el.closest('.grid-detail') ? game.status : game.sessions; });
+          section.querySelectorAll('.lower-label span').forEach(el => el.textContent = el.closest('.grid-detail') ? game.platform : game.status);
+          const leadTitle = section.querySelector('.lead-title'); if (leadTitle) leadTitle.textContent = game.title;
+          const leadMeta = section.querySelector('.lead-meta'); if (leadMeta) leadMeta.innerHTML = '<span><strong>' + game.hours.replace('h','') + ' год</strong> у грі</span><span>' + game.sessions + ' сесії</span><span>' + game.platform + '</span>';
+          const leadArt = section.querySelector('.lead-art'); if (leadArt) { leadArt.dataset.game = key; leadArt.querySelector('span').textContent = game.short; }
+          const miniArt = section.querySelector('.mini-art'); if (miniArt) miniArt.dataset.game = key;
+          const last = section.querySelector('.lower-line strong'); if (last) last.textContent = game.last;
+        }));
+      });
+    })();
+  </script>
+</div>
