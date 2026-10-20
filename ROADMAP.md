@@ -70,7 +70,7 @@
 
 - ✅ Додати `schemaVersion` і idempotent-міграції локального, cloud та backup payload.
 - ✅ Відокремити profile settings, games, sessions, integrations і public recap у backward-compatible canonical snapshot.
-- ⏭️ Наступний окремий етап: перехід від whole-snapshot writes до безпечніших per-game/session операцій.
+- ◐ У коді, але ще не в релізі: перехід від whole-snapshot writes до транзакцій окремих ігор і сесій. Нові game/session-документи вже працюють у тестах; старий знімок і попередні game-документи залишаються резервними. Ручний прогін на двох ПК ще потрібен.
 
 ### R3 — тести й фікстури
 
@@ -122,7 +122,7 @@
 ### Поточний Windows-фокус
 
 1. Завершити R1-рефакторинг renderer без зміни поведінки.
-2. Перейти від whole-snapshot sync до безпечніших per-game/session операцій.
+2. ◐ Перейти від whole-snapshot sync до безпечніших per-game/session операцій: код і автоматичні тести готові, але зміна ще не в релізі; потрібні перевірка офлайн/конфліктів на двох реальних ПК і release review.
 3. Посилити Windows Steam/HLTB/Recap сценарії та offline/retry перевірки.
 4. Зробити CI обов’язковим для тестів, release gate та Windows installer.
 5. Підготувати наступний Windows-реліз тільки після проходження smoke-чекліста.

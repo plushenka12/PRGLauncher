@@ -56,6 +56,8 @@ Game records currently combine identity, status, platform, playtime, sessions, s
 
 The long-term model should keep profile settings separate from games, sessions and integrations. Per-game/session documents will reduce overwrite risk when several devices are active.
 
+Unreleased work after 1.2.6: the client can migrate the legacy snapshot (or interim `games-v1` documents) into private `users/{uid}/game-records/{gameId}` and `users/{uid}/session-records/{sessionId}` documents. Only after all writes succeed does the root switch to `storageMode: games-sessions-v1`. The root retains the old game array as a recovery copy, while game metadata and session events are updated transactionally. A stored playtime offset preserves imported/manual time that is not represented by sessions. This migration has not been released or manually checked on two real PCs yet.
+
 ## Security boundaries
 
 - Firestore rules are deny-by-default and scope private data to the authenticated UID.
