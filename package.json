@@ -1,16 +1,22 @@
 {
   "name": "prg-launcher",
-  "version": "1.2.5",
+  "version": "1.2.6",
   "description": "PRGLauncher — Game Launcher & Tracker",
   "main": "src/main/index.js",
   "scripts": {
+    "build:renderer": "node scripts/bundle-renderer.cjs",
+    "prestart": "npm run build:renderer",
     "start": "electron . --enable-logging",
+    "predev": "npm run build:renderer",
     "dev": "electron . --enable-logging",
+    "pretest": "npm run build:renderer",
     "test": "node --test tests/*.test.cjs",
     "lint:md": "markdownlint-cli2 \"*.md\" \"web-dashboard/*.md\" \"src/**/AGENTS.md\"",
     "test:emulator": "set FIRESTORE_EMULATOR_HOST=127.0.0.1:8080&& node --test tests/firestore-emulator.test.cjs",
     "release:check": "node scripts/release-gate.cjs",
+    "prebuild": "npm run build:renderer",
     "build": "electron-builder --win --x64",
+    "prebuild:mac": "npm run build:renderer",
     "build:mac": "electron-builder --mac --universal"
   },
   "build": {
@@ -54,13 +60,15 @@
     },
     "files": [
       "src/**/*",
-      "assets/**/*"
+      "assets/**/*",
+      "web-dashboard/review-markdown.js"
     ]
   },
   "devDependencies": {
     "@firebase/rules-unit-testing": "6.0.0",
     "electron": "44.9.0",
     "electron-builder": "26.15.3",
+    "esbuild": "^0.25.12",
     "firebase-tools": "15.34.0",
     "markdownlint-cli2": "^0.23.3",
     "playwright-core": "^1.64.0"

@@ -2,17 +2,21 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Every private profile document is owned by the authenticated UID in its
-    // path. No anonymous or cross-account reads/writes are allowed.
-    match /users/{uid}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+    function isOwner() {
+      return request.auth != null && request.auth.uid == 'Qf6BCLccnvfJv5JEjROoxYlwhSv1';
     }
 
-    // Recap is intentionally public only when the launcher has published it.
-    // The client can write only its own dashboard document.
+    // Existing documents are preserved, but only the owner's account can use
+    // the launcher cloud profile. The UID in the path must still match.
+    match /users/{uid}/{document=**} {
+      allow read, write: if isOwner() && request.auth.uid == uid;
+    }
+
+    // The owner's published recap stays readable without login. Old recap
+    // documents for other accounts are not deleted, but are no longer public.
     match /public-dashboard/{uid} {
-      allow read: if true;
-      allow create, update, delete: if request.auth != null && request.auth.uid == uid;
+      allow read: if uid == 'Qf6BCLccnvfJv5JEjROoxYlwhSv1';
+      allow create, update, delete: if isOwner() && request.auth.uid == uid;
     }
 
     // Legacy shared storage is closed; migration must use the UID-scoped path.

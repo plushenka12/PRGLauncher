@@ -7,6 +7,7 @@ const https = require('https')
 const { execSync, execFile, spawn } = require('child_process')
 const crypto = require('crypto')
 const { STEAM_STARTUP_HIDE_SCRIPT, scheduleSteamStartupHide } = require('./steam-startup-window')
+const { parseRunningSteamAppId } = require('./steam-activity')
 
 // Keep the Windows app identity and packaged process name discoverable.
 if (process.platform === 'win32') app.setAppUserModelId('com.prgtracker.launcher')
@@ -38,6 +39,9 @@ let miniBarStandby = false
 let tray       = null
 let steamPath  = null
 let steamMonitorTimer = null
+let steamActivityTimer = null
+let steamActivityPolling = false
+let steamStatusPolling = false
 let steamTrackedApps = new Set()
 let steamMonitorStates = new Map()
 let steamRunningAppId = null
@@ -94,26 +98,9 @@ function findSteamPath() {
   return null
 }
 
-function isGameInstalled(appId) {
+function isGameInstalled(appId, libraries = getSteamLibraries()) {
   if (!steamPath) return false
-  const appsDir = path.join(steamPath, 'steamapps')
-  if (!fs.existsSync(appsDir)) return false
-
-  // Check main steamapps folder
-  const manifest = path.join(appsDir, `appmanifest_${appId}.acf`)
-  if (isInstalledManifest(manifest)) return true
-
-  // Check library folders (libraryfolders.vdf)
-  try {
-    const vdf = fs.readFileSync(path.join(appsDir, 'libraryfolders.vdf'), 'utf8')
-    const pathMatches = [...vdf.matchAll(/"path"\s+"([^"]+)"/g)]
-    for (const m of pathMatches) {
-      const libManifest = path.join(m[1].replace(/\\\\/g, '\\'), 'steamapps', `appmanifest_${appId}.acf`)
-      if (isInstalledManifest(libManifest)) return true
-    }
-  } catch {}
-
-  return false
+  return libraries.some(library => isInstalledManifest(path.join(library, 'steamapps', `appmanifest_${appId}.acf`)))
 }
 
 function isInstalledManifest(manifest) {
@@ -194,9 +181,9 @@ function readVdfNumber(contents, key) {
   return match ? Number(match[1]) : null
 }
 
-function getInstallProgress(appId) {
-  if (isGameInstalled(appId)) return { state: 'ready', progress: 100, downloaded: null, total: null }
-  for (const library of getSteamLibraries()) {
+function getInstallProgress(appId, libraries = getSteamLibraries()) {
+  if (isGameInstalled(appId, libraries)) return { state: 'ready', progress: 100, downloaded: null, total: null }
+  for (const library of libraries) {
     const steamApps = path.join(library, 'steamapps')
     const manifest = path.join(steamApps, `appmanifest_${appId}.acf`)
     const downloadDir = path.join(steamApps, 'downloading', String(appId))
@@ -320,16 +307,24 @@ function publishSteamStatus(appId, status) {
   if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('steam:status', { appId, ...status })
 }
 
-function pollSteamStatus() {
-  for (const appId of steamTrackedApps) {
-    const status = getInstallProgress(appId)
-    const signature = JSON.stringify(status)
-    if (steamMonitorStates.get(appId) !== signature) {
-      steamMonitorStates.set(appId, signature)
-      publishSteamStatus(appId, status)
+async function pollSteamStatus() {
+  if (steamStatusPolling || !steamTrackedApps.size) return
+  steamStatusPolling = true
+  try {
+    const libraries = getSteamLibraries()
+    let processed = 0
+    for (const appId of steamTrackedApps) {
+      const status = getInstallProgress(appId, libraries)
+      const signature = JSON.stringify(status)
+      if (steamMonitorStates.get(appId) !== signature) {
+        steamMonitorStates.set(appId, signature)
+        publishSteamStatus(appId, status)
+      }
+      if (++processed % 10 === 0) await new Promise(resolve => setImmediate(resolve))
     }
+  } finally {
+    steamStatusPolling = false
   }
-  pollSteamActivity()
 }
 
 function getRunningSteamAppId() {
@@ -337,29 +332,34 @@ function getRunningSteamAppId() {
   // equivalent stable, permission-free API on macOS, so manual sessions and
   // Steam profile import still work while automatic local game detection is
   // intentionally disabled there.
-  if (process.platform !== 'win32') return null
-  try {
-    const result = execSync('reg query "HKCU\\Software\\Valve\\Steam\\Apps" /s /v Running', { encoding: 'utf8' })
-    let currentAppId = null
-    for (const line of result.split(/\r?\n/)) {
-      const keyMatch = line.match(/\\Apps\\(\d+)\s*$/i)
-      if (keyMatch) { currentAppId = keyMatch[1]; continue }
-      if (currentAppId && /\bRunning\b\s+REG_DWORD\s+0x1\b/i.test(line)) return currentAppId
-    }
-  } catch {}
-  return null
+  if (process.platform !== 'win32') return Promise.resolve(null)
+  return new Promise(resolve => {
+    execFile('reg', ['query', 'HKCU\\Software\\Valve\\Steam\\Apps', '/s', '/v', 'Running'], { encoding: 'utf8', windowsHide: true, timeout: 3000, maxBuffer: 4 * 1024 * 1024 }, (error, output) => {
+      resolve(error ? undefined : parseRunningSteamAppId(output))
+    })
+  })
 }
 
-function pollSteamActivity() {
-  const runningAppId = getRunningSteamAppId()
-  if (runningAppId === steamRunningAppId) return
-  steamRunningAppId = runningAppId
-  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('steam:runningApp', { appId: runningAppId })
+async function pollSteamActivity() {
+  if (steamActivityPolling) return
+  steamActivityPolling = true
+  try {
+    const runningAppId = await getRunningSteamAppId()
+    if (runningAppId === undefined) return
+    if (runningAppId === steamRunningAppId) return
+    steamRunningAppId = runningAppId
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('steam:runningApp', { appId: runningAppId })
+  } finally {
+    steamActivityPolling = false
+  }
 }
 
 function startSteamMonitor() {
-  if (steamMonitorTimer) return
-  steamMonitorTimer = setInterval(pollSteamStatus, 1500)
+  if (!steamMonitorTimer) steamMonitorTimer = setInterval(pollSteamStatus, 10000)
+  if (!steamActivityTimer) {
+    pollSteamActivity()
+    steamActivityTimer = setInterval(pollSteamActivity, 1500)
+  }
 }
 
 function getSteamCollection(name) {
@@ -760,9 +760,11 @@ ipcMain.handle('steam:requestInstall', async (_, appId) => {
 ipcMain.handle('steam:hideWindow', () => hideSteamWindow())
 
 ipcMain.handle('steam:trackApps', (_, appIds) => {
-  steamTrackedApps = new Set((Array.isArray(appIds) ? appIds : [])
+  const nextApps = new Set((Array.isArray(appIds) ? appIds : [])
     .map(appId => String(appId))
     .filter(appId => /^\d+$/.test(appId)))
+  if (nextApps.size === steamTrackedApps.size && [...nextApps].every(appId => steamTrackedApps.has(appId))) return
+  steamTrackedApps = nextApps
   steamMonitorStates.clear()
   pollSteamStatus()
   startSteamMonitor()
@@ -809,7 +811,7 @@ ipcMain.handle('steam:getStoreGames', async (_, appIds) => {
 })
 
 ipcMain.handle('steam:getRunningAppId', async () => {
-  return { appId: getRunningSteamAppId() }
+  return { appId: (await getRunningSteamAppId()) ?? null }
 })
 
 ipcMain.handle('gog:installedGames', async () => ({ ok: true, games: getGogInstalledGames() }))
@@ -884,6 +886,15 @@ ipcMain.handle('app:openExternal', async (_, url) => {
     const parsed = new URL(String(url || ''))
     if (parsed.protocol !== 'https:' || parsed.hostname !== 'prgtracker.netlify.app') return { ok: false }
     await shell.openExternal(parsed.toString())
+    return { ok: true }
+  } catch { return { ok: false } }
+})
+ipcMain.handle('review:openLink', async (event, value) => {
+  if (event.sender !== mainWindow?.webContents || typeof value !== 'string' || value.length > 2048) return { ok: false }
+  try {
+    const url = new URL(value)
+    if (url.protocol !== 'https:' || url.username || url.password || !url.hostname || /(^localhost$|\.localhost$|\.local$|^\d+\.\d+\.\d+\.\d+$|^\[.*\]$)/i.test(url.hostname)) return { ok: false }
+    await shell.openExternal(url.toString())
     return { ok: true }
   } catch { return { ok: false } }
 })
@@ -1181,6 +1192,7 @@ function prepareForUpdateInstall() {
   updateState = { ...updateState, status: 'installing', error: null }
   mainWindow?.webContents.send('app:updateStatus', updateState)
   if (steamMonitorTimer) { clearInterval(steamMonitorTimer); steamMonitorTimer = null }
+  if (steamActivityTimer) { clearInterval(steamActivityTimer); steamActivityTimer = null }
   if (steamCollectionTimer) { clearInterval(steamCollectionTimer); steamCollectionTimer = null }
   if (miniBar && !miniBar.isDestroyed()) miniBar.hide()
   if (mainWindow && !mainWindow.isDestroyed()) mainWindow.hide()
@@ -1452,6 +1464,7 @@ app.whenReady().then(() => {
 app.on('before-quit', () => {
   isQuitting = true
   if (steamMonitorTimer) { clearInterval(steamMonitorTimer); steamMonitorTimer = null }
+  if (steamActivityTimer) { clearInterval(steamActivityTimer); steamActivityTimer = null }
   if (steamCollectionTimer) { clearInterval(steamCollectionTimer); steamCollectionTimer = null }
 })
 

@@ -48,7 +48,7 @@ The renderer currently contains almost the entire product in one 343 KB HTML fil
 
 ### Web dashboard and functions
 
-The dashboard reads a public, user-selected Recap snapshot. The Steam function validates a Firebase ID token before calling Steam. Public data must remain an explicit opt-in and must never expose the private library by default.
+The dashboard reads a public, user-selected Recap snapshot. The working version also projects only reviews explicitly marked public in a separate `publicReviews` field; private notes and the full library remain private. The Steam function validates a Firebase ID token before calling Steam. Public data must remain an explicit opt-in and must never expose the private library by default.
 
 ## Data model and sync
 

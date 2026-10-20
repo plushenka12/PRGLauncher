@@ -8,7 +8,9 @@ const publicFixture = JSON.parse(fs.readFileSync('tests/fixtures/public-recap.js
 
 test('Firestore rules keep private profiles UID-scoped', () => {
   assert.match(rules, /match \/users\/\{uid\}\/\{document=\*\*\}/);
-  assert.match(rules, /request\.auth != null && request\.auth\.uid == uid/);
+  assert.match(rules, /request\.auth != null && request\.auth\.uid == 'Qf6BCLccnvfJv5JEjROoxYlwhSv1'/);
+  assert.match(rules, /allow read, write: if isOwner\(\) && request\.auth\.uid == uid/);
+  assert.match(rules, /allow read: if uid == 'Qf6BCLccnvfJv5JEjROoxYlwhSv1'/);
   assert.match(rules, /match \/gamevault\/\{document=\*\*\}/);
   assert.match(rules, /match \/\{document=\*\*\}/);
   assert.match(rules, /allow read, write: if false/);

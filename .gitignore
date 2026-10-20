@@ -2,6 +2,8 @@ node_modules/
 .npm-cache/
 dist/
 release/
+src/renderer/firebase-bundle.js
+.taste-skill/
 *.enc
 *.log
 .DS_Store

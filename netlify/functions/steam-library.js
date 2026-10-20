@@ -1,4 +1,5 @@
 const reply = (statusCode, data) => ({ statusCode, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' }, body: JSON.stringify(data) });
+const OWNER_UID = 'Qf6BCLccnvfJv5JEjROoxYlwhSv1';
 function parseProfile(value) {
   if (typeof value !== 'string' || value.length > 300) throw new Error('INVALID_PROFILE');
   const url = new URL(value.trim());
@@ -26,6 +27,7 @@ exports.handler = async event => {
     const firebaseKey = process.env.FIREBASE_WEB_API_KEY || 'AIzaSyBL-IHjUiSlmJ2N_caWx_MWAI8v2RL4Rpw';
     const account = await jsonFetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${encodeURIComponent(firebaseKey)}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ idToken: token }) });
     if (!account.users?.length) return reply(401, { error: 'LOGIN_REQUIRED' });
+    if (account.users[0]?.localId !== OWNER_UID) return reply(403, { error: 'ACCESS_DENIED' });
   } catch { return reply(401, { error: 'LOGIN_REQUIRED' }); }
   try {
     const steam = async (method, params) => jsonFetch(`https://api.steampowered.com/${method}/?${new URLSearchParams({ key, ...params })}`);

@@ -27,6 +27,7 @@ contextBridge.exposeInMainWorld('launcher', {
   fetchHltbGame: (url) => ipcRenderer.invoke('hltb:fetchGame', url),
   openHltbGame: (url) => ipcRenderer.invoke('hltb:openGame', url),
   openExternal: (url) => ipcRenderer.invoke('app:openExternal', url),
+  openReviewLink: (url) => ipcRenderer.invoke('review:openLink', url),
 
   // Backloggd public-profile importer (no password or private data)
   importBackloggdProfile: (url) => ipcRenderer.invoke('backloggd:importProfile', url),

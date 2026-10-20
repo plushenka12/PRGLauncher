@@ -1,6 +1,43 @@
 // Pure Recap/statistics aggregation. Rendering stays in index.html; this
 // module owns only deterministic data shaping so it can be tested in Node.
 (function exposeRecapUtils(global) {
+  function buildPublicReviews(games = []) {
+    return (Array.isArray(games) ? games : []).filter(game => game?.review?.public === true && String(game.review.markdown || '').trim() && String(game.review.markdown).length <= 3000).map(game => ({
+      gameId: String(game.id || ''),
+      title: String(game.title || ''),
+      cover: typeof game.cover === 'string' ? game.cover : null,
+      rating: game.rating != null && Number.isFinite(Number(game.rating)) ? Number(game.rating) : null,
+      markdown: String(game.review.markdown).trim().slice(0, 3000),
+      updatedAt: Number(game.review.updatedAt) || null
+    }));
+  }
+  // A separate, deliberately small guest-facing projection. Never spread a
+  // game object here: records may contain notes, launch paths and account IDs.
+  function buildPublicLibrary(games = []) {
+    const safeText = (value, limit) => String(value || '').trim().slice(0, limit);
+    const safeCover = value => {
+      if (typeof value !== 'string') return null;
+      try { const url = new URL(value); return url.protocol === 'https:' && value.length <= 2048 ? value : null; }
+      catch { return null; }
+    };
+    const positive = value => Number.isFinite(Number(value)) ? Math.max(0, Number(value)) : 0;
+    const statuses = new Set(['Playing', 'Backlog', 'Completed', 'QuickPlay']);
+    return (Array.isArray(games) ? games : []).filter(game => game && safeText(game.title, 200)).map(game => ({
+      gameId: safeText(game.id, 100),
+      title: safeText(game.title, 200),
+      cover: safeCover(game.cover),
+      status: statuses.has(game.status) ? game.status : 'Backlog',
+      platform: safeText(game.platform, 60) || null,
+      platforms: [...new Set((Array.isArray(game.platforms) ? game.platforms : [game.platform]).map(value => safeText(value, 60)).filter(Boolean))].slice(0, 8),
+      rating: game.rating != null && Number.isFinite(Number(game.rating)) ? Math.min(10, Math.max(0, Number(game.rating))) : null,
+      playtime: positive(game.playtime),
+      sessions: Array.isArray(game.sessions) ? game.sessions.length : 0,
+      hltbMainMinutes: game.hltb?.hidden ? null : positive(game.hltb?.mainStoryMinutes) || null
+    }));
+  }
+  function choosePublicLibraryConsent(remoteEnabled, localChoice, forceLocal = false) {
+    return forceLocal ? localChoice === '1' : remoteEnabled === true;
+  }
   function buildStatsDashboard({ games = [], now = Date.now() } = {}) {
     const list = Array.isArray(games) ? games : [];
     const allSessions = list.flatMap(game => (Array.isArray(game.sessions) ? game.sessions : []).map(session => ({ ...session, title: game.title, cover: game.cover || null })));
@@ -34,9 +71,10 @@
         const date = new Date(start);
         const year = date.getFullYear();
         const bucket = ensureYear(year);
-        const current = bucket.games.get(game.id) || { playtime: 0, sessions: 0, firstPlayedAt: null, lastPlayedAt: null };
+        const current = bucket.games.get(game.id) || { playtime: 0, sessions: 0, longestSession: 0, firstPlayedAt: null, lastPlayedAt: null };
         current.playtime += Number(session.dur || 0);
         current.sessions++;
+        current.longestSession = Math.max(current.longestSession, Number(session.dur || 0));
         current.firstPlayedAt = current.firstPlayedAt ? Math.min(current.firstPlayedAt, start) : start;
         current.lastPlayedAt = current.lastPlayedAt ? Math.max(current.lastPlayedAt, start) : start;
         bucket.games.set(game.id, current);
@@ -51,7 +89,7 @@
     const yearly = Object.fromEntries([...yearlyMap.entries()].map(([year, bucket]) => {
       const yearGames = [...bucket.games.entries()].map(([id, stats]) => {
         const game = list.find(item => item.id === id);
-        return game ? { title: game.title, cover: game.cover || null, playtime: stats.playtime, sessions: stats.sessions, firstPlayedAt: stats.firstPlayedAt, lastPlayedAt: stats.lastPlayedAt, status: game.status || 'Backlog', platform: game.platform || null } : null;
+        return game ? { gameId: String(game.id), title: game.title, cover: game.cover || null, playtime: stats.playtime, sessions: stats.sessions, longestSession: stats.longestSession, firstPlayedAt: stats.firstPlayedAt, lastPlayedAt: stats.lastPlayedAt, status: game.status || 'Backlog', platform: game.platform || null } : null;
       }).filter(Boolean).sort((a, b) => b.playtime - a.playtime);
       const days = [...bucket.activeDays].sort();
       let longestStreak = 0; let currentStreak = 0; let previous = null;
@@ -77,5 +115,5 @@
     };
   }
 
-  global.createRecapUtils = () => ({ buildStatsDashboard });
+  global.createRecapUtils = () => ({ buildStatsDashboard, buildPublicReviews, buildPublicLibrary, choosePublicLibraryConsent });
 })(window);
