@@ -8,6 +8,7 @@ test('launcher, Firestore and Steam endpoint use the same owner UID', () => {
   const renderer = fs.readFileSync('src/renderer/index.html', 'utf8');
   const rules = fs.readFileSync('firestore.rules', 'utf8');
   const steamFunction = fs.readFileSync('netlify/functions/steam-library.js', 'utf8');
+  const rawgFunction = fs.readFileSync('netlify/functions/rawg-search.js', 'utf8');
 
   assert.match(renderer, new RegExp(`PRG_OWNER_UID='${ownerUid}'`));
   assert.match(renderer, /user\.uid!==PRG_OWNER_UID/);
@@ -16,4 +17,6 @@ test('launcher, Firestore and Steam endpoint use the same owner UID', () => {
   assert.match(rules, new RegExp(`allow read: if uid == '${ownerUid}'`));
   assert.match(steamFunction, new RegExp(`OWNER_UID = '${ownerUid}'`));
   assert.match(steamFunction, /account\.users\[0\]\?\.localId !== OWNER_UID/);
+  assert.match(rawgFunction, new RegExp(`OWNER_UID = '${ownerUid}'`));
+  assert.match(rawgFunction, /account\.users\?\.\[0\]\?\.localId !== OWNER_UID/);
 });

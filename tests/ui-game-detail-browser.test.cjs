@@ -9,8 +9,7 @@ const executablePath = process.env.PRG_TEST_BROWSER;
 const rendererPath = path.join(__dirname, '..', 'src', 'renderer');
 
 test('portrait game detail scrolls below the cover with the wheel over the cover', { skip: !executablePath }, async () => {
-  const html = fs.readFileSync(path.join(rendererPath, 'index.html'), 'utf8');
-  const styles = html.match(/<style>([\s\S]*?)<\/style>/)?.[1];
+  const styles = fs.readFileSync(path.join(rendererPath, 'styles.css'), 'utf8');
   assert.ok(styles, 'renderer styles must exist');
   const browser = await chromium.launch({ executablePath, headless: true });
   try {

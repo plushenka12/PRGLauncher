@@ -788,6 +788,27 @@ ipcMain.handle('steam:profileLibrary', async (_, payload) => {
   } catch { return { error: 'STEAM_UNAVAILABLE' } }
 })
 
+ipcMain.handle('rawg:search', async (event, payload) => {
+  if (!mainWindow || event.sender !== mainWindow.webContents) return { error: 'ACCESS_DENIED' }
+  if (!payload || typeof payload.query !== 'string' || !payload.query.trim() || payload.query.length > 200
+    || ![1, 8].includes(payload.pageSize) || typeof payload.token !== 'string' || payload.token.length > 10000) {
+    return { error: 'INVALID_QUERY' }
+  }
+  try {
+    const response = await fetch('https://prgtracker.netlify.app/.netlify/functions/rawg-search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${payload.token}` },
+      body: JSON.stringify({ query: payload.query, pageSize: payload.pageSize }),
+      signal: AbortSignal.timeout(16000),
+      redirect: 'error'
+    })
+    const body = await response.text()
+    if (body.length > 1000000) return { error: 'RAWG_UNAVAILABLE' }
+    const data = JSON.parse(body)
+    return response.ok && Array.isArray(data?.results) ? { results: data.results } : { error: data?.error || 'RAWG_UNAVAILABLE' }
+  } catch { return { error: 'RAWG_UNAVAILABLE' } }
+})
+
 ipcMain.handle('steam:importGames', async () => {
   const found = new Map()
   for (const library of getSteamLibraries()) {

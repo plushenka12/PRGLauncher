@@ -4,7 +4,7 @@ Code audit updated 21 October 2026. Published app version: 1.2.6; unreleased wor
 
 ## Product boundary
 
-PRGLauncher is an Electron desktop app. The desktop app owns the library UI, native integrations, timers, imports and local privacy-sensitive state. Firebase stores a per-user profile/library snapshot and an optional public Recap snapshot. The Netlify site is a read-only presentation layer; the Steam function is a token-validated proxy for library import.
+PRGLauncher is an Electron desktop app. The desktop app owns the library UI, native integrations, timers, imports and local privacy-sensitive state. Firebase stores a per-user profile/library snapshot and an optional public Recap snapshot. The Netlify site is a read-only presentation layer; Steam and the unreleased RAWG search function are token-validated proxies.
 
 ## Runtime map
 
@@ -44,7 +44,7 @@ The preload exposes a deliberately small, named bridge. It must not expose `ipcR
 
 ### Renderer
 
-The renderer still has a roughly 385 KB HTML entry point containing markup, CSS and many state/event handlers. Pure sync/model, integration and UI helpers have been extracted into adjacent modules, but the entry point remains the primary refactoring target. Continue splitting by responsibility while keeping the existing UI stable.
+The renderer now has a roughly 300 KB HTML entry point containing markup and many state/event handlers. Its roughly 86 KB stylesheet is separate in `src/renderer/styles.css`; pure sync/model, integration and UI helpers are also adjacent modules. The remaining JavaScript in the entry point is still the primary refactoring target.
 
 ### Web dashboard and functions
 
@@ -64,7 +64,7 @@ Unreleased work after 1.2.6: the client can migrate the legacy snapshot (or inte
 - Public Recap is opt-in and has an explicit delete path.
 - Nintendo credentials stay local and use the platform secure store where available.
 - Diagnostics export aggregate information rather than secrets or tokens.
-- Steam proxy requests require a valid Firebase ID token.
+- Steam proxy requests require a valid Firebase ID token. The unreleased RAWG proxy also requires the owner's token and server-side `RAWG_API_KEY` plus `FIREBASE_WEB_API_KEY` in Netlify; it must be configured and deployed before using this client code.
 - Multi-launcher and console integrations outside the current Steam/Nintendo scope remain parked in the distant backlog.
 
 ## Target module layout

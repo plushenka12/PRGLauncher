@@ -23,7 +23,7 @@
 
 PRGLauncher — це не заміна магазину Steam. Steam залишається технічним бекендом для запуску та встановлення, а PRGLauncher стає твоїм основним ігровим простором: тут бібліотека, Backlog, статуси, таймери, сесії та статистика.
 
-Застосунок поєднує ігри зі Steam, Nintendo Switch / Switch 2 і будь-які додані вручну тайтли в одному особистому каталозі. Кожен PRG Account має власні дані та персональну read-only сторінку статистики.
+Застосунок поєднує ігри зі Steam, Nintendo Switch / Switch 2 і будь-які додані вручну тайтли в одному особистому каталозі. Поточна версія призначена для одного власника PRG Account; гостьова сторінка показує лише дозволену до публікації частину бібліотеки.
 
 ## Головні можливості
 
@@ -184,9 +184,10 @@ npm run build:mac
 src/main/index.js              Electron main process, Steam, tray, IPC, Nintendo OAuth
 src/preload/index.js           безпечний міст renderer ↔ main
 src/renderer/index.html        основний інтерфейс і логіка бібліотеки
+src/renderer/styles.css        стилі основного інтерфейсу
 src/renderer/mini-bar.html     floating mini-bar
 web-dashboard/index.html       read-only веб-статистика
-netlify/functions/             захищені серверні інтеграції, зокрема Steam library import
+netlify/functions/             захищені серверні інтеграції Steam і RAWG
 assets/                        іконки PRGLauncher
 .github/workflows/             macOS tester build та Windows release pipeline
 ```
@@ -196,6 +197,7 @@ assets/                        іконки PRGLauncher
 - [Повна документація продукту](DOCUMENTATION.md)
 - [Nintendo Sync: технічна документація](NINTENDO_SYNC.md)
 - [Steam library import: серверне налаштування](STEAM_IMPORT_SETUP.md)
+- [RAWG proxy: налаштування ключа](RAWG_PROXY_SETUP.md)
 - [Захист і багатокористувацький режим](SECURITY_AND_MULTIUSER.md)
 - [Roadmap](ROADMAP.md)
 - [macOS release / tester docs](MACOS_RELEASE.md)
@@ -203,7 +205,7 @@ assets/                        іконки PRGLauncher
 
 ## Roadmap
 
-Найближчий великий напрям — завершити macOS-версію: реальне тестування tray і mini-bar, потім Apple signing та notarization. Актуальний стан завжди є в [ROADMAP.md](ROADMAP.md).
+Поточний фокус — Windows: перевірка синхронізації на двох ПК, стабільність Steam/Nintendo/HLTB і поступове розділення renderer. macOS production та нові платформи відкладені; актуальні пріоритети — у [ROADMAP.md](ROADMAP.md).
 
 ---
 

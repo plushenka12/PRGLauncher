@@ -6,7 +6,7 @@ Audit updated 21 October 2026. Priorities describe engineering risk, not user-fa
 
 ### TD-001 — Monolithic renderer
 
-`src/renderer/index.html` is roughly 385 KB and still mixes markup, styles, state and event handlers. Sync/model, integration and UI helpers have been extracted, but changes to the entry point remain hard to review. Continue extracting remaining state and handlers without changing the product contract.
+`src/renderer/index.html` is roughly 300 KB after its 86 KB stylesheet moved to `styles.css`, but still mixes markup, state and event handlers. Sync/model, integration and UI helpers have been extracted; continue separating remaining state and handlers without changing the product contract.
 
 ### TD-002 — Whole-snapshot cloud writes
 
@@ -26,7 +26,7 @@ HLTB availability, token capture and site changes can break enrichment. Keep the
 
 ## Medium priority
 
-- TD-006 — Inline CSS and HTML strings make visual changes risky; move styles and new templates into dedicated modules.
+- TD-006 — The main stylesheet is separate, but large HTML templates and inline style attributes still make visual changes risky; extract them incrementally.
 - TD-007 — Schema migrations are now explicit in schema v3; keep adding ordered migrations whenever the canonical model changes.
 - TD-008 — Alerts and console errors are scattered; centralize notifications, logging and user-safe error messages.
 - TD-009 — Platform-specific behavior is mixed into generic flows; introduce Steam, Nintendo and local-launch adapters behind one interface.

@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron')
 contextBridge.exposeInMainWorld('launcher', {
   // Steam
   getSteamProfileLibrary: (profile, token) => ipcRenderer.invoke('steam:profileLibrary', { profile, token }),
+  searchRawg: (query, pageSize, token) => ipcRenderer.invoke('rawg:search', { query, pageSize, token }),
   launchGame:      (appId) => ipcRenderer.invoke('steam:launchGame', appId),
   gameStatus:      (appId) => ipcRenderer.invoke('steam:gameStatus', appId),
   installStatus:   (appId) => ipcRenderer.invoke('steam:installStatus', appId),
