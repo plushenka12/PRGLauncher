@@ -17,9 +17,17 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
       - name: Install dependencies
         run: npm ci
       - name: Run tests
         run: npm test
+      - name: Test Firestore rules and two-client sync
+        run: npx.cmd firebase emulators:exec --only firestore --project demo-prglauncher "npm.cmd run test:emulator"
+        env:
+          FIREBASE_TOOLS_DISABLE_UPDATE_CHECK: 'true'
       - name: Lint Markdown
         run: npm run lint:md

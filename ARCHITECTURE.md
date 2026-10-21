@@ -1,6 +1,6 @@
 # PRGLauncher architecture
 
-Audit baseline: 3 October 2026 · local `main` after `f42da05` · app version 1.2.3.
+Code audit updated 21 October 2026. Published app version: 1.2.6; unreleased work is called out below.
 
 ## Product boundary
 
@@ -44,7 +44,7 @@ The preload exposes a deliberately small, named bridge. It must not expose `ipcR
 
 ### Renderer
 
-The renderer currently contains almost the entire product in one 343 KB HTML file: markup, CSS, state, Firebase sync, platform integrations, import dialogs, HLTB/RAWG matching, Recap and event handlers. This is the primary refactoring target. New code should be split by responsibility while keeping the existing UI stable.
+The renderer still has a roughly 385 KB HTML entry point containing markup, CSS and many state/event handlers. Pure sync/model, integration and UI helpers have been extracted into adjacent modules, but the entry point remains the primary refactoring target. Continue splitting by responsibility while keeping the existing UI stable.
 
 ### Web dashboard and functions
 
@@ -96,5 +96,5 @@ This is an incremental destination, not a rewrite requirement. Extract pure func
 - Node syntax checks for main and preload pass.
 - `git diff --check` passes for the audit changes.
 - The Windows builder has produced the current installer successfully.
-- There is no renderer test script yet; only the Steam function test exists.
+- `npm test` runs unit/contract tests, and `npm run test:emulator` covers Firestore rules and a two-client sync scenario. GitHub Actions execution of the new emulator step remains to be verified.
 - macOS behavior still requires the CI artifact or tester hardware.

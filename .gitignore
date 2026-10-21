@@ -7,5 +7,6 @@ src/renderer/firebase-bundle.js
 *.enc
 *.log
 PRGLauncher-backup-*.json
+PRGLauncher-diagnostics-*.json
 .private-history/
 .DS_Store

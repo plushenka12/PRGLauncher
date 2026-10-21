@@ -1,24 +1,24 @@
 # PRGLauncher technical debt register
 
-Audit baseline: 3 October 2026. Priorities describe engineering risk, not user-facing severity.
+Audit updated 21 October 2026. Priorities describe engineering risk, not user-facing severity. Published version: 1.2.6; newer sync and CI work is not yet released.
 
 ## High priority
 
 ### TD-001 — Monolithic renderer
 
-`src/renderer/index.html` is roughly 343 KB and mixes markup, styles, state, persistence, integrations and event handlers. Changes are hard to review and regressions are easy to introduce. Extract pure utilities, then store/sync services, then platform adapters and UI components without changing the product contract.
+`src/renderer/index.html` is roughly 385 KB and still mixes markup, styles, state and event handlers. Sync/model, integration and UI helpers have been extracted, but changes to the entry point remain hard to review. Continue extracting remaining state and handlers without changing the product contract.
 
 ### TD-002 — Whole-snapshot cloud writes
 
-The profile/library snapshot at `users/{uid}/profile/library` is convenient but can overwrite another device's edits. Schema v3 now separates profile/integrations/session data inside a backward-compatible payload; the remaining work is moving to per-game/session documents with revision metadata.
+The released 1.2.6 client writes a whole profile/library snapshot. Unreleased code migrates to per-game and per-session documents and passed unit and two-client Emulator tests. Remaining risk: manual two-PC/offline/conflict checks and release review before this can replace the released sync path.
 
-### TD-003 — Thin automated test coverage
+### TD-003 — UI and real-device coverage
 
-There is a Steam-library test but no project test script and no renderer/state/integration fixtures. Add deterministic tests for migrations, merge/conflict resolution, HLTB matching, recap aggregation and platform import normalization.
+The Node suite covers migrations, merge/conflicts, HLTB matching, Recap and platform normalization. Firestore Emulator covers owner rules and two isolated clients. Visual Electron checks and a real two-PC sync run are still manual.
 
 ### TD-004 — Rules deployment is manual
 
-Firestore rules exist locally but deployment and emulator verification are not part of the release gate. Add Firebase Emulator/Rules Playground checks and a documented deploy command before production changes.
+Firestore rules are owner-scoped and Emulator tests are added to local scripts and the Windows workflows. Verify the first GitHub Actions run of the new step; rules deployment and live-account validation remain separate, deliberate operations.
 
 ### TD-005 — HLTB is an external dependency
 
@@ -30,8 +30,8 @@ HLTB availability, token capture and site changes can break enrichment. Keep the
 - TD-007 — Schema migrations are now explicit in schema v3; keep adding ordered migrations whenever the canonical model changes.
 - TD-008 — Alerts and console errors are scattered; centralize notifications, logging and user-safe error messages.
 - TD-009 — Platform-specific behavior is mixed into generic flows; introduce Steam, Nintendo and local-launch adapters behind one interface.
-- TD-010 — Version/tag/artifact drift is possible; CI should assert package version, tag and published artifact names agree.
-- TD-011 — No Firebase emulator fixture set exists; add seeded private/public documents and rules tests.
+- TD-010 — Release workflow checks the tag against `package.json` and runs a release gate; verify artifact/update metadata and a real installed-client upgrade before publishing.
+- TD-011 — Firestore fixtures and rules tests exist; keep their owner-only and public-opt-in boundaries current as the schema evolves.
 
 ## Low priority
 
@@ -47,6 +47,7 @@ HLTB availability, token capture and site changes can break enrichment. Keep the
 - Public Recap opt-in and deletion.
 - Deny-by-default Firestore rules in the repository.
 - Windows build and Node syntax checks.
+- Unit/contract tests, Firestore Emulator fixtures and a two-client sync test.
 
 ## Suggested order
 

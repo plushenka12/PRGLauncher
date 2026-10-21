@@ -30,3 +30,5 @@ running. Passing emulator tests does not replace the two-PC manual check in
 
 The launcher never relies on emulator behavior in production; this document is
 the release checklist for validating `firestore.rules` before deployment.
+The Windows CI and release workflows include this emulator run, but a successful
+GitHub Actions execution of the new step has not yet been confirmed.

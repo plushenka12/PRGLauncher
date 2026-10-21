@@ -1153,13 +1153,13 @@ ipcMain.handle('app:isMaximized', () => {
 
 ipcMain.handle('app:exportBackup', async (_, payload) => {
   if (!payload || !Array.isArray(payload.games)) return { ok: false, error: 'Invalid backup data' }
-  const result = await dialog.showSaveDialog(mainWindow, { title: 'Export PRGLauncher backup', defaultPath: `PRGLauncher-backup-${new Date().toISOString().slice(0,10)}.json`, filters: [{ name: 'JSON backup', extensions: ['json'] }] })
+  const result = await dialog.showSaveDialog(mainWindow, { title: 'Export PRGLauncher backup', defaultPath: path.join(app.getPath('documents'), `PRGLauncher-backup-${new Date().toISOString().slice(0,10)}.json`), filters: [{ name: 'JSON backup', extensions: ['json'] }] })
   if (result.canceled || !result.filePath) return { ok: false, canceled: true }
   try { fs.writeFileSync(result.filePath, JSON.stringify(payload, null, 2), 'utf8'); return { ok: true, filePath: result.filePath } } catch (error) { return { ok: false, error: error.message } }
 })
 
 ipcMain.handle('app:exportDiagnostics', async (_, payload) => {
-  const result = await dialog.showSaveDialog(mainWindow, { title: 'Export PRGLauncher diagnostics', defaultPath: `PRGLauncher-diagnostics-${new Date().toISOString().slice(0,10)}.json`, filters: [{ name: 'JSON diagnostics', extensions: ['json'] }] })
+  const result = await dialog.showSaveDialog(mainWindow, { title: 'Export PRGLauncher diagnostics', defaultPath: path.join(app.getPath('documents'), `PRGLauncher-diagnostics-${new Date().toISOString().slice(0,10)}.json`), filters: [{ name: 'JSON diagnostics', extensions: ['json'] }] })
   if (result.canceled || !result.filePath) return { ok: false, canceled: true }
   try {
     const safe = payload && typeof payload === 'object' ? payload : {}
