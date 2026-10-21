@@ -12,7 +12,7 @@
     "pretest": "npm run build:renderer",
     "test": "node --test tests/*.test.cjs",
     "lint:md": "markdownlint-cli2 \"*.md\" \"web-dashboard/*.md\" \"src/**/AGENTS.md\"",
-    "test:emulator": "set FIRESTORE_EMULATOR_HOST=127.0.0.1:8080&& node --test tests/firestore-emulator.test.cjs",
+    "test:emulator": "set FIRESTORE_EMULATOR_HOST=127.0.0.1:8080&& node --test tests/firestore-emulator.test.cjs tests/multi-device-emulator.test.cjs",
     "release:check": "node scripts/release-gate.cjs",
     "prebuild": "npm run build:renderer",
     "build": "electron-builder --win --x64",

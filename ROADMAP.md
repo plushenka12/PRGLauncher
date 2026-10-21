@@ -70,7 +70,7 @@
 
 - ✅ Додати `schemaVersion` і idempotent-міграції локального, cloud та backup payload.
 - ✅ Відокремити profile settings, games, sessions, integrations і public recap у backward-compatible canonical snapshot.
-- ◐ У коді, але ще не в релізі: перехід від whole-snapshot writes до транзакцій окремих ігор і сесій. Нові game/session-документи вже працюють у тестах; старий знімок і попередні game-документи залишаються резервними. Ручний прогін на двох ПК ще потрібен.
+- ◐ У коді, але ще не в релізі: перехід від whole-snapshot writes до транзакцій окремих ігор і сесій. Unit-тести та Firestore Emulator з двома незалежними клієнтами пройшли; старий знімок і попередні game-документи залишаються резервними. Ручний прогін на двох ПК ще потрібен.
 
 ### R3 — тести й фікстури
 

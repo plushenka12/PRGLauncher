@@ -6,4 +6,6 @@ src/renderer/firebase-bundle.js
 .taste-skill/
 *.enc
 *.log
+PRGLauncher-backup-*.json
+.private-history/
 .DS_Store

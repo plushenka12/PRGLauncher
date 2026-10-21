@@ -6,12 +6,16 @@ test command runs these checks without network access.
 
 For a full Firestore Emulator run on a development machine or CI worker:
 
-1. Install the Firebase CLI and run `firebase emulators:start --only firestore`.
-2. Run the rules-unit tests against the emulator with authenticated contexts
-   for `user-a` and `user-b`.
-3. Verify that `user-a` can read/write `users/user-a/**`, `user-b` cannot read it,
-   anyone can read `public-dashboard/user-a`, and only `user-a` can write it.
-4. Verify that `gamevault/**` and all unmatched paths reject reads and writes.
+1. Use the repository's Firebase CLI and Java 21 or newer. Run
+   `npx.cmd firebase emulators:start --only firestore --project demo-prglauncher`.
+2. Run `npm run test:emulator` in a second terminal.
+3. The suite checks that only the configured owner UID can access its private
+   `users/{uid}/**` records; another authenticated user is denied. The owner's
+   published `public-dashboard/{uid}` is readable anonymously, but not writable
+   by another user. `gamevault/**` remains closed.
+4. The two-client test uses independent authenticated Firestore contexts and
+   demo games. It checks migration, offline pending edits, independent sessions,
+   an idempotent retry, and a conflicting status edit.
 
 With the emulator running on the standard port, Windows can run the real rule
 test directly:
@@ -20,7 +24,9 @@ test directly:
 npm run test:emulator
 ```
 
-The regular `npm test` command skips this test when the emulator is not running.
+The regular `npm test` command skips emulator tests when the emulator is not
+running. Passing emulator tests does not replace the two-PC manual check in
+[WINDOWS_TEST_CHECKLIST.md](WINDOWS_TEST_CHECKLIST.md).
 
 The launcher never relies on emulator behavior in production; this document is
 the release checklist for validating `firestore.rules` before deployment.
