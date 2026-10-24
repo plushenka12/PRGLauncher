@@ -12,6 +12,8 @@ const { createNintendoHttpError, requiresNintendoReauth } = require('./nintendo-
 const { createLaunchAllowlist } = require('./launch-allowlist')
 const { attachNavigationGuard } = require('./navigation-guard')
 const { runCommand } = require('./run-command')
+const { createSteamInstallScanner, readVdfNumber } = require('./steam-install-scan')
+const { createActivityScheduler, isGameProcessLog } = require('./steam-activity-scheduler')
 
 // Keep the Windows app identity and packaged process name discoverable.
 if (process.platform === 'win32') app.setAppUserModelId('com.prgtracker.launcher')
@@ -43,7 +45,6 @@ let miniBarStandby = false
 let tray       = null
 let steamPath  = null
 let steamMonitorTimer = null
-let steamActivityTimer = null
 let steamActivityPolling = false
 let steamStatusPolling = false
 let steamTrackedApps = new Set()
@@ -200,32 +201,17 @@ async function getGogInstalledGames() {
   return games
 }
 
-function readVdfNumber(contents, key) {
-  const match = contents.match(new RegExp(`"${key}"\\s+"(\\d+)"`))
-  return match ? Number(match[1]) : null
+const steamInstallScanner = createSteamInstallScanner({ fs })
+
+// Steam removes the downloading/<appId> folder when a queued download is
+// cancelled, so stale byte counters in a manifest never mean "downloading".
+function getInstallProgress(appId, libraries = getSteamLibraries()) {
+  return steamInstallScanner.statusFor(appId, steamInstallScanner.scan(libraries), Boolean(steamPath))
 }
 
-function getInstallProgress(appId, libraries = getSteamLibraries()) {
-  if (isGameInstalled(appId, libraries)) return { state: 'ready', progress: 100, downloaded: null, total: null }
-  for (const library of libraries) {
-    const steamApps = path.join(library, 'steamapps')
-    const manifest = path.join(steamApps, `appmanifest_${appId}.acf`)
-    const downloadDir = path.join(steamApps, 'downloading', String(appId))
-    let downloaded = null
-    let total = null
-    try {
-      const manifestData = fs.readFileSync(manifest, 'utf8')
-      downloaded = readVdfNumber(manifestData, 'BytesDownloaded')
-      total = readVdfNumber(manifestData, 'BytesToDownload')
-    } catch {}
-    // Steam removes this directory when a queued download is cancelled. Do not
-    // infer "downloading" from stale byte counters left in an app manifest.
-    if (fs.existsSync(downloadDir)) {
-      const progress = total && downloaded !== null ? Math.min(99, Math.floor(downloaded / total * 100)) : null
-      return { state: 'downloading', progress, downloaded, total }
-    }
-  }
-  return { state: steamPath ? 'waiting' : 'steam_not_found', progress: null, downloaded: null, total: null }
+function readSteamStatuses(appIds, libraries = getSteamLibraries()) {
+  const snapshot = steamInstallScanner.scan(libraries)
+  return [...appIds].map(appId => steamInstallScanner.statusFor(appId, snapshot, Boolean(steamPath)))
 }
 
 async function isGameInLibrary(appId) {
@@ -325,17 +311,15 @@ async function pollSteamStatus() {
   if (steamStatusPolling || !steamTrackedApps.size) return
   steamStatusPolling = true
   try {
-    const libraries = getSteamLibraries()
-    let processed = 0
-    for (const appId of steamTrackedApps) {
-      const status = getInstallProgress(appId, libraries)
+    const appIds = [...steamTrackedApps]
+    readSteamStatuses(appIds).forEach((status, index) => {
+      const appId = appIds[index]
       const signature = JSON.stringify(status)
       if (steamMonitorStates.get(appId) !== signature) {
         steamMonitorStates.set(appId, signature)
         publishSteamStatus(appId, status)
       }
-      if (++processed % 10 === 0) await new Promise(resolve => setImmediate(resolve))
-    }
+    })
   } finally {
     steamStatusPolling = false
   }
@@ -354,26 +338,54 @@ function getRunningSteamAppId() {
   })
 }
 
+// Resolves whether a Steam game is running, or undefined when the check failed.
 async function pollSteamActivity() {
-  if (steamActivityPolling) return
+  if (steamActivityPolling) return undefined
   steamActivityPolling = true
   try {
     const runningAppId = await getRunningSteamAppId()
-    if (runningAppId === undefined) return
-    if (runningAppId === steamRunningAppId) return
-    steamRunningAppId = runningAppId
-    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('steam:runningApp', { appId: runningAppId })
+    if (runningAppId === undefined) return undefined
+    if (runningAppId !== steamRunningAppId) {
+      steamRunningAppId = runningAppId
+      if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('steam:runningApp', { appId: runningAppId })
+    }
+    return Boolean(runningAppId)
   } finally {
     steamActivityPolling = false
   }
 }
 
+const steamActivity = createActivityScheduler({ poll: pollSteamActivity })
+let steamLogWatcher = null
+
+// Steam's game-process log changes the moment a game starts or exits, so a
+// watcher on it makes detection immediate while the registry is read rarely.
+function watchSteamGameLog() {
+  if (steamLogWatcher || !steamPath) return
+  try {
+    steamLogWatcher = fs.watch(path.join(steamPath, 'logs'), (_, filename) => {
+      if (isGameProcessLog(filename)) steamActivity.notify()
+    })
+    steamLogWatcher.on('error', () => stopSteamGameLogWatch())
+  } catch {
+    steamLogWatcher = null
+  }
+}
+
+function stopSteamGameLogWatch() {
+  try { steamLogWatcher?.close() } catch {}
+  steamLogWatcher = null
+}
+
 function startSteamMonitor() {
   if (!steamMonitorTimer) steamMonitorTimer = setInterval(pollSteamStatus, 10000)
-  if (!steamActivityTimer) {
-    pollSteamActivity()
-    steamActivityTimer = setInterval(pollSteamActivity, 1500)
-  }
+  steamActivity.start()
+  watchSteamGameLog()
+}
+
+function stopSteamActivity() {
+  steamActivity.stop()
+  stopSteamGameLogWatch()
 }
 
 function getSteamCollection(name) {
@@ -736,6 +748,7 @@ handleFromMain('steam:launchGame', async (_, appId) => {
   // Steam client make that decision: it can launch an owned game or offer its
   // normal install/purchase flow without producing a false "not owned" result.
   await shell.openExternal(`steam://run/${normalizedAppId}`)
+  steamActivity.notify()
   // Steam may briefly surface its main window to hand off a launch. Hide it
   // only for this launcher-initiated path; manually opening Steam from tray is
   // intentionally left alone.
@@ -1271,7 +1284,7 @@ function prepareForUpdateInstall() {
   updateState = { ...updateState, status: 'installing', error: null }
   mainWindow?.webContents.send('app:updateStatus', updateState)
   if (steamMonitorTimer) { clearInterval(steamMonitorTimer); steamMonitorTimer = null }
-  if (steamActivityTimer) { clearInterval(steamActivityTimer); steamActivityTimer = null }
+  stopSteamActivity()
   if (steamCollectionTimer) { clearInterval(steamCollectionTimer); steamCollectionTimer = null }
   if (miniBar && !miniBar.isDestroyed()) miniBar.hide()
   if (mainWindow && !mainWindow.isDestroyed()) mainWindow.hide()
@@ -1553,7 +1566,7 @@ app.whenReady().then(async () => {
 app.on('before-quit', () => {
   isQuitting = true
   if (steamMonitorTimer) { clearInterval(steamMonitorTimer); steamMonitorTimer = null }
-  if (steamActivityTimer) { clearInterval(steamActivityTimer); steamActivityTimer = null }
+  stopSteamActivity()
   if (steamCollectionTimer) { clearInterval(steamCollectionTimer); steamCollectionTimer = null }
 })
 
