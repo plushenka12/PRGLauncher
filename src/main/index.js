@@ -9,6 +9,7 @@ const crypto = require('crypto')
 const { STEAM_STARTUP_HIDE_SCRIPT, scheduleSteamStartupHide } = require('./steam-startup-window')
 const { parseRunningSteamAppId } = require('./steam-activity')
 const { createNintendoHttpError, requiresNintendoReauth } = require('./nintendo-http')
+const { createLaunchAllowlist } = require('./launch-allowlist')
 
 // Keep the Windows app identity and packaged process name discoverable.
 if (process.platform === 'win32') app.setAppUserModelId('com.prgtracker.launcher')
@@ -837,7 +838,39 @@ ipcMain.handle('steam:getRunningAppId', async () => {
 })
 
 ipcMain.handle('gog:installedGames', async () => ({ ok: true, games: getGogInstalledGames() }))
-ipcMain.handle('local:chooseExecutable', async () => {
+// Only the main launcher window may start processes; the mini-bar shares the
+// preload bridge but has no reason to launch games.
+function isMainSender(event) {
+  return Boolean(mainWindow) && event?.sender === mainWindow.webContents
+}
+
+let launchAllowlist = null
+function getLaunchAllowlist() {
+  if (!launchAllowlist) launchAllowlist = createLaunchAllowlist({ filePath: path.join(app.getPath('userData'), 'launch-allowlist.json'), fs })
+  return launchAllowlist
+}
+
+// A path that did not come from the file picker (an older library entry, a
+// synced PC or an imported backup) needs one native confirmation the renderer
+// cannot answer for the user.
+async function confirmUnknownExecutable(executable, args) {
+  const uk = String(app.getLocale() || '').toLowerCase().startsWith('uk')
+  const detail = [executable, args.length ? args.join(' ') : ''].filter(Boolean).join('\n')
+  const result = await dialog.showMessageBox(mainWindow, {
+    type: 'warning',
+    title: 'PRGLauncher',
+    message: uk ? 'Дозволити PRGLauncher запустити цю програму?' : 'Allow PRGLauncher to run this program?',
+    detail: `${detail}\n\n${uk ? 'Її не було вибрано через діалог на цьому ПК. Запускайте лише програми, яким довіряєте.' : 'It was not chosen with the file picker on this PC. Only run programs you trust.'}`,
+    buttons: uk ? ['Запустити', 'Скасувати'] : ['Run', 'Cancel'],
+    defaultId: 1,
+    cancelId: 1,
+    noLink: true,
+  })
+  return result.response === 0
+}
+
+ipcMain.handle('local:chooseExecutable', async (event) => {
+  if (!isMainSender(event)) return { canceled: true }
   const filters = process.platform === 'win32'
     ? [{ name: 'Executable', extensions: ['exe', 'bat', 'cmd'] }]
     : process.platform === 'darwin'
@@ -845,6 +878,7 @@ ipcMain.handle('local:chooseExecutable', async () => {
       : []
   const result = await dialog.showOpenDialog(mainWindow, { title: 'Choose game executable', properties: ['openFile'], filters })
   if (result.canceled || !result.filePaths[0]) return { canceled: true }
+  getLaunchAllowlist().add(result.filePaths[0])
   return { canceled: false, path: result.filePaths[0] }
 })
 
@@ -859,10 +893,16 @@ function parseLaunchArguments(value) {
   return args.slice(0, 32)
 }
 
-ipcMain.handle('local:launchGame', async (_, payload) => {
+ipcMain.handle('local:launchGame', async (event, payload) => {
+  if (!isMainSender(event)) return { action: 'error', message: 'Launch request was rejected' }
   const data = typeof payload === 'string' ? { executable: payload } : (payload || {})
   const executable = String(data.executable || '')
   if (!executable || !path.isAbsolute(executable) || !fs.existsSync(executable)) return { action: 'error', message: 'Executable was not found' }
+  const allowlist = getLaunchAllowlist()
+  if (!allowlist.has(executable)) {
+    if (!(await confirmUnknownExecutable(executable, parseLaunchArguments(data.arguments)))) return { action: 'cancelled' }
+    allowlist.add(executable)
+  }
   if (process.platform === 'darwin' && executable.toLowerCase().endsWith('.app')) {
     const error = await shell.openPath(executable)
     return error ? { action: 'error', message: error } : { action: 'requested' }
@@ -874,10 +914,15 @@ ipcMain.handle('local:launchGame', async (_, payload) => {
   return { action: 'requested' }
 })
 
-ipcMain.handle('gog:launchGame', async (_, payload) => {
+ipcMain.handle('gog:launchGame', async (event, payload) => {
+  if (!isMainSender(event)) return { action: 'error', message: 'Launch request was rejected' }
   const id = String(payload?.id || '')
+  if (!gogGameCache.has(id)) getGogInstalledGames()
   const cached = gogGameCache.get(id)
-  const executable = String(payload?.executable || cached?.executable || '')
+  // The registry scan is the source of truth; a renderer-supplied path is used
+  // only when the user already approved it for a local launch.
+  const requested = String(payload?.executable || '')
+  const executable = cached?.executable || (requested && getLaunchAllowlist().has(requested) ? requested : '')
   if (executable && path.isAbsolute(executable) && fs.existsSync(executable)) {
     const child = spawn(executable, [], { detached: true, stdio: 'ignore', windowsHide: true })
     child.unref()

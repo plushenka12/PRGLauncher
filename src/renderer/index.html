@@ -1265,7 +1265,7 @@ async function launchAndTrack(gameId){
   if(!game)return;
 
   if(game.localExecutable&&window.launcher?.launchLocalGame){
-    try{const result=await window.launcher.launchLocalGame({executable:game.localExecutable,workingDirectory:game.workingDirectory||'',arguments:game.launchArguments||''});if(result?.action==='requested'){startTimer(gameId,'local');return;}alert(result?.message||'Не вдалося запустити гру з пристрою.');}catch(error){console.error('[Local] Launch failed:',error);alert('Не вдалося запустити гру з пристрою.');}return;
+    try{const result=await window.launcher.launchLocalGame({executable:game.localExecutable,workingDirectory:game.workingDirectory||'',arguments:game.launchArguments||''});if(result?.action==='requested'){startTimer(gameId,'local');return;}if(result?.action==='cancelled')return;alert(result?.message||'Не вдалося запустити гру з пристрою.');}catch(error){console.error('[Local] Launch failed:',error);alert('Не вдалося запустити гру з пристрою.');}return;
   }
 
   if(game.gogGameId&&window.launcher?.launchGogGame){
