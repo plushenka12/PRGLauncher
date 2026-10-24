@@ -597,6 +597,7 @@
 <script src="./steam-utils.js"></script>
 <script src="./nintendo-utils.js"></script>
 <script src="./rawg-utils.js"></script>
+<script src="./ui-library-grid.js"></script>
 <script src="./ui-game-card.js"></script>
 <script src="./ui-game-detail.js"></script>
 <script src="./ui-settings.js"></script>
@@ -652,6 +653,14 @@ const syncTools=createFirebaseSyncTools();
 const documentTools=createDocumentSyncTools();
 const sessionTools=createSessionSyncTools();
 const uiTools=createRendererUiTools();
+const libraryGrid=createLibraryGrid({
+  signature:gameCardSignature,
+  prepareCard:card=>translateDom(card),
+  createCard:game=>uiTools.createGameCard(game,{
+    activeGameId,activeStart,coverEl,createStatusButton,fmtTime,platformIcons:PLATFORM_ICONS,
+    sessionCountText,translate:t,isGuest:()=>Boolean(guestBlock()),stopTimer,launchAndTrack,openDetail
+  })
+});
 const detailUi=createGameDetailUi();
 const detailFocus=detailUi.createFocusController();
 const settingsUi=createSettingsUi({storage:localStorage});
@@ -1586,15 +1595,14 @@ function renderGrid(){
     finishPerf(0);
     return;
   }
-  grid.innerHTML='';
-  const fragment=document.createDocumentFragment();
-  list.forEach(game=>fragment.appendChild(uiTools.createGameCard(game,{
-    activeGameId,activeStart,coverEl,createStatusButton,fmtTime,platformIcons:PLATFORM_ICONS,
-    sessionCountText,translate:t,isGuest:()=>Boolean(guestBlock()),stopTimer,launchAndTrack,openDetail
-  })));
-  grid.appendChild(fragment);
-  translateDom(grid);
+  libraryGrid.render(grid,list,new Set(games.map(game=>game.id)));
   finishPerf(list.length);
+}
+
+// Everything a game card displays. A card whose signature is unchanged is
+// reused as is; the running timer badge is refreshed separately by tickTimer.
+function gameCardSignature(game){
+  return [currentLanguage,activeGameId===game.id?1:0,game.title,game.cover||'',game.status,game.platform||'',game.rating||0,game.playtime||0,(game.sessions||[]).length,game.steamAppId||'',game.gogGameId||''].join('\u0001');
 }
 
 function resetLibraryFilters(){
