@@ -29,3 +29,26 @@ test('allows only one retry at a time and resets cleanly', () => {
   state.reset();
   assert.equal(JSON.stringify(state.snapshot()), JSON.stringify({ dirty: false, retrying: false, writing: false, writeAgain: false }));
 });
+
+test('a conflict choice can wait for an in-flight write without losing it', async () => {
+  const state = context.window.createSyncState();
+  assert.equal(state.beginWrite(), true);
+  let settled = false;
+  const waiting = state.waitForWrite().then(() => { settled = true; });
+  await Promise.resolve();
+  assert.equal(settled, false);
+  state.endWrite();
+  await waiting;
+  assert.equal(settled, true);
+  assert.equal(state.beginWrite(), true);
+  state.reset();
+});
+
+test('account reset releases a waiting conflict choice', async () => {
+  const state = context.window.createSyncState();
+  state.beginWrite();
+  const waiting = state.waitForWrite();
+  state.reset();
+  await waiting;
+  assert.equal(state.snapshot().writing, false);
+});

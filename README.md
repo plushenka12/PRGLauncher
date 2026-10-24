@@ -17,7 +17,7 @@
   <a href="DOCUMENTATION.md">Детальна документація</a>
 </p>
 
-> **Поточний реліз:** [PRGLauncher 1.2.6](https://github.com/plushenka12/PRGLauncher/releases/tag/1.2.6) для Windows 10/11 x64.
+> **Поточний реліз:** [PRGLauncher 1.2.7](https://github.com/plushenka12/PRGLauncher/releases/tag/1.2.7) для Windows 10/11 x64.
 
 ## Що це таке
 

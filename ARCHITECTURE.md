@@ -1,10 +1,10 @@
 # PRGLauncher architecture
 
-Code audit updated 21 October 2026. Published app version: 1.2.6; unreleased work is called out below.
+Code audit updated 24 October 2026. Windows release target: 1.2.7.
 
 ## Product boundary
 
-PRGLauncher is an Electron desktop app. The desktop app owns the library UI, native integrations, timers, imports and local privacy-sensitive state. Firebase stores a per-user profile/library snapshot and an optional public Recap snapshot. The Netlify site is a read-only presentation layer; Steam and the unreleased RAWG search function are token-validated proxies.
+PRGLauncher is an Electron desktop app. The desktop app owns the library UI, native integrations, timers, imports and local privacy-sensitive state. Firebase stores a per-user profile/library snapshot and an optional public Recap snapshot. The Netlify site is a read-only presentation layer; Steam and RAWG search functions are token-validated proxies.
 
 ## Runtime map
 
@@ -56,7 +56,7 @@ Game records currently combine identity, status, platform, playtime, sessions, s
 
 The long-term model should keep profile settings separate from games, sessions and integrations. Per-game/session documents will reduce overwrite risk when several devices are active.
 
-Unreleased work after 1.2.6: the client can migrate the legacy snapshot (or interim `games-v1` documents) into private `users/{uid}/game-records/{gameId}` and `users/{uid}/session-records/{sessionId}` documents. Only after all writes succeed does the root switch to `storageMode: games-sessions-v1`. The root retains the old game array as a recovery copy, while game metadata and session events are updated transactionally. A stored playtime offset preserves imported/manual time that is not represented by sessions. This migration has not been released or manually checked on two real PCs yet.
+The 1.2.7 client can migrate the legacy snapshot (or interim `games-v1` documents) into private `users/{uid}/game-records/{gameId}` and `users/{uid}/session-records/{sessionId}` documents. Only after all writes succeed does the root switch to `storageMode: games-sessions-v1`. The root retains the old game array as a recovery copy, while game metadata and session events are updated transactionally. A stored playtime offset preserves imported/manual time that is not represented by sessions. This migration has not yet been manually checked on two real PCs.
 
 ## Security boundaries
 
@@ -64,7 +64,7 @@ Unreleased work after 1.2.6: the client can migrate the legacy snapshot (or inte
 - Public Recap is opt-in and has an explicit delete path.
 - Nintendo credentials stay local and use the platform secure store where available.
 - Diagnostics export aggregate information rather than secrets or tokens.
-- Steam proxy requests require a valid Firebase ID token. The unreleased RAWG proxy also requires the owner's token and server-side `RAWG_API_KEY` plus `FIREBASE_WEB_API_KEY` in Netlify; it must be configured and deployed before using this client code.
+- Steam proxy requests require a valid Firebase ID token. The RAWG proxy requires the owner's token and server-side `RAWG_API_KEY` plus `FIREBASE_WEB_API_KEY` in Netlify.
 - Multi-launcher and console integrations outside the current Steam/Nintendo scope remain parked in the distant backlog.
 
 ## Target module layout

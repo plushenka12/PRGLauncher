@@ -6,8 +6,14 @@
     let retrying = false;
     let writing = false;
     let writeAgain = false;
+    let writeWaiters = [];
+    const releaseWriteWaiters = () => {
+      const waiting = writeWaiters;
+      writeWaiters = [];
+      waiting.forEach(resolve => resolve());
+    };
     return {
-      reset() { dirty = false; retrying = false; writing = false; writeAgain = false; },
+      reset() { dirty = false; retrying = false; writing = false; writeAgain = false; releaseWriteWaiters(); },
       markDirty() { dirty = true; },
       clearDirty() { dirty = false; },
       isDirty() { return dirty; },
@@ -15,9 +21,10 @@
       endRetry() { retrying = false; },
       isRetrying() { return retrying; },
       beginWrite() { if (writing) return false; writing = true; return true; },
+      waitForWrite() { return writing ? new Promise(resolve => writeWaiters.push(resolve)) : Promise.resolve(); },
       requestWriteAgain() { writeAgain = true; },
       hasWriteAgain() { return writeAgain; },
-      endWrite() { writing = false; const again = writeAgain; writeAgain = false; return again; },
+      endWrite() { writing = false; const again = writeAgain; writeAgain = false; releaseWriteWaiters(); return again; },
       snapshot() { return { dirty, retrying, writing, writeAgain }; }
     };
   }

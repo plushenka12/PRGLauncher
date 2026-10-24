@@ -3,7 +3,12 @@
 (function exposeSessionSync(global) {
   const MODE = 'games-sessions-v1';
   const clone = value => value === undefined ? undefined : JSON.parse(JSON.stringify(value));
-  const equal = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  const orderedValue = value => Array.isArray(value) ? value.map(orderedValue)
+    : value && typeof value === 'object'
+      ? typeof value.toJSON === 'function' ? orderedValue(value.toJSON())
+        : Object.fromEntries(Object.keys(value).sort().map(key => [key, orderedValue(value[key])])) : value;
+  const equal = (a, b) => JSON.stringify(a) === JSON.stringify(b)
+    || JSON.stringify(orderedValue(a)) === JSON.stringify(orderedValue(b));
   const sumTime = sessions => (sessions || []).reduce((total, session) => total + Number(session.dur || 0), 0);
 
   function safeId(prefix, value) {

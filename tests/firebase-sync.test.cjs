@@ -34,6 +34,16 @@ test('pending offline edits require explicit resolution before replacing a diffe
   assert.equal(tools.shouldPromptForPendingConflict(true, [], []), false);
 });
 
+test('key order inside synced game objects does not create a false conflict', () => {
+  const local = [{ id: 'demo', history: [{ id: 'event', kind: 'added', at: 1 }],
+    sources: [{ type: 'steam', id: '42', platform: 'PC' }], sessions: [] }];
+  const remote = [{ sources: [{ platform: 'PC', id: '42', type: 'steam' }],
+    sessions: [], history: [{ at: 1, kind: 'added', id: 'event' }], id: 'demo' }];
+  assert.equal(tools.shouldPromptForPendingConflict(true, local, remote), false);
+  assert.equal(tools.reconcileLibraries(local, local, remote).conflict, false);
+  assert.equal(tools.sameValue({ at: new Date('2026-01-01') }, { at: new Date('2026-01-02') }), false);
+});
+
 test('three-way merge combines edits to different games and preserves deletions', () => {
   const base = [{ id: 'a', title: 'A', status: 'Backlog', sessions: [] }, { id: 'b', title: 'B', status: 'Backlog', sessions: [] }];
   const local = [{ ...base[0], status: 'Playing' }, base[1]];

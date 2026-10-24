@@ -2,6 +2,20 @@
 // renderer for now; these functions make snapshot decisions deterministic and
 // easy to test before the full service is extracted.
 (function exposeFirebaseSyncTools(global) {
+  function orderedValue(value) {
+    if (Array.isArray(value)) return value.map(orderedValue);
+    if (value && typeof value === 'object') {
+      if (typeof value.toJSON === 'function') return orderedValue(value.toJSON());
+      return Object.fromEntries(Object.keys(value).sort().map(key => [key, orderedValue(value[key])]));
+    }
+    return value;
+  }
+
+  function sameValue(a, b) {
+    return JSON.stringify(a) === JSON.stringify(b)
+      || JSON.stringify(orderedValue(a)) === JSON.stringify(orderedValue(b));
+  }
+
   function cloneLibrarySnapshot(games) {
     return (Array.isArray(games) ? games : []).map(game => ({
       ...game,
@@ -22,14 +36,14 @@
 
   function shouldPromptForPendingConflict(pending, localGames, remoteGames) {
     return Boolean(pending) && Array.isArray(localGames) && Array.isArray(remoteGames)
-      && JSON.stringify(localGames) !== JSON.stringify(remoteGames);
+      && !sameValue(localGames, remoteGames);
   }
 
   // Three-way merge against the last acknowledged cloud snapshot. A missing
   // baseline is intentionally not treated as an empty library: doing so could
   // turn a lost cache into a destructive overwrite.
   function reconcileLibraries(baseGames, localGames, remoteGames) {
-    const equal = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+    const equal = sameValue;
     const clone = value => value === undefined ? undefined : JSON.parse(JSON.stringify(value));
     if (!Array.isArray(localGames) || !Array.isArray(remoteGames)) return { conflict: true };
     if (equal(localGames, remoteGames)) return { conflict: false, games: clone(remoteGames) };
@@ -126,7 +140,7 @@
       const remote = snapshot.exists() ? snapshot.data() : null;
       const remoteGames = remote ? extractGames(remote) : [];
       const merged = forceLocalAgainst
-        ? JSON.stringify(forceLocalAgainst) === JSON.stringify(remoteGames)
+        ? sameValue(forceLocalAgainst, remoteGames)
           ? { conflict: false, games: cloneLibrarySnapshot(localGames) }
           : { conflict: true }
         : !remote && (localGames.length || baseGames?.length)
@@ -171,5 +185,5 @@
     return { clear, schedule, retryNow, getState: () => ({ pending: timer !== null, delay }) };
   }
 
-  global.createFirebaseSyncTools = () => ({ cloneLibrarySnapshot, chooseRemoteLibrary, shouldPromptForPendingConflict, reconcileLibraries, writeLibrarySnapshot, commitLibraryTransaction, createFirebaseSyncQueue });
+  global.createFirebaseSyncTools = () => ({ sameValue, cloneLibrarySnapshot, chooseRemoteLibrary, shouldPromptForPendingConflict, reconcileLibraries, writeLibrarySnapshot, commitLibraryTransaction, createFirebaseSyncQueue });
 })(window);

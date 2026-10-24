@@ -668,7 +668,7 @@ const steamUtils=createSteamUtils();
 const nintendoUtils=createNintendoUtils();
 const rawgUtils=createRawgUtils();
 const hltbUtils=createHltbUtils();
-let syncRetryTimer=null,syncRetryDelay=5000,syncConflictRemote=null,libraryEditRevision=0,syncGeneration=0;
+let syncRetryTimer=null,syncRetryDelay=5000,syncConflictRemote=null,syncConflictResolving=false,libraryEditRevision=0,syncGeneration=0;
 const syncRetryQueue=syncTools.createFirebaseSyncQueue({
   isCurrentUser:user=>Boolean(user?.uid&&currentUser?.uid===user.uid),
   isBusy:()=>syncState.isRetrying(),
@@ -747,6 +747,7 @@ UI_COPY.push(
   ['Імпортовано','Imported'],['нових ігор','new games'],
   ['Імпортувати вибране','Import selected'],['Готово','Done'],['Обрати гру','Select game']
 );
+UI_COPY.push(['Повторно увійти в Nintendo','Sign in to Nintendo again'],['Nintendo-сесія недійсна. Увійди повторно; ігри й час залишаться.','Nintendo session is no longer valid. Sign in again; your games and playtime will stay.']);
 const UK_TEXT=new Map(UI_COPY.map(([uk,en])=>[en,uk]));
 const EN_TEXT=new Map(UI_COPY.map(([uk,en])=>[uk,en]));
 let currentLanguage=localStorage.getItem('gv-language')==='en'?'en':'uk';
@@ -870,7 +871,7 @@ function initFb(cfg) {
     onAuthStateChanged(fbAuth,async user=>{
       syncGeneration++;documentGeneration=null;documentOrderIds=[];documentExpectedCount=0;sessionExpectedCount=0;
       clearUserSyncRetry();syncState.reset();syncActive=false;closeSyncConflict();clearTimeout(syncDebounceTimer);syncDebounceTimer=null;if(fbUnsub){fbUnsub();fbUnsub=null;}
-      clearInterval(nintendoSyncTimer);nintendoProfileReady=false;
+      clearInterval(nintendoSyncTimer);nintendoProfileReady=false;nintendoAuthRequired=false;
       if(activeGameId)stopTimer(true);
       if(user&&user.uid!==PRG_OWNER_UID){
         deniedAccountLogin=true;
@@ -936,14 +937,25 @@ function updateSteamProfileUI(){
   if(disconnect){disconnect.disabled=!profile;disconnect.hidden=!profile;disconnect.title=t(profile?'Від’єднати Steam-профіль':'Немає підключеного Steam-профілю');}
 }
 function updateProfileUI(){const email=currentUser?.email||t('PRG Account не підключено');const label=document.getElementById('profile-email-label'),link=document.getElementById('profile-link');if(label)label.textContent=email;if(link)link.textContent=currentUser?`prgtracker.netlify.app/?u=${currentUser.uid}`:'Увійди, щоб створити персональне посилання';const publicToggle=document.getElementById('public-recap-toggle');if(publicToggle)publicToggle.checked=localStorage.getItem(profileStorageKey('gv-public-recap-v1'))!=='0';const libraryToggle=document.getElementById('public-library-toggle');if(libraryToggle)libraryToggle.checked=localStorage.getItem(profileStorageKey('gv-public-library-v1'))==='1';updateSteamProfileUI();const backloggdInput=document.getElementById('backloggd-profile-url');if(backloggdInput)backloggdInput.value=currentUser?localStorage.getItem(profileStorageKey('gv-backloggd-profile-url'))||'':'';}
-function closeSyncConflict(){syncConflictRemote=null;document.getElementById('sync-conflict-modal')?.classList.add('hidden');}
+function setSyncConflictResolving(resolving){
+  syncConflictResolving=resolving;
+  for(const id of ['sync-conflict-cloud','sync-conflict-local']){
+    const button=document.getElementById(id);if(button)button.disabled=resolving;
+  }
+  const localButton=document.getElementById('sync-conflict-local');
+  if(localButton)localButton.textContent=resolving?(currentLanguage==='en'?'Saving…':'Зберігаю…'):t('Залишити мої дані');
+  document.getElementById('sync-conflict-modal')?.setAttribute('aria-busy',String(resolving));
+}
+function closeSyncConflict(){syncConflictRemote=null;setSyncConflictResolving(false);document.getElementById('sync-conflict-modal')?.classList.add('hidden');}
 function renderLocalLibrary(){save({publish:false});buildFilterBar();renderGrid();updateStats();updateSessionBar();}
 function openSyncConflict(remoteGames,remoteTs){
   syncConflictRemote={games:Array.isArray(remoteGames)?remoteGames:[],ts:Number(remoteTs||Date.now())};
+  setSyncConflictResolving(false);
   const copy=document.getElementById('sync-conflict-copy');
   if(copy)copy.textContent=currentLanguage==='en'
     ?`Cloud: ${syncConflictRemote.games.length} games. This device: ${games.length} games. Choose which library to keep.`
     :`У хмарі ${syncConflictRemote.games.length} ігор, на цьому пристрої — ${games.length}. Обери, яку бібліотеку залишити.`;
+  if(copy)copy.dataset.baseText=copy.textContent;
   document.getElementById('sync-conflict-modal')?.classList.remove('hidden');
   document.getElementById('sync-conflict-local')?.focus({preventScroll:true});
 }
@@ -954,16 +966,36 @@ async function acceptRemoteSyncConflict(){
     const fresh=await window._fbImports.getDocFromServer(userLibraryRef());
     if(currentUser?.uid!==user?.uid)return;
     const remoteGames=documentGeneration?await readDocumentLibrary(user,documentOrderIds):fresh.exists()?schema.migrateGames(canonical.extractGames(fresh.data())):[];
-    if(JSON.stringify(remoteGames)!==JSON.stringify(expected.games)){openSyncConflict(remoteGames,Number(fresh.data()?.ts||0));return;}
+    if(!syncTools.sameValue(remoteGames,expected.games)){openSyncConflict(remoteGames,Number(fresh.data()?.ts||0));return;}
     games=remoteGames;localStorage.setItem(profileStorageKey('gv-local-ts'),String(expected.ts));
     syncState.clearDirty();if(storeSyncBase(remoteGames))clearPendingLibrarySync();
     clearTimeout(syncDebounceTimer);syncDebounceTimer=null;renderLocalLibrary();closeSyncConflict();
   }catch(error){console.warn('[Sync] Could not verify cloud library before accepting it',error);setSyncBadge('err');}
 }
-function keepLocalSyncConflict(){
-  if(!syncConflictRemote)return;
-  const expectedRemote=syncConflictRemote.games;
-  closeSyncConflict();syncState.markDirty();pushToFb(expectedRemote).catch(error=>console.warn('[Sync] Conflict resolution failed',error));
+async function keepLocalSyncConflict(){
+  if(!syncConflictRemote||syncConflictResolving)return;
+  const expected=syncConflictRemote,chosenLocal=canonical.clone(games);
+  const chosenUid=currentUser?.uid,chosenRevision=libraryEditRevision;
+  let uploaded=false;
+  setSyncConflictResolving(true);
+  try{
+    uploaded=await pushToFb(expected.games,chosenLocal,chosenRevision);
+    if(uploaded&&syncConflictRemote===expected)closeSyncConflict();
+    else if(syncConflictRemote===expected){
+      const copy=document.getElementById('sync-conflict-copy');
+      if(copy)copy.textContent=(copy.dataset.baseText||copy.textContent)+(currentLanguage==='en'
+        ?' Could not save the local library yet. Your data is still on this device; try again when sync is available.'
+        :' Не вдалося зберегти локальну бібліотеку. Дані залишилися на цьому пристрої; спробуй ще раз, коли синхронізація доступна.');
+    }
+  }catch(error){
+    console.warn('[Sync] Conflict resolution failed',error);
+    if(syncConflictRemote===expected)setSyncBadge('err');
+  }finally{
+    if(!uploaded&&chosenUid&&currentUser?.uid===chosenUid&&libraryEditRevision===chosenRevision){
+      games=schema.migrateGames(chosenLocal);renderLocalLibrary();
+    }
+    if(syncConflictRemote===expected)setSyncConflictResolving(false);
+  }
 }
 async function startUserSync(user){
   if(navigator.onLine===false){syncActive=false;restoreCachedLibrary();scheduleUserSyncRetry(user,'offline at startup');return false;}
@@ -983,7 +1015,7 @@ async function startUserSync(user){
       const remoteGames=await readDocumentLibrary(user,remote.orderIds||[]);
       if(currentUser?.uid!==user.uid)return false;
       const remoteTs=Number(remote.ts||0);
-      const pending=hasPendingLibrarySync(),different=JSON.stringify(localGames)!==JSON.stringify(remoteGames);
+       const pending=hasPendingLibrarySync(),different=!syncTools.sameValue(localGames,remoteGames);
       if(pending&&different){
         const merged=syncTools.reconcileLibraries(loadSyncBase(),localGames,remoteGames);
         if(merged.conflict){games=localGames;syncState.markDirty();openSyncConflict(remoteGames,remoteTs);}
@@ -1035,8 +1067,8 @@ async function startUserSync(user){
     readDocumentLibrary(user,documentOrderIds).then(remoteGames=>{
       if(refresh!==remoteRefresh||currentUser?.uid!==user.uid||syncState.snapshot().writing)return;
       const remoteTs=Number(root.ts||0);
-      if(syncConflictRemote){if(JSON.stringify(syncConflictRemote.games)!==JSON.stringify(remoteGames))openSyncConflict(remoteGames,remoteTs);return;}
-      if(JSON.stringify(games)===JSON.stringify(remoteGames))return;
+       if(syncConflictRemote){if(!syncTools.sameValue(syncConflictRemote.games,remoteGames))openSyncConflict(remoteGames,remoteTs);return;}
+       if(syncTools.sameValue(games,remoteGames))return;
       if(syncState.isDirty()||hasPendingLibrarySync()){
         const merged=syncTools.reconcileLibraries(loadSyncBase(),games,remoteGames);
         if(merged.conflict){openSyncConflict(remoteGames,remoteTs);return;}
@@ -1051,22 +1083,29 @@ async function startUserSync(user){
   if(newProfile&&!games.length&&!localStorage.getItem(profileStorageKey('gv-steam-onboarding-done-v1')))setTimeout(showSteamOnboarding,450);
   return true;
 }
-async function pushToFb(forceLocalAgainst=null){
-  if(!fbDb||!currentUser||syncConflictRemote)return;
-  const user=currentUser,generation=syncGeneration,editRevision=libraryEditRevision;
+async function pushToFb(forceLocalAgainst=null,forcedLocalGames=null,chosenRevision=null){
+  if(!fbDb||!currentUser||(syncConflictRemote&&!forceLocalAgainst))return false;
+  if(forceLocalAgainst&&syncConflictRemote?.games!==forceLocalAgainst)return false;
+  const user=currentUser,generation=syncGeneration;
+  if(forceLocalAgainst&&syncState.snapshot().writing){
+    await syncState.waitForWrite();
+    if(syncGeneration!==generation||currentUser?.uid!==user.uid||syncConflictRemote?.games!==forceLocalAgainst)return false;
+  }
+  if(forceLocalAgainst&&chosenRevision!==null&&libraryEditRevision!==chosenRevision)return false;
+  const editRevision=libraryEditRevision;
   clearTimeout(syncDebounceTimer);syncDebounceTimer=null;
   syncState.markDirty();
   markPendingLibrarySync();
-  if(!syncState.beginWrite()){syncState.requestWriteAgain();return;}
-  if(!syncActive){syncState.endWrite();scheduleUserSyncRetry(currentUser,'waiting to publish local changes');return;}
+  if(!syncState.beginWrite()){syncState.requestWriteAgain();return false;}
+  if(!syncActive){syncState.endWrite();scheduleUserSyncRetry(currentUser,'waiting to publish local changes');return false;}
   try{
     const{runTransaction,doc,setDoc}=window._fbImports,ref=userLibraryRef();
-    const localGames=canonical.clone(games),baseGames=loadSyncBase();
+    const localGames=canonical.clone(forceLocalAgainst&&forcedLocalGames?forcedLocalGames:games),baseGames=loadSyncBase();
     const integrations={steamProfile:localStorage.getItem(profileStorageKey('gv-steam-profile-url'))||null,backloggdProfile:localStorage.getItem(profileStorageKey('gv-backloggd-profile-url'))||null,nintendoConnected:Boolean(nintendoProfileReady)};
     const profile={language:currentLanguage,theme:localStorage.getItem('gv-theme')||'neon',scale:localStorage.getItem('gv-ui-scale-v1')||localStorage.getItem('gv-ui-scale')||'1'};
     if(forceLocalAgainst){
       const latest=await readDocumentLibrary(user,documentOrderIds);
-      if(JSON.stringify(latest)!==JSON.stringify(forceLocalAgainst)){
+       if(!syncTools.sameValue(latest,forceLocalAgainst)){
         const conflict=new Error('Cloud library changed during conflict resolution.');
         conflict.code='sync-conflict';conflict.remoteGames=latest;conflict.remoteTs=Date.now();throw conflict;
       }
@@ -1084,7 +1123,7 @@ async function pushToFb(forceLocalAgainst=null){
       documentCount:documentExpectedCount,sessionDocumentCount:sessionExpectedCount,ts,
       statsDashboard:makeStatsDashboard(mergedGames)},{merge:true});
     const committed={games:mergedGames,ts};
-    if(syncGeneration!==generation||currentUser?.uid!==user.uid)return;
+    if(syncGeneration!==generation||currentUser?.uid!==user.uid)return false;
     localStorage.setItem(profileStorageKey('gv-local-ts'),String(committed.ts));
     const baseStored=storeSyncBase(committed.games);
     if(libraryEditRevision===editRevision){games=schema.migrateGames(committed.games);renderLocalLibrary();}
@@ -1094,16 +1133,18 @@ async function pushToFb(forceLocalAgainst=null){
       else{games=schema.migrateGames(afterWrite.games);renderLocalLibrary();}
     }
     await publishStatsDashboard(committed.ts,committed.games);
-    if(!syncConflictRemote&&!syncState.hasWriteAgain()&&libraryEditRevision===editRevision&&baseStored){syncState.clearDirty();clearPendingLibrarySync();}
+    if((!syncConflictRemote||forceLocalAgainst)&&!syncState.hasWriteAgain()&&libraryEditRevision===editRevision&&baseStored){syncState.clearDirty();clearPendingLibrarySync();}
+    return true;
   }catch(e){
-    if(syncGeneration!==generation)return;
+    if(syncGeneration!==generation)return false;
     if(e?.code==='sync-conflict'){
       try{
         const remoteGames=Array.isArray(e.remoteGames)?e.remoteGames:await readDocumentLibrary(user,documentOrderIds);
-        openSyncConflict(schema.migrateGames(remoteGames),e.remoteTs||Date.now());return;
+        openSyncConflict(schema.migrateGames(remoteGames),e.remoteTs||Date.now());return false;
       }catch(readError){console.error('[Sync] Could not load conflicting cloud library',readError);}
     }
     console.error('[Sync] Could not publish library or dashboard:',e);syncActive=false;scheduleUserSyncRetry(user,'could not publish changes');
+    return false;
   }
   finally{
     if(syncGeneration===generation&&syncState.endWrite())queueLibrarySync();
@@ -2258,22 +2299,31 @@ function renderNintendoHistoryPreview(includeIgnored=false){
   importButton.onclick=()=>{if(guestBlock())return;let added=0;const ignoreUnselected=document.getElementById('nintendo-ignore-unselected').checked;choices.forEach(input=>{const item=visible[Number(input.dataset.ni)];if(!item)return;if(!input.checked){if(ignoreUnselected)nintendoIgnoredIds.add(item.id);return;}nintendoIgnoredIds.delete(item.id);if(games.some(g=>g.nintendoTitleId===item.id||g.title.trim().toLocaleLowerCase()===item.title.trim().toLocaleLowerCase()))return;const status=input.closest('.nintendo-preview-row').querySelector('select').value||'Backlog';const firstPlayedAt=Date.parse(item.raw?.firstPlayedAt||'');const lastPlayedAt=Date.parse(item.lastPlayedAt||'');games.unshift({id:uid(),title:item.title,status,platform:item.platform,cover:item.cover||null,notes:null,genres:[],tags:['Nintendo Sync'],rating:null,steamAppId:null,nintendoTitleId:item.id,nintendoLastSeenMinutes:item.minutes,nintendoLastSeenPlayedAt:Number.isFinite(lastPlayedAt)?lastPlayedAt:null,nintendoLastSync:Date.now(),playtime:item.minutes*60000,sessions:[],lastPlayed:Number.isFinite(lastPlayedAt)?lastPlayedAt:(Number.isFinite(firstPlayedAt)?firstPlayedAt:null),added:Date.now()});added++;});localStorage.setItem(profileStorageKey('gv-nintendo-ignored-v1'),JSON.stringify([...nintendoIgnoredIds]));if(added){save();pushToFb();buildFilterBar();renderGrid();updateStats();}setNintendoSyncStatus(`${t('Імпортовано')} ${added} ${t('нових ігор')}`,true);};
 }
 async function loadNintendoHistory(includeIgnored=false){
+  const owner=currentUser?.uid;
   setNintendoSyncStatus('Завантажуємо play activity…');
-  try{const result=await window.launcher.fetchNintendoHistory();if(result?.ok){nintendoHistoryData=normalizeNintendoHistory(result.data||{});setNintendoSyncStatus(`Play activity отримано · ${nintendoHistoryData.filter(item=>includeIgnored||!nintendoIgnoredIds.has(item.id)).length} записів`,true);renderNintendoHistoryPreview(includeIgnored);return true;}setNintendoSyncStatus(`Nintendo API: ${result?.error||'невідома помилка'}`);}catch(error){console.error('[Nintendo] Play activity failed:',error);setNintendoSyncStatus('Не вдалося завантажити play activity');}return false;
+  try{const result=await window.launcher.fetchNintendoHistory();if(owner!==currentUser?.uid)return false;if(result?.authRequired){requireNintendoReconnect();return false;}if(result?.ok){nintendoHistoryData=normalizeNintendoHistory(result.data||{});setNintendoSyncStatus(`Play activity отримано · ${nintendoHistoryData.filter(item=>includeIgnored||!nintendoIgnoredIds.has(item.id)).length} записів`,true);renderNintendoHistoryPreview(includeIgnored);return true;}setNintendoSyncStatus(`Nintendo API: ${result?.error||'невідома помилка'}`);}catch(error){console.error('[Nintendo] Play activity failed:',error);setNintendoSyncStatus('Не вдалося завантажити play activity');}return false;
 }
-let nintendoSyncTimer=null,nintendoProfileReady=false;
+let nintendoSyncTimer=null,nintendoProfileReady=false,nintendoAuthRequired=false;
+function requireNintendoReconnect(){
+  nintendoAuthRequired=true;
+  clearInterval(nintendoSyncTimer);nintendoSyncTimer=null;
+  nintendoConnectBtn.textContent=t('Повторно увійти в Nintendo');
+  nintendoConnectBtn.dataset.checking='0';nintendoConnectBtn.disabled=false;
+  setNintendoSyncStatus('Nintendo-сесія недійсна. Увійди повторно; ігри й час залишаться.');
+}
 function startNintendoAutoSync(){
   if(nintendoSyncTimer)clearInterval(nintendoSyncTimer);
-  if(localStorage.getItem(profileStorageKey('gv-nintendo-auto-sync-v1'))==='0')return;
+  nintendoSyncTimer=null;
+  if(nintendoAuthRequired||localStorage.getItem(profileStorageKey('gv-nintendo-auto-sync-v1'))==='0')return;
   setTimeout(()=>syncNintendoLibrary({announce:false}),2000);
   const mins=Number(localStorage.getItem(profileStorageKey('gv-nintendo-sync-interval-v1'))||30);nintendoSyncTimer=setInterval(()=>syncNintendoLibrary({announce:false}),Math.max(5,mins)*60*1000);
 }
 async function syncNintendoLibrary({showIgnored=false,announce=true}={}){
-  if(!nintendoProfileReady)return false;
+  if(!nintendoProfileReady||nintendoAuthRequired)return false;
   const owner=currentUser?.uid;
   if(!window.launcher?.fetchNintendoHistory)return false;
   try{
-    const result=await window.launcher.fetchNintendoHistory();if(!result?.ok)throw new Error(result?.error||'Nintendo API error');
+    const result=await window.launcher.fetchNintendoHistory();if(owner!==currentUser?.uid)return false;if(result?.authRequired){requireNintendoReconnect();return false;}if(!result?.ok)throw new Error(result?.error||'Nintendo API error');
     if(owner!==currentUser?.uid||!nintendoProfileReady)return false;
     const incoming=normalizeNintendoHistory(result.data||{});let changed=0,matched=0;const pending=[],updatedTitles=[];
     incoming.forEach(item=>{
@@ -2299,9 +2349,9 @@ async function syncNintendoLibrary({showIgnored=false,announce=true}={}){
     const updatedLabel=updatedTitles.length?` · ${updatedTitles.slice(0,2).join(', ')}${updatedTitles.length>2?'…':''}`:'';
     if(pending.length){renderNintendoHistoryPreview(showIgnored);if(!showIgnored)notifyNintendoNewGames(pending);setNintendoSyncStatus(`Nintendo sync: ${incoming.length} записів · знайдено ${matched} · оновлено ${changed}${updatedLabel} · нових ${pending.length}`,true);}
     else if(announce)setNintendoSyncStatus(`Nintendo sync: ${incoming.length} записів · знайдено ${matched} · оновлено ${changed}${updatedLabel}`,true);
-    console.info('[Nintendo] Sync summary', { records: incoming.length, matched, changed, pending: pending.length, sample: incoming.slice(0,5).map(item=>({id:item.id,title:item.title,minutes:item.minutes,lastPlayedAt:item.lastPlayedAt})) });
+    console.info('[Nintendo] Sync summary', { records: incoming.length, matched, changed, pending: pending.length });
     return true;
-  }catch(error){console.error('[Nintendo] Background sync failed:',error);if(announce)setNintendoSyncStatus('Nintendo sync тимчасово недоступний');return false;}
+  }catch(error){console.error('[Nintendo] Background sync failed:',error);if(announce){const detail=/^Nintendo (?:session-token|access-token|play-history|request) HTTP \d{3}(?: \([a-zA-Z0-9_.-]{1,64}\))?$/.test(error?.message||'')?error.message:null;setNintendoSyncStatus(detail?`Nintendo API: ${detail}`:'Nintendo sync тимчасово недоступний');}return false;}
 }
 document.getElementById('nintendo-covers-btn')?.addEventListener('click',async()=>{if(guestBlock())return;const targets=games.filter(g=>g.tags?.includes('Nintendo Sync')&&!g.cover);if(!targets.length){setNintendoSyncStatus('Усі Nintendo-ігри вже мають обкладинки',true);return;}const btn=document.getElementById('nintendo-covers-btn');btn.disabled=true;let found=0;for(const game of targets){try{const data=await searchRAWG(game.title);const image=data?.results?.[0]?.background_image;if(image){game.cover=image;found++;}await new Promise(resolve=>setTimeout(resolve,250));}catch{}}save();pushToFb();renderGrid();updateStats();btn.disabled=false;setNintendoSyncStatus(`Обкладинки оновлено: ${found} з ${targets.length}`,true);});
 document.getElementById('nintendo-full-sync-btn')?.addEventListener('click',()=>loadNintendoHistory(true));
@@ -2345,7 +2395,8 @@ nintendoConnectBtn?.addEventListener('click',async()=>{
     setNintendoSyncStatus('Завантажуємо play activity…'); nintendoConnectBtn.disabled=true;
     try{
       const result=await window.launcher.fetchNintendoHistory();
-      if(result?.ok){nintendoHistoryData=normalizeNintendoHistory(result.data||{});setNintendoSyncStatus(`Play activity отримано · ${nintendoHistoryData.length} записів`,true);nintendoConnectBtn.textContent='Play activity завантажено';renderNintendoHistoryPreview();}
+      if(result?.authRequired){requireNintendoReconnect();}
+      else if(result?.ok){nintendoHistoryData=normalizeNintendoHistory(result.data||{});setNintendoSyncStatus(`Play activity отримано · ${nintendoHistoryData.length} записів`,true);nintendoConnectBtn.textContent='Play activity завантажено';renderNintendoHistoryPreview();}
       else {setNintendoSyncStatus(`Nintendo API: ${result?.error||'невідома помилка'}`);nintendoConnectBtn.disabled=false;}
     }catch(error){console.error('[Nintendo] Play activity failed:',error);setNintendoSyncStatus('Не вдалося завантажити play activity');nintendoConnectBtn.disabled=false;}
     return;
@@ -2354,6 +2405,7 @@ nintendoConnectBtn?.addEventListener('click',async()=>{
     setNintendoSyncStatus('Перевіряємо Nintendo-сесію…');
     try{
       const result=await window.launcher.nintendoAuthStatus();
+      if(nintendoAuthRequired){requireNintendoReconnect();return;}
       if(result?.connected){setNintendoSyncStatus('Nintendo Account авторизовано',true);nintendoConnectBtn.textContent='Сесію підтверджено';nintendoConnectBtn.dataset.checking='0';nintendoConnectBtn.disabled=false;return;}
       setNintendoSyncStatus('Сесію не знайдено — заверши вхід у вікні Nintendo');
       nintendoConnectBtn.disabled=false;
@@ -2377,11 +2429,11 @@ document.getElementById('nintendo-callback-btn')?.addEventListener('click',async
   const input=document.getElementById('nintendo-callback-input');const value=input?.value.trim();
   if(!value){setNintendoSyncStatus('Встав URL callback Nintendo');return;}
   setNintendoSyncStatus('Завершуємо авторизацію…');
-  try{const result=await window.launcher.completeNintendoAuth(value);if(result?.connected){setNintendoSyncStatus('Nintendo Account авторизовано',true);nintendoConnectBtn.textContent='Завантажити play activity';nintendoConnectBtn.dataset.checking='2';}else setNintendoSyncStatus(`Помилка Nintendo: ${result?.error||'невідома помилка'}`);}catch(error){setNintendoSyncStatus('Не вдалося завершити авторизацію');console.error('[Nintendo] Callback failed:',error);}
+  try{const result=await window.launcher.completeNintendoAuth(value);if(result?.connected){nintendoAuthRequired=false;nintendoProfileReady=true;setNintendoSyncStatus('Nintendo Account авторизовано',true);nintendoConnectBtn.textContent='Завантажити play activity';nintendoConnectBtn.dataset.checking='2';startNintendoAutoSync();}else setNintendoSyncStatus(`Помилка Nintendo: ${result?.error||'невідома помилка'}`);}catch(error){setNintendoSyncStatus('Не вдалося завершити авторизацію');console.error('[Nintendo] Callback failed:',error);}
 });
 window.launcher?.onNintendoAuthComplete?.(status=>{
-  if(status?.connected){setNintendoSyncStatus('Nintendo Account авторизовано',true);nintendoConnectBtn.textContent='Завантажити play activity';nintendoConnectBtn.dataset.checking='2';nintendoConnectBtn.disabled=false;startNintendoAutoSync();}
-  else {setNintendoSyncStatus(`Помилка Nintendo: ${status?.error||'авторизація не завершилась'}`);nintendoConnectBtn.disabled=false;}
+  if(status?.connected){nintendoAuthRequired=false;nintendoProfileReady=true;setNintendoSyncStatus('Nintendo Account авторизовано',true);nintendoConnectBtn.textContent='Завантажити play activity';nintendoConnectBtn.dataset.checking='2';nintendoConnectBtn.disabled=false;startNintendoAutoSync();}
+  else {if(nintendoAuthRequired)requireNintendoReconnect();else setNintendoSyncStatus(`Помилка Nintendo: ${status?.error||'авторизація не завершилась'}`);nintendoConnectBtn.disabled=false;}
 });
 Promise.resolve(null).then(status=>{
   if(status?.connected){setNintendoSyncStatus('Nintendo Account авторизовано',true);nintendoConnectBtn.textContent='Завантажити play activity';nintendoConnectBtn.dataset.checking='2';startNintendoAutoSync();}

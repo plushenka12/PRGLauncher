@@ -45,6 +45,20 @@ test('migration preserves the old snapshot and separates imported time from sess
   assert.equal(assembled(db, generation)[0]._syncSessionRevision, 0);
 });
 
+test('reordered nested object keys do not trigger a spurious per-game write', async () => {
+  const rootRef = 'users/demo/profile/library';
+  const original = { ...game('a'), history: [{ id: 'event', kind: 'added', at: 1 }],
+    sources: [{ type: 'steam', id: '42', platform: 'PC' }] };
+  const db = fakeFirestore({ [rootRef]: { ts: 1, games: [original] } });
+  const generation = await tools.migrateSnapshot({ runTransaction: db.runTransaction, db, rootRef,
+    doc: db.doc, writeBatch: db.writeBatch, uid: 'demo', root: db.values.get(rootRef), games: [original] });
+  const reordered = { ...original, history: [{ at: 1, kind: 'added', id: 'event' }],
+    sources: [{ platform: 'PC', id: '42', type: 'steam' }] };
+  const writes = await tools.commitChanges({ runTransaction: db.runTransaction, db, doc: db.doc,
+    uid: 'demo', generation, baseGames: [original], localGames: [reordered] });
+  assert.equal(writes, 0);
+});
+
 test('distinct simultaneous sessions merge without duplicate playtime on retry', async () => {
   const rootRef = 'users/demo/profile/library', base = game('a', [], 100);
   const root = { ts: 1, games: [base] }, db = fakeFirestore({ [rootRef]: root });

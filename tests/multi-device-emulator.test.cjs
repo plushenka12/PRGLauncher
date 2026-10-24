@@ -96,6 +96,14 @@ test('two independent clients merge offline sessions, retry idempotently and rej
       await assert.rejects(writeChange(b, generation, staleB,
         [{ ...staleB[0], status: 'QuickPlay' }]), error => error.code === 'sync-conflict');
       assert.equal((await readLibrary(a, generation))[0].status, 'Completed');
+
+      // After an explicit "keep this device" choice, the current cloud state
+      // becomes the baseline. Local metadata and even a local deletion win.
+      const latest = await readLibrary(b, generation);
+      await writeChange(b, generation, latest, [{ ...latest[0], status: 'QuickPlay' }]);
+      assert.equal((await readLibrary(a, generation))[0].status, 'QuickPlay');
+      await writeChange(b, generation, await readLibrary(b, generation), []);
+      assert.equal((await readLibrary(a, generation)).length, 0);
     } finally {
       await environment.cleanup();
     }

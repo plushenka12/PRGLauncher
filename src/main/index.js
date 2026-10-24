@@ -8,6 +8,7 @@ const { execSync, execFile, spawn } = require('child_process')
 const crypto = require('crypto')
 const { STEAM_STARTUP_HIDE_SCRIPT, scheduleSteamStartupHide } = require('./steam-startup-window')
 const { parseRunningSteamAppId } = require('./steam-activity')
+const { createNintendoHttpError, requiresNintendoReauth } = require('./nintendo-http')
 
 // Keep the Windows app identity and packaged process name discoverable.
 if (process.platform === 'win32') app.setAppUserModelId('com.prgtracker.launcher')
@@ -1011,6 +1012,7 @@ ipcMain.handle('backloggd:importProfile', async (_, url) => {
 })
 
 const NINTENDO_CLIENT_ID = '5c38e31cd085304b'
+const NINTENDO_USER_AGENT = 'com.nintendo.znej/1.13.0 (Android/7.1.2)'
 const NINTENDO_REDIRECT_URI = 'npf5c38e31cd085304b://auth'
 const NINTENDO_SCOPE = 'openid user user.mii user.email user.links[].id'
 let nintendoProfile = null
@@ -1035,7 +1037,12 @@ function nintendoRequest(url, options = {}, body = null) {
     const request = https.request(url, { method: options.method || 'GET', headers: { Accept: 'application/json', ...(options.headers || {}) } }, response => {
       let text = ''
       response.setEncoding('utf8'); response.on('data', chunk => { text += chunk })
-      response.on('end', () => { let data = null; try { data = JSON.parse(text) } catch {} if (response.statusCode >= 200 && response.statusCode < 300) resolve(data); else reject(new Error(`Nintendo HTTP ${response.statusCode}`)) })
+      response.on('end', () => {
+        let data = null
+        try { data = JSON.parse(text) } catch {}
+        if (response.statusCode >= 200 && response.statusCode < 300) return resolve(data)
+        reject(createNintendoHttpError(options.stage, response.statusCode, data))
+      })
     })
     request.setTimeout(15000, () => request.destroy(new Error('Nintendo request timeout')))
     request.on('error', reject)
@@ -1053,7 +1060,7 @@ function loadNintendoSession() {
 async function nintendoExchangeSessionCode(code, verifier) {
   const profile = nintendoProfile
   const body = new URLSearchParams({ client_id: NINTENDO_CLIENT_ID, session_token_code: code, session_token_code_verifier: verifier }).toString()
-  const session = await nintendoRequest('https://accounts.nintendo.com/connect/1.0.0/api/session_token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' } }, body)
+  const session = await nintendoRequest('https://accounts.nintendo.com/connect/1.0.0/api/session_token', { method: 'POST', stage: 'session-token', headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'User-Agent': NINTENDO_USER_AGENT, 'X-Platform': 'Android', 'X-ProductVersion': '2.5.0' } }, body)
   const sessionToken = session?.session_token || session?.sessionToken
   if (!sessionToken) throw new Error('Nintendo did not return a session token')
   if (!profile || profile !== nintendoProfile) throw new Error('PRG account changed')
@@ -1061,7 +1068,7 @@ async function nintendoExchangeSessionCode(code, verifier) {
   return sessionToken
 }
 async function nintendoGetAccessToken(sessionToken) {
-  return nintendoRequest('https://accounts.nintendo.com/connect/1.0.0/api/token', { method: 'POST', headers: { 'Content-Type': 'application/json' } }, { client_id: NINTENDO_CLIENT_ID, session_token: sessionToken, grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer-session-token' })
+  return nintendoRequest('https://accounts.nintendo.com/connect/1.0.0/api/token', { method: 'POST', stage: 'access-token', headers: { 'Content-Type': 'application/json; charset=utf-8', 'User-Agent': NINTENDO_USER_AGENT } }, { client_id: NINTENDO_CLIENT_ID, session_token: sessionToken, grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer-session-token' })
 }
 async function nintendoFetchPlayHistory() {
   const profile = nintendoProfile
@@ -1070,7 +1077,7 @@ async function nintendoFetchPlayHistory() {
   if (!profile || profile !== nintendoProfile) throw new Error('PRG account changed')
   const accessToken = token?.access_token || token?.accessToken
   if (!accessToken) throw new Error('Nintendo access token unavailable')
-  return nintendoRequest('https://app-api.znej.nintendo.com/api/v2.0/users/me/play_histories', { headers: { Authorization: `${token.token_type || 'Bearer'} ${accessToken}`, 'User-Agent': 'com.nintendo.znej/1.13.0 (Windows; PRGLauncher)', 'gentry-locale': 'en-US' } })
+  return nintendoRequest('https://app-api.znej.nintendo.com/api/v2.0/users/me/play_histories', { stage: 'play-history', headers: { Authorization: `${token.token_type || 'Bearer'} ${accessToken}`, 'User-Agent': NINTENDO_USER_AGENT, 'gentry-locale': 'en-US' } })
 }
 async function completeNintendoCallback(url) {
   if (!nintendoAuthState || !String(url || '').includes('auth')) throw new Error('Nintendo callback is missing')
@@ -1151,7 +1158,7 @@ ipcMain.handle('nintendo:completeAuth', async (_, callbackUrl) => {
 ipcMain.handle('nintendo:fetchHistory', async () => {
   const profile = nintendoProfile
   try { const history = await nintendoFetchPlayHistory(); if (!profile || profile !== nintendoProfile) return { ok: false, error: 'PRG account changed' }; nintendoPlayHistory = history; return { ok: true, data: history } }
-  catch (error) { return { ok: false, error: error.message } }
+  catch (error) { if (profile !== nintendoProfile) return { ok: false, error: 'PRG account changed' }; return { ok: false, error: error.message, authRequired: requiresNintendoReauth(error) } }
 })
 
 ipcMain.handle('app:minimize', () => {

@@ -25,6 +25,6 @@ test('pending local edits survive restart and block an automatic cloud overwrite
   assert.match(source, /reconcileLibraries\(loadSyncBase\(\),localGames,remoteGames\)/);
   assert.match(source, /if\(merged\.conflict\)\{games=localGames;syncState\.markDirty\(\);openSyncConflict\(remoteGames,remoteTs\)/);
   assert.match(source, /!syncActive\|\|syncConflictRemote\)return;pushToFb/);
-  assert.match(source, /if\(!fbDb\|\|!currentUser\|\|syncConflictRemote\)return/);
+  assert.match(source, /if\(!fbDb\|\|!currentUser\|\|\(syncConflictRemote&&!forceLocalAgainst\)\)return false/);
   assert.match(source, /libraryEditRevision===editRevision&&baseStored\)\{syncState\.clearDirty\(\);clearPendingLibrarySync\(\)/);
 });
