@@ -18,7 +18,6 @@ const handlerSource = [
   slice('function parseLaunchArguments', '\n}'),
   slice("ipcMain.handle('local:chooseExecutable'"),
   slice("ipcMain.handle('local:launchGame'"),
-  slice("ipcMain.handle('gog:launchGame'"),
 ].join('\n');
 
 // Values created inside the vm context have another realm's prototypes.
@@ -28,7 +27,7 @@ function tempDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'prg-launch-'));
 }
 
-function loadHandlers({ confirm = false, picked = null, gogGames = [] } = {}) {
+function loadHandlers({ confirm = false, picked = null } = {}) {
   const dir = tempDir();
   const handlers = {};
   const spawned = [];
@@ -36,7 +35,6 @@ function loadHandlers({ confirm = false, picked = null, gogGames = [] } = {}) {
   const mainFrame = {};
   const sender = { mainFrame };
   const allowlist = createLaunchAllowlist({ filePath: path.join(dir, 'launch-allowlist.json'), fs });
-  const gogGameCache = new Map();
   vm.runInNewContext(handlerSource, {
     ipcMain: { handle: (name, callback) => { handlers[name] = callback; } },
     mainWindow: { webContents: sender },
@@ -45,8 +43,6 @@ function loadHandlers({ confirm = false, picked = null, gogGames = [] } = {}) {
     dialog: { showOpenDialog: async () => (picked ? { canceled: false, filePaths: [picked] } : { canceled: true, filePaths: [] }) },
     spawn: (executable, args, options) => { spawned.push({ executable, args, cwd: options.cwd }); return { unref() {} }; },
     shell: { openPath: async () => '', openExternal: async () => {} },
-    gogGameCache,
-    getGogInstalledGames: () => gogGames.forEach(game => gogGameCache.set(game.id, game)),
     path, fs, process, String, Boolean,
   });
   return { handlers, spawned, prompts, allowlist, mainEvent: { sender, senderFrame: mainFrame }, dir };
@@ -131,16 +127,4 @@ test('missing or relative executables never reach the prompt or spawn', async ()
   }
   assert.deepEqual(spawned, []);
   assert.deepEqual(prompts, []);
-});
-
-test('GOG launch ignores renderer-supplied executables that were never approved', async () => {
-  const dir = tempDir();
-  const registryExe = fakeExecutable(dir, 'Witcher3.exe');
-  const injected = fakeExecutable(dir, 'payload.exe');
-  const { handlers, spawned, mainEvent } = loadHandlers({ gogGames: [{ id: '1207664663', executable: registryExe }] });
-  assert.equal((await handlers['gog:launchGame'](mainEvent, { id: '1207664663', executable: injected })).action, 'requested');
-  assert.deepEqual(spawned.map(item => item.executable), [registryExe]);
-  assert.deepEqual(plain(await handlers['gog:launchGame'](mainEvent, { id: 'unknown', executable: injected })), { action: 'requested', id: 'unknown' });
-  assert.equal(spawned.length, 1, 'unknown id falls back to the GOG Galaxy URL');
-  assert.equal((await handlers['gog:launchGame']({ sender: {} }, { id: '1207664663' })).action, 'error');
 });

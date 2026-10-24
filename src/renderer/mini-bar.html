@@ -2,29 +2,188 @@
 <html lang="uk">
 <head>
 <meta charset="utf-8">
-<title>PRGLauncher session</title>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://shared.akamai.steamstatic.com https://cdn.akamai.steamstatic.com https://media.rawg.io https://images.igdb.com">
+<title>PRGLauncher</title>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
 <style>
-  *{box-sizing:border-box} html,body{margin:0;width:100%;height:100%;overflow:hidden;background:transparent!important;font-family:'Manrope','Segoe UI',Arial,sans-serif}
-  #bar{height:56px;display:flex;align-items:center;gap:9px;padding:0 9px 0 11px;border:1px solid rgba(167,139,250,.34);border-radius:15px;background:rgba(17,18,26,.92);backdrop-filter:blur(18px);box-shadow:0 12px 32px rgba(0,0,0,.42),0 0 0 1px rgba(255,255,255,.025) inset;color:#e8e7ef;-webkit-app-region:drag;transform-origin:top right;transition:opacity .18s cubic-bezier(.2,.8,.2,1),transform .18s cubic-bezier(.2,.8,.2,1)}
-  body.entering #bar{opacity:0;transform:translateY(-9px) scale(.94)}body.entering.entered #bar{opacity:1;transform:translateY(0) scale(1)}body.leaving #bar{opacity:0;transform:translateY(-7px) scale(.96)}@media(prefers-reduced-motion:reduce){#bar{transition:none!important}}
-  .dot{width:7px;height:7px;border-radius:50%;background:#00e676;box-shadow:0 0 9px #00e676;flex:none}.info{min-width:0;flex:1}.label{font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:#a6a2b7}.title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;font-weight:650;margin-top:2px;color:#f3f1fa}.timer{font:600 14px Consolas,monospace;color:#c4b5fd;white-space:nowrap;padding-left:5px}
-  button{width:27px;height:27px;border:1px solid transparent;border-radius:8px;background:transparent;color:#aaa6bb;cursor:pointer;font-size:14px;-webkit-app-region:no-drag;transition:background .14s,color .14s,border-color .14s}button:hover{background:rgba(167,139,250,.16);border-color:rgba(167,139,250,.2);color:#fff}button.active{color:#fbbf24;background:rgba(251,191,36,.11);border-color:rgba(251,191,36,.22)}#pause:hover{color:#fb7185;border-color:rgba(251,113,133,.25)}
+  /* Defaults match the Neon theme; the launcher sends its current theme. */
+  :root{--bg:#08080f;--bg2:#0d0d1a;--bg3:#121226;--bg4:#1a1a35;--border:rgba(190,184,219,.1);--border2:rgba(190,184,219,.2);--text:#f6f4ff;--text2:#c5c1d7;--text3:#a49dbb;--accent:#7b2fff;--accent2:#5a00ff;--green:#00ff41;--coral:#ff3366;--focus:color-mix(in srgb,var(--accent) 70%,#fff);--ease-out:cubic-bezier(.23,1,.32,1)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden;background:var(--bg2);color:var(--text);font:600 13px/1.35 'Manrope','Segoe UI',sans-serif;-webkit-user-select:none;user-select:none}
+  body{display:flex;flex-direction:column;border:1px solid var(--border2)}
+  button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;-webkit-app-region:no-drag}
+  button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+  svg{display:block;width:16px;height:16px;fill:currentColor}
+
+  #head{flex:none;display:flex;align-items:flex-start;gap:10px;padding:14px 12px 14px 16px;background:var(--bg3);-webkit-app-region:drag}
+  .session{min-width:0;flex:1}
+  #label{color:var(--text2);font-size:12px}
+  #timer{margin-top:2px;font:800 30px/1.1 'Manrope','Segoe UI',sans-serif;font-variant-numeric:tabular-nums;letter-spacing:-.02em;color:var(--text3)}
+  body.active #timer{color:var(--text)}
+  #session-title{margin-top:3px;font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #session-title:empty{display:none}
+  .head-actions{display:flex;gap:6px}
+  .icon-btn{width:32px;height:32px;display:grid;place-items:center;border-radius:8px;color:var(--text2);background:var(--bg4);transition:background-color .15s,color .15s,transform .16s var(--ease-out)}
+  .icon-btn:active{transform:scale(.95)}
+  #stop{background:color-mix(in srgb,var(--coral) 22%,var(--bg4));color:var(--text)}
+  #stop[hidden]{display:none}
+
+  #list{flex:1;min-height:0;overflow-y:auto;padding:6px 6px 8px;scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
+  .row{display:flex;align-items:center;gap:10px;padding:6px 6px 6px 8px;border-radius:9px}
+  .row.active{background:color-mix(in srgb,var(--accent) 16%,transparent)}
+  .cover{flex:none;width:68px;height:32px;border-radius:5px;object-fit:cover;background:var(--bg4)}
+  .cover-fallback{display:grid;place-items:center;font:800 12px 'Manrope','Segoe UI',sans-serif;color:var(--text3)}
+  .meta{min-width:0;flex:1}
+  .name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sub{margin-top:1px;font-size:12px;font-weight:500;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .play{flex:none;width:34px;height:34px;display:grid;place-items:center;border-radius:9px;background:var(--accent2);color:#fff;transition:background-color .15s,transform .16s var(--ease-out)}
+  .play:active{transform:scale(.95)}
+  .row.active .play{background:color-mix(in srgb,var(--coral) 30%,var(--bg4))}
+  .play:disabled{opacity:.45;cursor:default}
+
+  #empty{flex:1;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:12px;padding:18px 16px;color:var(--text2)}
+  #empty[hidden]{display:none}
+  #empty-open{padding:9px 14px;border-radius:8px;background:var(--accent2);color:#fff}
+
+  @media (hover:hover) and (pointer:fine){
+    .icon-btn:hover{background:var(--bg2);color:var(--text)}
+    .row:not(.active):hover{background:var(--bg3)}
+    .play:hover{background:var(--accent)}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
-<div id="bar">
-  <span class="dot" id="dot"></span><div class="info"><div class="label" id="label">Now playing</div><div class="title" id="title">Loading…</div></div>
-  <div class="timer" id="timer">00:00:00</div>
-  <button id="pause" title="Завершити сесію" aria-label="Завершити сесію">■</button><button id="pin" class="active" title="Відкріпити від усіх вікон" aria-label="Відкріпити від усіх вікон">⌖</button><button id="restore" title="Відкрити PRGLauncher" aria-label="Відкрити PRGLauncher">↗</button>
-</div>
+<header id="head">
+  <div class="session">
+    <div id="label">Нічого не запущено</div>
+    <div id="timer" aria-live="off">00:00:00</div>
+    <div id="session-title"></div>
+  </div>
+  <div class="head-actions">
+    <button id="stop" class="icon-btn" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="4" y="4" width="8" height="8" rx="1.5"/></svg></button>
+    <button id="open" class="icon-btn"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9 2.5h4.5V7h-1.5V5.06L7.53 9.53 6.47 8.47 10.94 4H9V2.5ZM3 4.5A1.5 1.5 0 0 1 4.5 3H7v1.5H4.5v7h7V9H13v2.5a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 3 11.5v-7Z"/></svg></button>
+  </div>
+</header>
+<main id="list" role="list"></main>
+<div id="empty" hidden><p id="empty-text"></p><button id="empty-open"></button></div>
 <script>
-  const fmt=ms=>{const s=Math.max(0,Math.floor(ms/1000)),h=String(Math.floor(s/3600)).padStart(2,'0'),m=String(Math.floor(s%3600/60)).padStart(2,'0'),x=String(s%60).padStart(2,'0');return `${h}:${m}:${x}`};
-  window.launcher?.onMiniState?.(state=>{document.getElementById('title').textContent=state.title;document.getElementById('timer').textContent=fmt(state.elapsed);document.getElementById('label').textContent=state.active?'Now playing':'Stand By';document.getElementById('dot').style.visibility=state.active?'visible':'hidden';document.getElementById('pause').disabled=!state.active});
-  window.launcher?.onMiniTransition?.(phase=>{document.body.classList.remove('entering','entered','leaving');if(phase==='in'){document.body.classList.add('entering');requestAnimationFrame(()=>document.body.classList.add('entered'));}else document.body.classList.add('leaving');});
-  document.getElementById('pause').onclick=()=>window.launcher?.pauseMiniSession?.();
-  document.getElementById('restore').onclick=()=>window.launcher?.restoreMain?.();
-  document.getElementById('pin').onclick=async e=>{const pinned=await window.launcher?.toggleMiniPin?.();e.currentTarget.classList.toggle('active',pinned);const label=pinned?'Відкріпити від усіх вікон':'Закріпити поверх вікон';e.currentTarget.title=label;e.currentTarget.setAttribute('aria-label',label);};
+  const TEXT = {
+    uk: { idle: 'Нічого не запущено', playing: 'Зараз граю', stop: 'Завершити сесію', open: 'Відкрити лаунчер', play: 'Запустити', running: 'Зупинити', never: 'Ще не запускали', today: 'Сьогодні', yesterday: 'Вчора', days: n => `${n} дн. тому`, weeks: n => `${n} тиж. тому`, months: n => `${n} міс. тому`, empty: 'Немає встановлених ігор Steam.', signedOut: 'Увійди в PRG Account у лаунчері, щоб бачити свої ігри.' },
+    en: { idle: 'Nothing running', playing: 'Now playing', stop: 'End session', open: 'Open launcher', play: 'Launch', running: 'Stop', never: 'Not played yet', today: 'Today', yesterday: 'Yesterday', days: n => `${n} days ago`, weeks: n => `${n} weeks ago`, months: n => `${n} months ago`, empty: 'No installed Steam games.', signedOut: 'Sign in to PRG Account in the launcher to see your games.' },
+  };
+  const PLAY_ICON = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.2v9.6c0 .6.65.97 1.17.66l7.6-4.8a.78.78 0 0 0 0-1.32l-7.6-4.8A.78.78 0 0 0 5 3.2Z"/></svg>';
+  const STOP_ICON = '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="4" y="4" width="8" height="8" rx="1.5"/></svg>';
+  const $ = id => document.getElementById(id);
+  let state = { active: false, startedAt: 0, games: [], lang: 'uk', signedIn: false };
+  let listKey = '';
+  let clock = null;
+
+  const pad = n => String(n).padStart(2, '0');
+  const fmt = ms => { const s = Math.max(0, Math.floor(ms / 1000)); return `${pad(Math.floor(s / 3600))}:${pad(Math.floor(s % 3600 / 60))}:${pad(s % 60)}`; };
+  const text = () => TEXT[state.lang] || TEXT.uk;
+
+  function ago(timestamp) {
+    const t = text();
+    if (!timestamp) return t.never;
+    const day = 864e5;
+    const startOfToday = new Date().setHours(0, 0, 0, 0);
+    if (timestamp >= startOfToday) return t.today;
+    if (timestamp >= startOfToday - day) return t.yesterday;
+    const days = Math.ceil((startOfToday - timestamp) / day);
+    if (days < 14) return t.days(days);
+    if (days < 60) return t.weeks(Math.round(days / 7));
+    return t.months(Math.round(days / 30));
+  }
+
+  function tick() { $('timer').textContent = state.active && state.startedAt ? fmt(Date.now() - state.startedAt) : '00:00:00'; }
+
+  function renderHeader() {
+    const t = text();
+    document.documentElement.lang = state.lang === 'en' ? 'en' : 'uk';
+    document.body.classList.toggle('active', Boolean(state.active));
+    $('label').textContent = state.active ? t.playing : t.idle;
+    $('session-title').textContent = state.active ? state.title || '' : '';
+    $('stop').hidden = !state.active;
+    for (const [id, label] of [['stop', t.stop], ['open', t.open]]) { $(id).title = label; $(id).setAttribute('aria-label', label); }
+    $('empty-open').textContent = t.open;
+    clearInterval(clock);
+    clock = state.active ? setInterval(tick, 1000) : null;
+    tick();
+  }
+
+  function coverFor(game) {
+    if (game.cover) {
+      const img = document.createElement('img');
+      img.className = 'cover'; img.alt = ''; img.loading = 'lazy'; img.decoding = 'async'; img.src = game.cover;
+      img.onerror = () => img.replaceWith(fallbackCover(game));
+      return img;
+    }
+    return fallbackCover(game);
+  }
+  function fallbackCover(game) {
+    const div = document.createElement('div');
+    div.className = 'cover cover-fallback';
+    div.textContent = String(game.title || '?').slice(0, 2).toUpperCase();
+    return div;
+  }
+
+  function renderList() {
+    const t = text();
+    const games = Array.isArray(state.games) ? state.games : [];
+    const key = JSON.stringify([new Date().toDateString(), state.lang, state.signedIn, state.active, state.gameId, games]);
+    if (key === listKey) return;
+    listKey = key;
+    const list = $('list');
+    list.replaceChildren();
+    $('empty').hidden = games.length > 0;
+    list.hidden = games.length === 0;
+    $('empty-text').textContent = state.signedIn ? t.empty : t.signedOut;
+    for (const game of games) {
+      const active = state.active && state.gameId === game.id;
+      const row = document.createElement('div');
+      row.className = `row${active ? ' active' : ''}`;
+      row.setAttribute('role', 'listitem');
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      const name = document.createElement('div');
+      name.className = 'name'; name.textContent = game.title;
+      const sub = document.createElement('div');
+      sub.className = 'sub'; sub.textContent = ago(game.lastPlayed);
+      meta.append(name, sub);
+      const button = document.createElement('button');
+      button.className = 'play';
+      button.innerHTML = active ? STOP_ICON : PLAY_ICON;
+      const label = `${active ? t.running : t.play}: ${game.title}`;
+      button.title = label; button.setAttribute('aria-label', label);
+      button.onclick = () => {
+        if (active) { window.launcher?.pauseMiniSession?.(); return; }
+        button.disabled = true;
+        Promise.resolve(window.launcher?.launchFromMini?.(game.id)).finally(() => setTimeout(() => { button.disabled = false; }, 1500));
+      };
+      row.append(coverFor(game), meta, button);
+      list.append(row);
+    }
+  }
+
+  function applyTheme(theme) {
+    if (!theme || typeof theme !== 'object') return;
+    for (const [name, value] of Object.entries(theme)) {
+      if (/^--[a-z0-9-]+$/.test(name) && typeof value === 'string' && value.length < 120) document.documentElement.style.setProperty(name, value);
+    }
+  }
+
+  window.launcher?.onMiniState?.(next => {
+    state = { ...state, ...next };
+    applyTheme(next.theme);
+    renderHeader();
+    renderList();
+  });
+  $('stop').onclick = () => window.launcher?.pauseMiniSession?.();
+  $('open').onclick = () => window.launcher?.restoreMain?.();
+  $('empty-open').onclick = () => window.launcher?.restoreMain?.();
+  renderHeader();
+  renderList();
 </script>
 </body>
 </html>

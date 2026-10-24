@@ -2,7 +2,7 @@ const path = require('path')
 
 // Executables the user has approved for launching. The renderer cannot write
 // this list: entries are added only by the main process after a native file
-// picker choice, a GOG registry scan or an explicit native confirmation.
+// picker choice or an explicit native confirmation.
 const MAX_ENTRIES = 1000
 
 function normalizeExecutablePath(value, platform = process.platform) {

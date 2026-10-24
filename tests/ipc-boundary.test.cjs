@@ -10,7 +10,7 @@ const appFile = path.resolve('src/renderer/index.html');
 
 // Channels that check their sender inline and return a result object instead
 // of throwing, so the renderer can show a friendly message.
-const INLINE_CHECKED = ['local:chooseExecutable', 'local:launchGame', 'gog:launchGame', 'review:openLink'];
+const INLINE_CHECKED = ['local:chooseExecutable', 'local:launchGame', 'review:openLink'];
 
 test('every IPC channel either uses the sender guard or checks its sender inline', () => {
   const direct = [...source.matchAll(/ipcMain\.handle\('([^']+)'/g)].map(match => match[1]);

@@ -130,7 +130,7 @@ test('renderer wires the keyed grid and a card signature covering what a card sh
   assert.match(grid, /libraryGrid\.render\(grid,list,new Set\(games\.map\(game=>game\.id\)\)\)/);
   assert.doesNotMatch(grid, /grid\.innerHTML=''/);
   const signature = html.slice(html.indexOf('function gameCardSignature(game)'), html.indexOf('\n}', html.indexOf('function gameCardSignature(game)')));
-  for (const field of ['currentLanguage', 'activeGameId', 'game.title', 'game.cover', 'game.status', 'game.platform', 'game.rating', 'game.playtime', 'game.sessions', 'game.steamAppId', 'game.gogGameId']) {
+  for (const field of ['currentLanguage', 'activeGameId', 'game.title', 'game.cover', 'game.status', 'game.platform', 'game.rating', 'game.playtime', 'game.sessions', 'game.steamAppId']) {
     assert.ok(signature.includes(field), field);
   }
   const css = fs.readFileSync('src/renderer/styles.css', 'utf8');

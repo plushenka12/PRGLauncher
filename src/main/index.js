@@ -6,7 +6,6 @@ const fs = require('fs')
 const https = require('https')
 const { execFile, spawn } = require('child_process')
 const crypto = require('crypto')
-const { STEAM_STARTUP_HIDE_SCRIPT, scheduleSteamStartupHide } = require('./steam-startup-window')
 const { parseRunningSteamAppId } = require('./steam-activity')
 const { createNintendoHttpError, requiresNintendoReauth } = require('./nintendo-http')
 const { createLaunchAllowlist } = require('./launch-allowlist')
@@ -14,6 +13,8 @@ const { attachNavigationGuard } = require('./navigation-guard')
 const { runCommand } = require('./run-command')
 const { createSteamInstallScanner, readVdfNumber } = require('./steam-install-scan')
 const { createActivityScheduler, isGameProcessLog } = require('./steam-activity-scheduler')
+const { STEAM_GUARD_SCRIPT, createSteamWindowGuard } = require('./steam-window-guard')
+const { resolveMiniTabBounds, loadSavedBounds, saveBounds, isReachable, MIN_WIDTH, MIN_HEIGHT } = require('./mini-tab-bounds')
 
 // Keep the Windows app identity and packaged process name discoverable.
 if (process.platform === 'win32') app.setAppUserModelId('com.prgtracker.launcher')
@@ -41,7 +42,6 @@ let automaticUpdateCheck = false
 let isQuitting = false
 let updateInstallInProgress = false
 let updateInstallTimer = null
-let miniBarStandby = false
 let tray       = null
 let steamPath  = null
 let steamMonitorTimer = null
@@ -53,7 +53,6 @@ let steamRunningAppId = null
 let steamCollectionTimer = null
 let lastBacklogSignature = null
 const steamStoreCache = new Map()
-const gogGameCache = new Map()
 let hltbSearchInFlight = null
 let hltbLastRequestAt = 0
 let hltbCredentials = null
@@ -61,12 +60,11 @@ let hltbCredentialsExpiry = 0
 let hltbSearchEndpoint = null
 let backloggdImportWindow = null
 const launchedAtLogin = process.argv.includes('--hidden')
-const opacityAnimations = new Map()
 
 // ── IPC SENDERS ───────────────────────────────────────────────────────────
 // The main window and the mini-bar share the preload bridge. Every channel
 // belongs to the main window's top frame except the two the mini-bar uses.
-const MINI_BAR_CHANNELS = new Set(['mini:restore', 'mini:togglePin'])
+const MINI_BAR_CHANNELS = new Set(['mini:restore', 'mini:launch'])
 
 function isMainSender(event) {
   return Boolean(mainWindow) && event?.sender === mainWindow.webContents && event.senderFrame === mainWindow.webContents.mainFrame
@@ -83,27 +81,6 @@ function handleFromMain(channel, handler) {
     }
     return handler(event, ...args)
   })
-}
-
-function animateWindowOpacity(window, from, to, duration, done) {
-  if (!window || window.isDestroyed()) return
-  const animationKey = window.id
-  const previous = opacityAnimations.get(animationKey)
-  if (previous) clearInterval(previous)
-  const startedAt = Date.now()
-  const tick = () => {
-    if (window.isDestroyed()) return clearInterval(opacityAnimations.get(animationKey))
-    const progress = Math.min(1, (Date.now() - startedAt) / duration)
-    const eased = 1 - Math.pow(1 - progress, 3)
-    window.setOpacity(from + (to - from) * eased)
-    if (progress < 1) return
-    clearInterval(opacityAnimations.get(animationKey))
-    opacityAnimations.delete(animationKey)
-    done?.()
-  }
-  const timer = setInterval(tick, 16)
-  opacityAnimations.set(animationKey, timer)
-  tick()
 }
 
 // ── STEAM DETECTION ───────────────────────────────────────────────────────
@@ -150,55 +127,6 @@ function getSteamLibraries() {
     }
   } catch {}
   return libraries
-}
-
-// ── GOG GALAXY (local, password-free MVP) ───────────────────────────────
-// GOG Galaxy keeps installed-game registration in the Windows registry. We
-// only read local install metadata; no GOG login, cookie or password is used.
-async function readGogRegistryGames(root) {
-  if (process.platform !== 'win32') return []
-  const { ok, stdout: output } = await runCommand('reg', ['query', root, '/s'])
-  if (!ok) return []
-  const result = []
-  let key = null
-  let values = {}
-  const flush = () => {
-    if (!key || !values.path) return
-    const installPath = String(values.path).trim().replace(/^"|"$/g, '')
-    if (!installPath || !fs.existsSync(installPath)) return
-    const id = String(values.gameid || values.gameID || key.split('\\').pop() || installPath)
-    const title = String(values.gamename || values.name || `GOG game ${id}`).trim()
-    const rawExe = String(values.exe || values.executable || '').trim().replace(/^"|"$/g, '')
-    const executable = rawExe ? (path.isAbsolute(rawExe) ? rawExe : path.join(installPath, rawExe)) : null
-    result.push({ id, title, installPath, executable: executable && fs.existsSync(executable) ? executable : null, platform: 'PC', source: 'gog' })
-  }
-  for (const line of output.split(/\r?\n/)) {
-    const trimmed = line.trim()
-    if (/^HKEY_LOCAL_MACHINE\\|^HKEY_CURRENT_USER\\/i.test(trimmed)) {
-      flush(); key = trimmed; values = {}; continue
-    }
-    const match = line.match(/^\s+([^\s]+)\s+REG_\w+\s+(.*)$/i)
-    if (match) values[match[1].toLocaleLowerCase()] = match[2].trim()
-  }
-  flush()
-  return result
-}
-
-async function getGogInstalledGames() {
-  if (process.platform !== 'win32') return []
-  const roots = [
-    'HKCU\\Software\\GOG.com\\Games',
-    'HKLM\\Software\\GOG.com\\Games',
-    'HKLM\\Software\\WOW6432Node\\GOG.com\\Games',
-  ]
-  const seen = new Set()
-  const games = (await Promise.all(roots.map(readGogRegistryGames))).flat().filter(game => {
-    const key = `${game.id}:${game.installPath}`.toLocaleLowerCase()
-    if (seen.has(key)) return false
-    seen.add(key); return true
-  })
-  games.forEach(game => gogGameCache.set(game.id, game))
-  return games
 }
 
 const steamInstallScanner = createSteamInstallScanner({ fs })
@@ -265,7 +193,14 @@ async function startSteamSilent() {
   console.log('[Steam] Started silently')
 }
 
-function hideSteamWindow() {
+const STEAM_GUARD_MS = { startup: 60000, launch: 30000, exit: 20000, download: 20000 }
+const steamWindowGuard = createSteamWindowGuard({
+  spawnGuard: durationMs => execFile('powershell.exe', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-WindowStyle', 'Hidden', '-Command', `& { ${STEAM_GUARD_SCRIPT} } -DurationMs ${Math.round(durationMs)}`], { windowsHide: true }, () => {}),
+})
+
+// Keeps Steam's main window hidden for `durationMs` while Steam may surface it
+// by itself. Dialogs that need the user stay visible (see steam-window-guard).
+function hideSteamWindow(durationMs = STEAM_GUARD_MS.download) {
   if (process.platform === 'darwin') {
     // macOS requires Automation access the first time this runs. Use Steam's
     // bundle id first (the display name can be localized), then fall back to
@@ -290,17 +225,9 @@ function hideSteamWindow() {
   // Do not request that intrusive permission just to hide Steam; launching via
   // steam:// stays supported and the user remains in control of Steam's UI.
   if (process.platform !== 'win32') return
-  // Steam has no Electron API. Hide only its top-level window; the client and
-  // downloads keep running in its tray process.
-  const script = `Add-Type @'
-using System;
-using System.Runtime.InteropServices;
-public static class SteamWindow { [DllImport("user32.dll")] public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow); }
-'@; Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.ProcessName -like 'steam*' -and $_.MainWindowHandle -ne 0 } | ForEach-Object { [SteamWindow]::ShowWindowAsync($_.MainWindowHandle, 0) | Out-Null }`
-  const hide = () => execFile('powershell.exe', ['-NoProfile', '-NonInteractive', '-WindowStyle', 'Hidden', '-Command', script], { windowsHide: true }, () => {})
-  // Steam may create its window after accepting the install URL, so hide it
-  // several times during that short handoff and leave its background client on.
-  ;[0, 500, 1500, 3000].forEach(delay => setTimeout(hide, delay))
+  // Steam has no Electron API. The client and downloads keep running in its
+  // tray process while the library window is hidden.
+  steamWindowGuard.guard(durationMs)
 }
 
 function publishSteamStatus(appId, status) {
@@ -346,6 +273,8 @@ async function pollSteamActivity() {
     const runningAppId = await getRunningSteamAppId()
     if (runningAppId === undefined) return undefined
     if (runningAppId !== steamRunningAppId) {
+      // Steam often brings its library forward when a game exits.
+      if (steamRunningAppId && !runningAppId && process.platform === 'win32') hideSteamWindow(STEAM_GUARD_MS.exit)
       steamRunningAppId = runningAppId
       if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('steam:runningApp', { appId: runningAppId })
     }
@@ -386,6 +315,7 @@ function startSteamMonitor() {
 function stopSteamActivity() {
   steamActivity.stop()
   stopSteamGameLogWatch()
+  steamWindowGuard.stop()
 }
 
 function getSteamCollection(name) {
@@ -749,10 +679,9 @@ handleFromMain('steam:launchGame', async (_, appId) => {
   // normal install/purchase flow without producing a false "not owned" result.
   await shell.openExternal(`steam://run/${normalizedAppId}`)
   steamActivity.notify()
-  // Steam may briefly surface its main window to hand off a launch. Hide it
-  // only for this launcher-initiated path; manually opening Steam from tray is
-  // intentionally left alone.
-  ;[500, 1800].forEach(delay => setTimeout(hideSteamWindow, delay))
+  // Steam may surface its library window to hand off a launch; keep it hidden
+  // for this launcher-initiated path. Launch and install dialogs stay visible.
+  hideSteamWindow(STEAM_GUARD_MS.launch)
   return { action: 'requested', appId: normalizedAppId, installed }
 })
 
@@ -862,7 +791,6 @@ handleFromMain('steam:getRunningAppId', async () => {
   return { appId: (await getRunningSteamAppId()) ?? null }
 })
 
-handleFromMain('gog:installedGames', async () => ({ ok: true, games: await getGogInstalledGames() }))
 let launchAllowlist = null
 function getLaunchAllowlist() {
   if (!launchAllowlist) launchAllowlist = createLaunchAllowlist({ filePath: path.join(app.getPath('userData'), 'launch-allowlist.json'), fs })
@@ -931,27 +859,6 @@ ipcMain.handle('local:launchGame', async (event, payload) => {
   const child = spawn(executable, parseLaunchArguments(data.arguments), { cwd: workingDirectory, detached: true, stdio: 'ignore', windowsHide: true })
   child.unref()
   return { action: 'requested' }
-})
-
-ipcMain.handle('gog:launchGame', async (event, payload) => {
-  if (!isMainSender(event)) return { action: 'error', message: 'Launch request was rejected' }
-  const id = String(payload?.id || '')
-  if (!gogGameCache.has(id)) await getGogInstalledGames()
-  const cached = gogGameCache.get(id)
-  // The registry scan is the source of truth; a renderer-supplied path is used
-  // only when the user already approved it for a local launch.
-  const requested = String(payload?.executable || '')
-  const executable = cached?.executable || (requested && getLaunchAllowlist().has(requested) ? requested : '')
-  if (executable && path.isAbsolute(executable) && fs.existsSync(executable)) {
-    const child = spawn(executable, [], { detached: true, stdio: 'ignore', windowsHide: true })
-    child.unref()
-    return { action: 'requested', id }
-  }
-  if (/^[\w.-]+$/.test(id)) {
-    await shell.openExternal(`goggalaxy://openGameView/${encodeURIComponent(id)}`)
-    return { action: 'requested', id }
-  }
-  return { action: 'error', message: 'GOG executable was not found' }
 })
 
 handleFromMain('hltb:search', async (_, query) => searchHltb(query))
@@ -1336,27 +1243,59 @@ handleFromMain('app:setSize', (_, w, h) => {
   if (mainWindow) mainWindow.setSize(w, h, true)
 })
 
+// ── MINI-TAB ──────────────────────────────────────────────────────────────
+// A small always-on-top window that is always present: the running session's
+// timer and the installed Steam games, newest played first. It opens on the
+// second monitor by default and remembers where the user puts it.
+let lastMiniState = null
+let miniBoundsSaveTimer = null
+const MINI_TAB_BOUNDS_FILE = () => path.join(app.getPath('userData'), 'mini-tab.json')
+
 function sendMiniState(state) {
-  if (miniBar && !miniBar.isDestroyed()) miniBar.webContents.send('mini:state', state)
+  if (state) lastMiniState = state
+  if (miniBar && !miniBar.isDestroyed() && !miniBar.webContents.isLoading() && lastMiniState) {
+    miniBar.webContents.send('mini:state', lastMiniState)
+  }
+}
+
+function currentMiniTabBounds() {
+  return resolveMiniTabBounds({
+    saved: loadSavedBounds(fs, MINI_TAB_BOUNDS_FILE()),
+    displays: screen.getAllDisplays(),
+    primaryId: screen.getPrimaryDisplay().id,
+  })
+}
+
+function rememberMiniTabBounds() {
+  clearTimeout(miniBoundsSaveTimer)
+  miniBoundsSaveTimer = setTimeout(() => {
+    if (miniBar && !miniBar.isDestroyed()) saveBounds(fs, MINI_TAB_BOUNDS_FILE(), miniBar.getBounds())
+  }, 400)
+}
+
+// After a monitor is unplugged or rearranged, bring the mini-tab back on screen.
+function keepMiniTabOnScreen() {
+  if (!miniBar || miniBar.isDestroyed()) return
+  if (!isReachable(miniBar.getBounds(), screen.getAllDisplays())) miniBar.setBounds(currentMiniTabBounds())
 }
 
 function createMiniBar() {
   if (miniBar && !miniBar.isDestroyed()) return miniBar
 
   miniBar = new BrowserWindow({
-    width: 360,
-    height: 58,
-    minWidth: 260,
-    minHeight: 58,
-    maxHeight: 58,
+    ...currentMiniTabBounds(),
+    minWidth: MIN_WIDTH,
+    minHeight: MIN_HEIGHT,
     frame: false,
-    transparent: true,
     resizable: true,
     alwaysOnTop: true,
     skipTaskbar: true,
     show: false,
     movable: true,
-    backgroundColor: '#00000000',
+    fullscreenable: false,
+    maximizable: false,
+    title: 'PRGLauncher',
+    backgroundColor: '#0d0d1a',
     webPreferences: {
       preload: path.join(__dirname, '..', 'preload', 'index.js'),
       contextIsolation: true,
@@ -1364,80 +1303,49 @@ function createMiniBar() {
     },
   })
   miniBar.setAlwaysOnTop(true, 'floating')
-  const workArea = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea
-  const margin = 16
-  miniBar.setPosition(workArea.x + workArea.width - 360 - margin, workArea.y + margin)
   const miniBarFile = path.join(__dirname, '..', 'renderer', 'mini-bar.html')
   attachNavigationGuard(miniBar.webContents, miniBarFile)
+  miniBar.webContents.on('did-finish-load', () => sendMiniState())
+  miniBar.once('ready-to-show', () => miniBar?.showInactive())
+  miniBar.on('moved', rememberMiniTabBounds)
+  miniBar.on('resized', rememberMiniTabBounds)
+  // The mini-tab is not closed by the user; only quitting the app removes it.
+  miniBar.on('close', event => { if (!isQuitting) event.preventDefault() })
+  miniBar.on('closed', () => { clearTimeout(miniBoundsSaveTimer); miniBar = null })
   miniBar.loadFile(miniBarFile)
-  miniBar.on('closed', () => { const timer=opacityAnimations.get(miniBar?.id); if(timer)clearInterval(timer); opacityAnimations.delete(miniBar?.id); miniBar = null })
   return miniBar
 }
 
-function transitionToMiniBar(bar, state) {
-  sendMiniState(state)
-  bar.setOpacity(0)
-  bar.showInactive()
-  bar.webContents.send('mini:transition', 'in')
-  animateWindowOpacity(bar, 0, 1, 180)
-
-  if (mainWindow && !mainWindow.isDestroyed() && mainWindow.isVisible()) {
-    mainWindow.webContents.send('app:miniTransition', 'out')
-    animateWindowOpacity(mainWindow, mainWindow.getOpacity(), 0, 150, () => {
-      if (!mainWindow?.isDestroyed()) {
-        mainWindow.hide()
-        mainWindow.setOpacity(1)
-      }
-    })
-  } else {
-    mainWindow?.hide()
-  }
+function showMainWindow() {
+  if (!mainWindow || mainWindow.isDestroyed()) return
+  if (mainWindow.isMinimized()) mainWindow.restore()
+  mainWindow.show()
+  mainWindow.focus()
 }
 
-function transitionToMainWindow() {
-  if (mainWindow && !mainWindow.isDestroyed()) {
-    mainWindow.setOpacity(0)
-    mainWindow.show()
-    mainWindow.webContents.send('app:miniTransition', 'in')
-    animateWindowOpacity(mainWindow, 0, 1, 190, () => mainWindow?.focus())
-  }
-  if (miniBar && !miniBar.isDestroyed() && miniBar.isVisible()) {
-    miniBar.webContents.send('mini:transition', 'out')
-    animateWindowOpacity(miniBar, miniBar.getOpacity(), 0, 150, () => {
-      if (!miniBar?.isDestroyed()) {
-        miniBar.hide()
-        miniBar.setOpacity(1)
-      }
-    })
-  }
-}
-
+// The big window's "compact" button: hide it and leave the mini-tab.
 handleFromMain('mini:show', (_, state) => {
+  sendMiniState(state)
   const bar = createMiniBar()
-  miniBarStandby = !state?.active
-  const show = () => transitionToMiniBar(bar, state)
-  if (bar.webContents.isLoading()) bar.webContents.once('did-finish-load', show)
-  else show()
+  if (!bar.isVisible() && !bar.webContents.isLoading()) bar.showInactive()
+  mainWindow?.hide()
 })
 
 handleFromMain('mini:update', (_, state) => {
-  if (!state?.active && !miniBarStandby && miniBar && !miniBar.isDestroyed() && miniBar.isVisible()) {
-    transitionToMainWindow()
-    return
-  }
-  if (state?.active) miniBarStandby = false
   sendMiniState(state)
 })
 
 handleFromMain('mini:restore', () => {
-  transitionToMainWindow()
+  showMainWindow()
 })
 
-handleFromMain('mini:togglePin', () => {
-  if (!miniBar || miniBar.isDestroyed()) return false
-  const pinned = !miniBar.isAlwaysOnTop()
-  miniBar.setAlwaysOnTop(pinned, pinned ? 'floating' : 'normal')
-  return pinned
+// The mini-tab asks the launcher window to start a game; the renderer owns
+// the library and the timer, so it decides whether the id can be launched.
+handleFromMain('mini:launch', (_, gameId) => {
+  const id = String(gameId || '')
+  if (!/^[\w.:-]{1,128}$/.test(id) || !mainWindow || mainWindow.isDestroyed()) return false
+  mainWindow.webContents.send('mini:launch', id)
+  return true
 })
 
 ipcMain.on('mini:pause', (event) => {
@@ -1524,6 +1432,8 @@ app.whenReady().then(async () => {
 
   // Start Steam silently in background
   startSteamSilent()
+  // Steam started by Windows at sign-in, or just now, may show its library.
+  if (process.platform === 'win32') hideSteamWindow(STEAM_GUARD_MS.startup)
   startSteamMonitor()
   startSteamCollectionMonitor()
 
@@ -1552,14 +1462,8 @@ app.whenReady().then(async () => {
 
   createWindow()
   createTray()
-  if (process.platform === 'win32' && launchedAtLogin) {
-    scheduleSteamStartupHide({
-      runHide: () => execFile('powershell.exe', ['-NoProfile', '-NonInteractive', '-WindowStyle', 'Hidden', '-Command', STEAM_STARTUP_HIDE_SCRIPT], { windowsHide: true }, error => {
-        if (error) console.warn('[Steam] Startup hide unavailable:', error.message)
-      }),
-      shouldContinue: () => !isQuitting && mainWindow && !mainWindow.isDestroyed() && !mainWindow.isVisible(),
-    })
-  }
+  createMiniBar()
+  for (const event of ['display-removed', 'display-metrics-changed']) screen.on(event, keepMiniTabOnScreen)
   checkForUpdatesAfterLaunch()
 })
 

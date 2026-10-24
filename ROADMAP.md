@@ -17,7 +17,7 @@
 - PRG Account через Firebase Email/Password і Google; окремі бібліотека, синхронізація та статистика для кожного акаунта.
 - Steam: імпорт профілю/бібліотеки/колекцій, картки з обкладинками, пошук і масовий вибір, запуск ігор, install/download tracking, підключення та заміна профілю.
 - Nintendo Switch/Switch 2 Sync Beta: авторизація в окремому вікні Nintendo, play activity, повний і delta-імпорт, захист від повторів, ручний повторний запит списку.
-- Mini-bar, tray, Stand By, закріплення поверх вікон, автозапуск і приховування Steam у межах підтриманих сценаріїв.
+- Міні-таб поверх вікон на другому моніторі (таймер і встановлені Steam-ігри з запуском), tray, автозапуск і приховування головного вікна Steam без чіпання його діалогів.
 - Єдина кнопка **Додати гру**: Steam, Nintendo, RAWG/стороння гра та локальний `.exe`/`.app` із запуском і трекінгом.
 - Статуси Backlog / Playing / Completed / QuickPlay / session-only, клікабельна зміна статусу, історія, таймлайн, об’єднання дублікатів і Backloggd import.
 - RAWG matching, ручне виправлення обкладинок і HLTB: пошук, пряме посилання, ручний match, кеш і conflict resolver.
@@ -28,7 +28,6 @@
 
 - **Windows:** основна стабільна платформа; інсталятор і автооновлення.
 - **macOS:** universal тестовий DMG, unsigned/not notarized; частина системних інтеграцій і поведінка Steam потребують реального тестування на Mac.
-- **GOG:** локальний MVP для пошуку встановлених ігор у Windows registry та запуску.
 
 ## Перевірити зараз
 
@@ -132,7 +131,6 @@
 
 ### P4 — більше джерел (дальний беклог)
 
-- Повний GOG import/delta history.
 - Локальні/дозволені інтеграції Epic Games, Ubisoft Connect, EA app (колишній Origin) і Battle.net: manifest, launch, tracking.
 - PlayStation Network та Xbox activity лише через офіційні або явно дозволені authorization flows; не зберігати паролі й не будувати продукт на undocumented endpoints.
 

@@ -13,8 +13,8 @@ Electron main process
   Steam process/filesystem detection and launch
   Nintendo OAuth and encrypted token handling
   HLTB hidden BrowserWindow and HTTPS adapter
-  GOG/local executable launch
-  updater, tray, mini-bar and native windows
+  local executable launch
+  updater, tray, mini-tab and native windows
   IPC handlers
         |
 Electron preload (narrow IPC bridge)

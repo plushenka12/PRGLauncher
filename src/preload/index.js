@@ -17,9 +17,7 @@ contextBridge.exposeInMainWorld('launcher', {
   getRunningAppId: ()      => ipcRenderer.invoke('steam:getRunningAppId'),
   onSteamRunningApp: (callback) => ipcRenderer.on('steam:runningApp', (_, status) => callback(status)),
 
-  // GOG Galaxy (local installed-game scan; no account credentials)
-  getGogInstalledGames: () => ipcRenderer.invoke('gog:installedGames'),
-  launchGogGame: (payload) => ipcRenderer.invoke('gog:launchGame', payload),
+  // Local executables
   chooseExecutable: () => ipcRenderer.invoke('local:chooseExecutable'),
   launchLocalGame: (payload) => ipcRenderer.invoke('local:launchGame', payload),
 
@@ -63,11 +61,10 @@ contextBridge.exposeInMainWorld('launcher', {
   showMiniBar:  (state) => ipcRenderer.invoke('mini:show', state),
   updateMiniBar:(state) => ipcRenderer.invoke('mini:update', state),
   restoreMain:  () => ipcRenderer.invoke('mini:restore'),
-  toggleMiniPin:() => ipcRenderer.invoke('mini:togglePin'),
+  launchFromMini: (gameId) => ipcRenderer.invoke('mini:launch', gameId),
+  onMiniLaunch: (callback) => ipcRenderer.on('mini:launch', (_, gameId) => callback(gameId)),
   pauseMiniSession: () => ipcRenderer.send('mini:pause'),
   onMiniState:  (callback) => ipcRenderer.on('mini:state', (_, state) => callback(state)),
-  onMiniTransition: (callback) => ipcRenderer.on('mini:transition', (_, phase) => callback(phase)),
-  onMainTransition: (callback) => ipcRenderer.on('app:miniTransition', (_, phase) => callback(phase)),
   onMiniPause:  (callback) => ipcRenderer.on('mini:pause', callback),
 
   // Platform

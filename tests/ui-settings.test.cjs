@@ -20,7 +20,7 @@ function fixture() {
     focus() { document.activeElement = this; },
   }));
   const panes = tabs.map(tab => ({ dataset: { settingsPane: tab.dataset.settingsTab }, classList: classes([]), hidden: false, scrollTop: 50 }));
-  const integrations = ['steam', 'nintendo', 'gog', 'backloggd'].map(name => ({ id: `integration-${name}`, open: false }));
+  const integrations = ['steam', 'nintendo', 'backloggd'].map(name => ({ id: `integration-${name}`, open: false }));
   const dialog = { scrollTop: 10, focus() { document.activeElement = this; } };
   const overlay = { classList: classes(['hidden']), scrollTop: 10, querySelector: () => dialog };
   document.querySelectorAll = selector => selector === '.settings-tab' ? tabs : selector === '.settings-pane' ? panes : integrations;
@@ -51,9 +51,9 @@ test('settings tabs expose one selected panel and support arrow keys', () => {
 test('opening a source shows only its integration controls', () => {
   const { ui, integrations } = fixture();
   ui.openIntegration('steam');
-  assert.deepEqual(integrations.map(item => item.open), [true, false, false, false]);
+  assert.deepEqual(integrations.map(item => item.open), [true, false, false]);
   ui.openIntegration('nintendo');
-  assert.deepEqual(integrations.map(item => item.open), [false, true, false, false]);
+  assert.deepEqual(integrations.map(item => item.open), [false, true, false]);
 });
 
 test('closing settings returns focus to its opener', () => {

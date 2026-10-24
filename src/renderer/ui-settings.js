@@ -31,7 +31,7 @@
     }
     function openIntegration(source) {
       const target = document.getElementById(`integration-${source}`);
-      if (!target || !['steam', 'nintendo', 'gog', 'backloggd'].includes(source)) return;
+      if (!target || !['steam', 'nintendo', 'backloggd'].includes(source)) return;
       document.querySelectorAll('.integration-item').forEach(item => { item.open = item === target; });
     }
     function open() {

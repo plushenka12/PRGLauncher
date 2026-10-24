@@ -70,7 +70,7 @@
     actions.className = 'card-actions';
     const primary = document.createElement('button');
     primary.className = `card-btn ${isActive ? 'card-btn-pause' : 'card-btn-play'}`;
-    primary.textContent = translate(isActive ? 'Pause' : game.steamAppId ? 'Play in Steam' : game.gogGameId ? 'Play in GOG' : 'Start timer');
+    primary.textContent = translate(isActive ? 'Pause' : game.steamAppId ? 'Play in Steam' : 'Start timer');
     primary.onclick = event => {
       event.stopPropagation();
       if (isActive) stopTimer(false);
