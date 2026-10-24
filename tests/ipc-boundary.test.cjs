@@ -24,7 +24,8 @@ test('every IPC channel either uses the sender guard or checks its sender inline
   for (const channel of ['app:exportBackup', 'app:importBackup', 'app:exportDiagnostics', 'app:installUpdate', 'nintendo:fetchHistory', 'nintendo:completeAuth', 'steam:profileLibrary', 'backloggd:importProfile']) {
     assert.ok(guarded.includes(channel), `${channel} is guarded`);
   }
-  assert.match(source, /ipcMain\.on\('mini:pause', \(event\) => \{\n {2}if \(!isMiniBarSender\(event\)\) return/);
+  // \r? keeps this working on a CRLF checkout (the Windows CI runner).
+  assert.match(source, /ipcMain\.on\('mini:pause', \(event\) => \{\r?\n {2}if \(!isMiniBarSender\(event\)\) return/);
 });
 
 test('guarded channels answer only the main window top frame', async () => {
