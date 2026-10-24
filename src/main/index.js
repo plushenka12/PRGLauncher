@@ -10,6 +10,7 @@ const { STEAM_STARTUP_HIDE_SCRIPT, scheduleSteamStartupHide } = require('./steam
 const { parseRunningSteamAppId } = require('./steam-activity')
 const { createNintendoHttpError, requiresNintendoReauth } = require('./nintendo-http')
 const { createLaunchAllowlist } = require('./launch-allowlist')
+const { attachNavigationGuard } = require('./navigation-guard')
 
 // Keep the Windows app identity and packaged process name discoverable.
 if (process.platform === 'win32') app.setAppUserModelId('com.prgtracker.launcher')
@@ -59,6 +60,28 @@ let hltbSearchEndpoint = null
 let backloggdImportWindow = null
 const launchedAtLogin = process.argv.includes('--hidden')
 const opacityAnimations = new Map()
+
+// ── IPC SENDERS ───────────────────────────────────────────────────────────
+// The main window and the mini-bar share the preload bridge. Every channel
+// belongs to the main window's top frame except the two the mini-bar uses.
+const MINI_BAR_CHANNELS = new Set(['mini:restore', 'mini:togglePin'])
+
+function isMainSender(event) {
+  return Boolean(mainWindow) && event?.sender === mainWindow.webContents && event.senderFrame === mainWindow.webContents.mainFrame
+}
+
+function isMiniBarSender(event) {
+  return Boolean(miniBar) && event?.sender === miniBar.webContents && event.senderFrame === miniBar.webContents.mainFrame
+}
+
+function handleFromMain(channel, handler) {
+  ipcMain.handle(channel, (event, ...args) => {
+    if (!isMainSender(event) && !(MINI_BAR_CHANNELS.has(channel) && isMiniBarSender(event))) {
+      throw new Error(`${channel} is not available to this window`)
+    }
+    return handler(event, ...args)
+  })
+}
 
 function animateWindowOpacity(window, from, to, duration, done) {
   if (!window || window.isDestroyed()) return
@@ -714,7 +737,7 @@ function fetchHltbGamePage(url) {
 }
 
 // ── IPC HANDLERS ──────────────────────────────────────────────────────────
-ipcMain.handle('steam:launchGame', async (_, appId) => {
+handleFromMain('steam:launchGame', async (_, appId) => {
   const normalizedAppId = String(appId || '')
   if (!/^\d+$/.test(normalizedAppId)) return { action: 'error', message: 'Invalid Steam App ID' }
 
@@ -731,7 +754,7 @@ ipcMain.handle('steam:launchGame', async (_, appId) => {
   return { action: 'requested', appId: normalizedAppId, installed }
 })
 
-ipcMain.handle('steam:gameStatus', async (_, appId) => {
+handleFromMain('steam:gameStatus', async (_, appId) => {
   if (!appId) return { status: 'unknown' }
   const installed = isGameInstalled(appId)
   const inLibrary = installed || isGameInLibrary(appId)
@@ -741,13 +764,13 @@ ipcMain.handle('steam:gameStatus', async (_, appId) => {
   }
 })
 
-ipcMain.handle('steam:installStatus', async (_, appId) => {
+handleFromMain('steam:installStatus', async (_, appId) => {
   const normalizedAppId = String(appId || '')
   if (!/^\d+$/.test(normalizedAppId)) return { state: 'error', message: 'Invalid Steam App ID' }
   return getInstallProgress(normalizedAppId)
 })
 
-ipcMain.handle('steam:requestInstall', async (_, appId) => {
+handleFromMain('steam:requestInstall', async (_, appId) => {
   const normalizedAppId = String(appId || '')
   if (!/^\d+$/.test(normalizedAppId)) return { action: 'error', message: 'Invalid Steam App ID' }
   await shell.openExternal(`steam://install/${normalizedAppId}`)
@@ -759,9 +782,9 @@ ipcMain.handle('steam:requestInstall', async (_, appId) => {
   return { action: 'requested' }
 })
 
-ipcMain.handle('steam:hideWindow', () => hideSteamWindow())
+handleFromMain('steam:hideWindow', () => hideSteamWindow())
 
-ipcMain.handle('steam:trackApps', (_, appIds) => {
+handleFromMain('steam:trackApps', (_, appIds) => {
   const nextApps = new Set((Array.isArray(appIds) ? appIds : [])
     .map(appId => String(appId))
     .filter(appId => /^\d+$/.test(appId)))
@@ -772,9 +795,9 @@ ipcMain.handle('steam:trackApps', (_, appIds) => {
   startSteamMonitor()
 })
 
-ipcMain.handle('steam:getCollection', (_, name) => getSteamCollection(name))
+handleFromMain('steam:getCollection', (_, name) => getSteamCollection(name))
 
-ipcMain.handle('steam:profileLibrary', async (_, payload) => {
+handleFromMain('steam:profileLibrary', async (_, payload) => {
   if (!payload || typeof payload.profile !== 'string' || payload.profile.length > 300 || typeof payload.token !== 'string' || payload.token.length > 10000) return { error: 'INVALID_PROFILE' }
   try {
     return await new Promise((resolve, reject) => {
@@ -790,7 +813,7 @@ ipcMain.handle('steam:profileLibrary', async (_, payload) => {
   } catch { return { error: 'STEAM_UNAVAILABLE' } }
 })
 
-ipcMain.handle('rawg:search', async (event, payload) => {
+handleFromMain('rawg:search', async (event, payload) => {
   if (!mainWindow || event.sender !== mainWindow.webContents) return { error: 'ACCESS_DENIED' }
   if (!payload || typeof payload.query !== 'string' || !payload.query.trim() || payload.query.length > 200
     || ![1, 8].includes(payload.pageSize) || typeof payload.token !== 'string' || payload.token.length > 10000) {
@@ -811,7 +834,7 @@ ipcMain.handle('rawg:search', async (event, payload) => {
   } catch { return { error: 'RAWG_UNAVAILABLE' } }
 })
 
-ipcMain.handle('steam:importGames', async () => {
+handleFromMain('steam:importGames', async () => {
   const found = new Map()
   for (const library of getSteamLibraries()) {
     const directory = path.join(library, 'steamapps')
@@ -828,22 +851,16 @@ ipcMain.handle('steam:importGames', async () => {
   return { found: Boolean(steamPath), games: [...found.values()].sort((a,b) => a.title.localeCompare(b.title)) }
 })
 
-ipcMain.handle('steam:getStoreGames', async (_, appIds) => {
+handleFromMain('steam:getStoreGames', async (_, appIds) => {
   const ids = [...new Set((Array.isArray(appIds) ? appIds : []).map(Number).filter(id => Number.isInteger(id) && id > 0))].slice(0, 100)
   return Promise.all(ids.map(getSteamStoreGame))
 })
 
-ipcMain.handle('steam:getRunningAppId', async () => {
+handleFromMain('steam:getRunningAppId', async () => {
   return { appId: (await getRunningSteamAppId()) ?? null }
 })
 
-ipcMain.handle('gog:installedGames', async () => ({ ok: true, games: getGogInstalledGames() }))
-// Only the main launcher window may start processes; the mini-bar shares the
-// preload bridge but has no reason to launch games.
-function isMainSender(event) {
-  return Boolean(mainWindow) && event?.sender === mainWindow.webContents
-}
-
+handleFromMain('gog:installedGames', async () => ({ ok: true, games: getGogInstalledGames() }))
 let launchAllowlist = null
 function getLaunchAllowlist() {
   if (!launchAllowlist) launchAllowlist = createLaunchAllowlist({ filePath: path.join(app.getPath('userData'), 'launch-allowlist.json'), fs })
@@ -935,12 +952,12 @@ ipcMain.handle('gog:launchGame', async (event, payload) => {
   return { action: 'error', message: 'GOG executable was not found' }
 })
 
-ipcMain.handle('hltb:search', async (_, query) => searchHltb(query))
-ipcMain.handle('hltb:fetchGame', async (_, url) => {
+handleFromMain('hltb:search', async (_, query) => searchHltb(query))
+handleFromMain('hltb:fetchGame', async (_, url) => {
   const result = await fetchHltbGamePage(url)
   return result ? { ok: true, result } : { ok: false, error: 'HLTB_DETAIL_UNAVAILABLE' }
 })
-ipcMain.handle('hltb:openGame', async (_, url) => {
+handleFromMain('hltb:openGame', async (_, url) => {
   try {
     const parsed = new URL(String(url || ''))
     if (parsed.protocol !== 'https:' || parsed.hostname !== 'howlongtobeat.com' || !/^\/game\/\d+\/?$/.test(parsed.pathname)) return { ok: false }
@@ -948,7 +965,7 @@ ipcMain.handle('hltb:openGame', async (_, url) => {
     return { ok: true }
   } catch { return { ok: false } }
 })
-ipcMain.handle('app:openExternal', async (_, url) => {
+handleFromMain('app:openExternal', async (_, url) => {
   try {
     const parsed = new URL(String(url || ''))
     if (parsed.protocol !== 'https:' || parsed.hostname !== 'prgtracker.netlify.app') return { ok: false }
@@ -957,7 +974,7 @@ ipcMain.handle('app:openExternal', async (_, url) => {
   } catch { return { ok: false } }
 })
 ipcMain.handle('review:openLink', async (event, value) => {
-  if (event.sender !== mainWindow?.webContents || typeof value !== 'string' || value.length > 2048) return { ok: false }
+  if (event.sender !== mainWindow?.webContents || event.senderFrame !== mainWindow.webContents.mainFrame || typeof value !== 'string' || value.length > 2048) return { ok: false }
   try {
     const url = new URL(value)
     if (url.protocol !== 'https:' || url.username || url.password || !url.hostname || /(^localhost$|\.localhost$|\.local$|^\d+\.\d+\.\d+\.\d+$|^\[.*\]$)/i.test(url.hostname)) return { ok: false }
@@ -1051,7 +1068,7 @@ async function scrapeBackloggdProfile(input) {
   }
 }
 
-ipcMain.handle('backloggd:importProfile', async (_, url) => {
+handleFromMain('backloggd:importProfile', async (_, url) => {
   try { return await scrapeBackloggdProfile(url) }
   catch (error) { return { ok: false, error: error?.message || 'Не вдалося прочитати Backloggd.' } }
 })
@@ -1065,7 +1082,7 @@ const NINTENDO_TOKEN_FILE = () => {
   if (!nintendoProfile) throw new Error('Select a PRG profile first')
   return path.join(app.getPath('userData'), `nintendo-${nintendoProfile}.enc`)
 }
-ipcMain.handle('nintendo:setProfile', (_, uid) => {
+handleFromMain('nintendo:setProfile', (_, uid) => {
   if (uid !== null && (typeof uid !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(uid))) throw new Error('Invalid profile')
   const next = uid === null ? null : crypto.createHash('sha256').update(uid).digest('hex')
   if (next !== nintendoProfile) {
@@ -1139,7 +1156,7 @@ async function completeNintendoCallback(url) {
   return { connected: true }
 }
 
-ipcMain.handle('nintendo:openAuth', async () => {
+handleFromMain('nintendo:openAuth', async () => {
   if (!nintendoProfile) throw new Error('Select a PRG profile first')
   if (nintendoAuthWindow && !nintendoAuthWindow.isDestroyed()) {
     nintendoAuthWindow.focus()
@@ -1181,57 +1198,57 @@ ipcMain.handle('nintendo:openAuth', async () => {
   return { action: 'opened' }
 })
 
-ipcMain.handle('nintendo:closeAuth', () => {
+handleFromMain('nintendo:closeAuth', () => {
   if (nintendoAuthWindow && !nintendoAuthWindow.isDestroyed()) nintendoAuthWindow.close()
   nintendoAuthWindow = null
   return { action: 'closed' }
 })
 
-ipcMain.handle('nintendo:authStatus', async () => {
+handleFromMain('nintendo:authStatus', async () => {
   return { connected: Boolean(loadNintendoSession()) }
 })
-ipcMain.handle('nintendo:disconnect', () => {
+handleFromMain('nintendo:disconnect', () => {
   try { fs.unlinkSync(NINTENDO_TOKEN_FILE()) } catch {}
   nintendoAuthState = null; nintendoPlayHistory = null
   if (nintendoAuthWindow && !nintendoAuthWindow.isDestroyed()) nintendoAuthWindow.close()
   return { connected: false }
 })
-ipcMain.handle('nintendo:completeAuth', async (_, callbackUrl) => {
+handleFromMain('nintendo:completeAuth', async (_, callbackUrl) => {
   try { return await completeNintendoCallback(callbackUrl) } catch (error) { return { connected: false, error: error.message } }
 })
 
-ipcMain.handle('nintendo:fetchHistory', async () => {
+handleFromMain('nintendo:fetchHistory', async () => {
   const profile = nintendoProfile
   try { const history = await nintendoFetchPlayHistory(); if (!profile || profile !== nintendoProfile) return { ok: false, error: 'PRG account changed' }; nintendoPlayHistory = history; return { ok: true, data: history } }
   catch (error) { if (profile !== nintendoProfile) return { ok: false, error: 'PRG account changed' }; return { ok: false, error: error.message, authRequired: requiresNintendoReauth(error) } }
 })
 
-ipcMain.handle('app:minimize', () => {
+handleFromMain('app:minimize', () => {
   if (mainWindow) mainWindow.minimize()
 })
 
-ipcMain.handle('app:hide', () => {
+handleFromMain('app:hide', () => {
   if (mainWindow) mainWindow.hide()
 })
 
-ipcMain.handle('app:maximize', () => {
+handleFromMain('app:maximize', () => {
   if (!mainWindow) return
   if (mainWindow.isMaximized()) mainWindow.unmaximize()
   else mainWindow.maximize()
 })
 
-ipcMain.handle('app:isMaximized', () => {
+handleFromMain('app:isMaximized', () => {
   return mainWindow?.isMaximized() ?? false
 })
 
-ipcMain.handle('app:exportBackup', async (_, payload) => {
+handleFromMain('app:exportBackup', async (_, payload) => {
   if (!payload || !Array.isArray(payload.games)) return { ok: false, error: 'Invalid backup data' }
   const result = await dialog.showSaveDialog(mainWindow, { title: 'Export PRGLauncher backup', defaultPath: path.join(app.getPath('documents'), `PRGLauncher-backup-${new Date().toISOString().slice(0,10)}.json`), filters: [{ name: 'JSON backup', extensions: ['json'] }] })
   if (result.canceled || !result.filePath) return { ok: false, canceled: true }
   try { fs.writeFileSync(result.filePath, JSON.stringify(payload, null, 2), 'utf8'); return { ok: true, filePath: result.filePath } } catch (error) { return { ok: false, error: error.message } }
 })
 
-ipcMain.handle('app:exportDiagnostics', async (_, payload) => {
+handleFromMain('app:exportDiagnostics', async (_, payload) => {
   const result = await dialog.showSaveDialog(mainWindow, { title: 'Export PRGLauncher diagnostics', defaultPath: path.join(app.getPath('documents'), `PRGLauncher-diagnostics-${new Date().toISOString().slice(0,10)}.json`), filters: [{ name: 'JSON diagnostics', extensions: ['json'] }] })
   if (result.canceled || !result.filePath) return { ok: false, canceled: true }
   try {
@@ -1241,7 +1258,7 @@ ipcMain.handle('app:exportDiagnostics', async (_, payload) => {
   } catch (error) { return { ok: false, error: error.message } }
 })
 
-ipcMain.handle('app:importBackup', async () => {
+handleFromMain('app:importBackup', async () => {
   const result = await dialog.showOpenDialog(mainWindow, { title: 'Import PRGLauncher backup', properties: ['openFile'], filters: [{ name: 'JSON backup', extensions: ['json'] }] })
   if (result.canceled || !result.filePaths[0]) return { ok: false, canceled: true }
   try {
@@ -1252,12 +1269,12 @@ ipcMain.handle('app:importBackup', async () => {
   } catch (error) { return { ok: false, error: error.message } }
 })
 
-ipcMain.handle('app:checkForUpdates', async () => {
+handleFromMain('app:checkForUpdates', async () => {
   if (!app.isPackaged) return { status: 'dev', message: 'Оновлення доступні лише у packaged-версії' }
   try { updateState = { status: 'checking', version: null, error: null }; const result = await autoUpdater.checkForUpdates(); return { status: result?.updateInfo?.version && result.updateInfo.version !== app.getVersion() ? 'available' : 'latest', version: result?.updateInfo?.version || null } }
   catch (error) { updateState = { status: 'error', version: null, error: error.message }; return { status: 'error', error: error.message } }
 })
-ipcMain.handle('app:downloadUpdate', async () => { try { await autoUpdater.downloadUpdate(); return { ok: true } } catch (error) { return { ok: false, error: error.message } } })
+handleFromMain('app:downloadUpdate', async () => { try { await autoUpdater.downloadUpdate(); return { ok: true } } catch (error) { return { ok: false, error: error.message } } })
 function prepareForUpdateInstall() {
   if (updateInstallInProgress) return
   updateInstallInProgress = true
@@ -1277,7 +1294,7 @@ function prepareForUpdateInstall() {
   }
 }
 
-ipcMain.handle('app:installUpdate', () => {
+handleFromMain('app:installUpdate', () => {
   const ready = updateState.status === 'downloaded'
   if (ready) {
     prepareForUpdateInstall()
@@ -1313,7 +1330,7 @@ function checkForUpdatesAfterLaunch() {
   }, 3000)
 }
 
-ipcMain.handle('app:setSize', (_, w, h) => {
+handleFromMain('app:setSize', (_, w, h) => {
   if (mainWindow) mainWindow.setSize(w, h, true)
 })
 
@@ -1348,7 +1365,9 @@ function createMiniBar() {
   const workArea = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea
   const margin = 16
   miniBar.setPosition(workArea.x + workArea.width - 360 - margin, workArea.y + margin)
-  miniBar.loadFile(path.join(__dirname, '..', 'renderer', 'mini-bar.html'))
+  const miniBarFile = path.join(__dirname, '..', 'renderer', 'mini-bar.html')
+  attachNavigationGuard(miniBar.webContents, miniBarFile)
+  miniBar.loadFile(miniBarFile)
   miniBar.on('closed', () => { const timer=opacityAnimations.get(miniBar?.id); if(timer)clearInterval(timer); opacityAnimations.delete(miniBar?.id); miniBar = null })
   return miniBar
 }
@@ -1391,7 +1410,7 @@ function transitionToMainWindow() {
   }
 }
 
-ipcMain.handle('mini:show', (_, state) => {
+handleFromMain('mini:show', (_, state) => {
   const bar = createMiniBar()
   miniBarStandby = !state?.active
   const show = () => transitionToMiniBar(bar, state)
@@ -1399,7 +1418,7 @@ ipcMain.handle('mini:show', (_, state) => {
   else show()
 })
 
-ipcMain.handle('mini:update', (_, state) => {
+handleFromMain('mini:update', (_, state) => {
   if (!state?.active && !miniBarStandby && miniBar && !miniBar.isDestroyed() && miniBar.isVisible()) {
     transitionToMainWindow()
     return
@@ -1408,22 +1427,23 @@ ipcMain.handle('mini:update', (_, state) => {
   sendMiniState(state)
 })
 
-ipcMain.handle('mini:restore', () => {
+handleFromMain('mini:restore', () => {
   transitionToMainWindow()
 })
 
-ipcMain.handle('mini:togglePin', () => {
+handleFromMain('mini:togglePin', () => {
   if (!miniBar || miniBar.isDestroyed()) return false
   const pinned = !miniBar.isAlwaysOnTop()
   miniBar.setAlwaysOnTop(pinned, pinned ? 'floating' : 'normal')
   return pinned
 })
 
-ipcMain.on('mini:pause', () => {
+ipcMain.on('mini:pause', (event) => {
+  if (!isMiniBarSender(event)) return
   mainWindow?.webContents.send('mini:pause')
 })
 
-ipcMain.handle('app:quit', () => {
+handleFromMain('app:quit', () => {
   miniBar?.destroy()
   mainWindow?.destroy()
   app.quit()
@@ -1451,7 +1471,9 @@ function createWindow() {
     icon: path.join(__dirname, '..', '..', 'assets', process.platform === 'darwin' ? 'icon.icns' : 'icon.ico'),
   })
 
-  mainWindow.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'))
+  const mainWindowFile = path.join(__dirname, '..', 'renderer', 'index.html')
+  attachNavigationGuard(mainWindow.webContents, mainWindowFile, { allowAuthPopup: true })
+  mainWindow.loadFile(mainWindowFile)
 
   mainWindow.once('ready-to-show', () => {
     if (!launchedAtLogin) mainWindow.show()
@@ -1489,6 +1511,11 @@ function createTray() {
 }
 
 // ── APP LIFECYCLE ─────────────────────────────────────────────────────────
+// No window uses <webview>; refuse one rather than let it load remote content.
+app.on('web-contents-created', (_, contents) => {
+  contents.on('will-attach-webview', event => event.preventDefault())
+})
+
 app.whenReady().then(() => {
   steamPath = findSteamPath()
   console.log('[Steam] Path:', steamPath || 'not found')

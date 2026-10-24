@@ -33,7 +33,8 @@ function loadHandlers({ confirm = false, picked = null, gogGames = [] } = {}) {
   const handlers = {};
   const spawned = [];
   const prompts = [];
-  const sender = {};
+  const mainFrame = {};
+  const sender = { mainFrame };
   const allowlist = createLaunchAllowlist({ filePath: path.join(dir, 'launch-allowlist.json'), fs });
   const gogGameCache = new Map();
   vm.runInNewContext(handlerSource, {
@@ -48,7 +49,7 @@ function loadHandlers({ confirm = false, picked = null, gogGames = [] } = {}) {
     getGogInstalledGames: () => gogGames.forEach(game => gogGameCache.set(game.id, game)),
     path, fs, process, String, Boolean,
   });
-  return { handlers, spawned, prompts, allowlist, mainEvent: { sender }, dir };
+  return { handlers, spawned, prompts, allowlist, mainEvent: { sender, senderFrame: mainFrame }, dir };
 }
 
 function fakeExecutable(dir, name = 'Game.exe') {
@@ -87,10 +88,10 @@ test('allowlist keeps only the most recent entries', () => {
 });
 
 test('local launch rejects requests that do not come from the main window', async () => {
-  const { handlers, spawned, prompts, dir } = loadHandlers({ confirm: true });
+  const { handlers, spawned, prompts, dir, mainEvent } = loadHandlers({ confirm: true });
   const executable = fakeExecutable(dir);
-  const result = await handlers['local:launchGame']({ sender: {} }, { executable });
-  assert.equal(result.action, 'error');
+  assert.equal((await handlers['local:launchGame']({ sender: {} }, { executable })).action, 'error');
+  assert.equal((await handlers['local:launchGame']({ sender: mainEvent.sender, senderFrame: {} }, { executable })).action, 'error', 'a subframe of the main window is rejected');
   assert.deepEqual(spawned, []);
   assert.deepEqual(prompts, []);
   assert.equal((await handlers['local:chooseExecutable']({ sender: {} })).canceled, true);
