@@ -4,13 +4,14 @@ const path = require('path')
 const os = require('os')
 const fs = require('fs')
 const https = require('https')
-const { execSync, execFile, spawn } = require('child_process')
+const { execFile, spawn } = require('child_process')
 const crypto = require('crypto')
 const { STEAM_STARTUP_HIDE_SCRIPT, scheduleSteamStartupHide } = require('./steam-startup-window')
 const { parseRunningSteamAppId } = require('./steam-activity')
 const { createNintendoHttpError, requiresNintendoReauth } = require('./nintendo-http')
 const { createLaunchAllowlist } = require('./launch-allowlist')
 const { attachNavigationGuard } = require('./navigation-guard')
+const { runCommand } = require('./run-command')
 
 // Keep the Windows app identity and packaged process name discoverable.
 if (process.platform === 'win32') app.setAppUserModelId('com.prgtracker.launcher')
@@ -105,15 +106,13 @@ function animateWindowOpacity(window, from, to, duration, done) {
 }
 
 // ── STEAM DETECTION ───────────────────────────────────────────────────────
-function findSteamPath() {
+async function findSteamPath() {
   // On Windows Steam keeps its root in the registry. macOS stores the same
   // steamapps/userdata tree under the user's Application Support directory.
   if (process.platform === 'win32') {
-    try {
-      const reg = execSync('reg query "HKCU\\Software\\Valve\\Steam" /v SteamPath', { encoding: 'utf8' })
-      const match = reg.match(/SteamPath\s+REG_SZ\s+(.+)/)
-      if (match) return match[1].trim().replace(/\//g, '\\')
-    } catch {}
+    const reg = await runCommand('reg', ['query', 'HKCU\\Software\\Valve\\Steam', '/v', 'SteamPath'])
+    const match = reg.stdout.match(/SteamPath\s+REG_SZ\s+(.+)/)
+    if (match) return match[1].trim().replace(/\//g, '\\')
   }
 
   // Fallback to known paths
@@ -155,10 +154,10 @@ function getSteamLibraries() {
 // ── GOG GALAXY (local, password-free MVP) ───────────────────────────────
 // GOG Galaxy keeps installed-game registration in the Windows registry. We
 // only read local install metadata; no GOG login, cookie or password is used.
-function readGogRegistryGames(root) {
+async function readGogRegistryGames(root) {
   if (process.platform !== 'win32') return []
-  let output = ''
-  try { output = execSync(`reg query "${root}" /s`, { encoding: 'utf8', windowsHide: true }) } catch { return [] }
+  const { ok, stdout: output } = await runCommand('reg', ['query', root, '/s'])
+  if (!ok) return []
   const result = []
   let key = null
   let values = {}
@@ -184,7 +183,7 @@ function readGogRegistryGames(root) {
   return result
 }
 
-function getGogInstalledGames() {
+async function getGogInstalledGames() {
   if (process.platform !== 'win32') return []
   const roots = [
     'HKCU\\Software\\GOG.com\\Games',
@@ -192,7 +191,7 @@ function getGogInstalledGames() {
     'HKLM\\Software\\WOW6432Node\\GOG.com\\Games',
   ]
   const seen = new Set()
-  const games = roots.flatMap(readGogRegistryGames).filter(game => {
+  const games = (await Promise.all(roots.map(readGogRegistryGames))).flat().filter(game => {
     const key = `${game.id}:${game.installPath}`.toLocaleLowerCase()
     if (seen.has(key)) return false
     seen.add(key); return true
@@ -229,32 +228,22 @@ function getInstallProgress(appId, libraries = getSteamLibraries()) {
   return { state: steamPath ? 'waiting' : 'steam_not_found', progress: null, downloaded: null, total: null }
 }
 
-function isGameInLibrary(appId) {
+async function isGameInLibrary(appId) {
   // Windows exposes installed/owned app records in the registry. macOS does
   // not; imported profile games are treated as library entries and Steam still
   // makes the final ownership decision when the steam:// link is opened.
   if (process.platform === 'darwin') return Boolean(steamPath)
-  if (process.platform !== 'win32') return false
-  try {
-    execSync(`reg query "HKCU\\Software\\Valve\\Steam\\Apps\\${appId}"`, { encoding: 'utf8' })
-    return true
-  } catch {
-    return false
-  }
+  if (process.platform !== 'win32' || !/^\d+$/.test(String(appId))) return false
+  return (await runCommand('reg', ['query', `HKCU\\Software\\Valve\\Steam\\Apps\\${appId}`])).ok
 }
 
-function isSteamRunning() {
-  try {
-    if (process.platform === 'win32') {
-      const result = execSync('tasklist /fi "imagename eq steam.exe" /fo csv /nh', { encoding: 'utf8' })
-      return result.toLowerCase().includes('steam.exe')
-    }
-    if (process.platform === 'darwin') {
-      execSync('pgrep -x steam_osx', { stdio: 'ignore' })
-      return true
-    }
-    return false
-  } catch { return false }
+async function isSteamRunning() {
+  if (process.platform === 'win32') {
+    const result = await runCommand('tasklist', ['/fi', 'imagename eq steam.exe', '/fo', 'csv', '/nh'])
+    return result.stdout.toLowerCase().includes('steam.exe')
+  }
+  if (process.platform === 'darwin') return (await runCommand('pgrep', ['-x', 'steam_osx'])).ok
+  return false
 }
 
 function getSteamExecutable() {
@@ -272,11 +261,11 @@ function getSteamExecutable() {
   return null
 }
 
-function startSteamSilent() {
+async function startSteamSilent() {
   const steamExe = getSteamExecutable()
   if (!steamExe) return
   // Only launch if not already running
-  if (isSteamRunning()) {
+  if (await isSteamRunning()) {
     console.log('[Steam] Already running')
     return
   }
@@ -757,7 +746,7 @@ handleFromMain('steam:launchGame', async (_, appId) => {
 handleFromMain('steam:gameStatus', async (_, appId) => {
   if (!appId) return { status: 'unknown' }
   const installed = isGameInstalled(appId)
-  const inLibrary = installed || isGameInLibrary(appId)
+  const inLibrary = installed || await isGameInLibrary(appId)
   return {
     status: installed ? 'installed' : inLibrary ? 'in_library' : 'not_owned',
     steamPath
@@ -860,7 +849,7 @@ handleFromMain('steam:getRunningAppId', async () => {
   return { appId: (await getRunningSteamAppId()) ?? null }
 })
 
-handleFromMain('gog:installedGames', async () => ({ ok: true, games: getGogInstalledGames() }))
+handleFromMain('gog:installedGames', async () => ({ ok: true, games: await getGogInstalledGames() }))
 let launchAllowlist = null
 function getLaunchAllowlist() {
   if (!launchAllowlist) launchAllowlist = createLaunchAllowlist({ filePath: path.join(app.getPath('userData'), 'launch-allowlist.json'), fs })
@@ -934,7 +923,7 @@ ipcMain.handle('local:launchGame', async (event, payload) => {
 ipcMain.handle('gog:launchGame', async (event, payload) => {
   if (!isMainSender(event)) return { action: 'error', message: 'Launch request was rejected' }
   const id = String(payload?.id || '')
-  if (!gogGameCache.has(id)) getGogInstalledGames()
+  if (!gogGameCache.has(id)) await getGogInstalledGames()
   const cached = gogGameCache.get(id)
   // The registry scan is the source of truth; a renderer-supplied path is used
   // only when the user already approved it for a local launch.
@@ -1516,8 +1505,8 @@ app.on('web-contents-created', (_, contents) => {
   contents.on('will-attach-webview', event => event.preventDefault())
 })
 
-app.whenReady().then(() => {
-  steamPath = findSteamPath()
+app.whenReady().then(async () => {
+  steamPath = await findSteamPath()
   console.log('[Steam] Path:', steamPath || 'not found')
 
   // Start Steam silently in background
