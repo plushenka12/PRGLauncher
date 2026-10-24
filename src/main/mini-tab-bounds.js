@@ -1,9 +1,7 @@
-// Where the mini-tab opens. By default it sits in the top-right corner of the
-// second (non-primary) monitor at a third of its height; once the user moves or
-// resizes it, that place is remembered and reused while it is still on screen.
-const DEFAULT_WIDTH = 330
-const MIN_WIDTH = 270
-const MIN_HEIGHT = 260
+// Where the mini-tab opens. It has one fixed size; by default it sits in the
+// top-right corner of the second (non-primary) monitor, and once the user
+// moves it, that place is remembered and reused while it is still on screen.
+const MINI_TAB_SIZE = { width: 340, height: 560 }
 const MARGIN = 16
 
 function pickDisplay(displays, primaryId) {
@@ -12,15 +10,22 @@ function pickDisplay(displays, primaryId) {
     || displays[0]
 }
 
+// The fixed size, shrunk only on a screen too small to hold it.
+function sizeFor(area) {
+  return {
+    width: Math.min(MINI_TAB_SIZE.width, area.width - MARGIN * 2),
+    height: Math.min(MINI_TAB_SIZE.height, area.height - MARGIN * 2),
+  }
+}
+
 function defaultBounds(display) {
   const area = display.workArea
-  const width = Math.min(DEFAULT_WIDTH, area.width - MARGIN * 2)
-  const height = Math.max(MIN_HEIGHT, Math.round(area.height / 3))
+  const { width, height } = sizeFor(area)
   return { x: area.x + area.width - width - MARGIN, y: area.y + MARGIN, width, height }
 }
 
-// Saved bounds count only while their top strip (where the window is dragged)
-// is still on some monitor, so an unplugged screen never strands the window.
+// Saved positions count only while the window's top strip (where it is
+// dragged) is still on some monitor, so an unplugged screen never strands it.
 function isReachable(bounds, displays) {
   const strip = { x: bounds.x, y: bounds.y, width: bounds.width, height: 36 }
   return displays.some(({ workArea: area }) => {
@@ -32,16 +37,26 @@ function isReachable(bounds, displays) {
 
 function sanitize(saved) {
   if (!saved || typeof saved !== 'object') return null
-  const values = ['x', 'y', 'width', 'height'].map(key => Number(saved[key]))
-  if (!values.every(Number.isFinite)) return null
-  const [x, y, width, height] = values.map(Math.round)
-  return { x, y, width: Math.max(MIN_WIDTH, width), height: Math.max(MIN_HEIGHT, height) }
+  const x = Number(saved.x)
+  const y = Number(saved.y)
+  return Number.isFinite(x) && Number.isFinite(y) ? { x: Math.round(x), y: Math.round(y) } : null
 }
 
+const clamp = (value, min, max) => Math.max(min, Math.min(max, value))
+
+// A remembered position stays on the monitor it was on and is pulled fully
+// inside it, so the fixed-size window never straddles two screens.
 function resolveMiniTabBounds({ saved, displays, primaryId }) {
-  const bounds = sanitize(saved)
-  if (bounds && isReachable(bounds, displays)) return bounds
-  return defaultBounds(pickDisplay(displays, primaryId))
+  const position = sanitize(saved)
+  const display = position && displays.find(candidate => isReachable({ ...position, width: MINI_TAB_SIZE.width, height: 36 }, [candidate]))
+  if (!display) return defaultBounds(pickDisplay(displays, primaryId))
+  const area = display.workArea
+  const size = sizeFor(area)
+  return {
+    x: clamp(position.x, area.x, area.x + area.width - size.width),
+    y: clamp(position.y, area.y, area.y + area.height - size.height),
+    ...size,
+  }
 }
 
 function loadSavedBounds(fs, file) {
@@ -59,4 +74,4 @@ function saveBounds(fs, file, bounds) {
   }
 }
 
-module.exports = { resolveMiniTabBounds, loadSavedBounds, saveBounds, isReachable, MIN_WIDTH, MIN_HEIGHT }
+module.exports = { resolveMiniTabBounds, loadSavedBounds, saveBounds, isReachable, MINI_TAB_SIZE }

@@ -1498,13 +1498,20 @@ function miniTabGames(){
   return games
     .filter(game=>game.steamAppId&&steamStatusCache.get(String(game.steamAppId))?.state==='ready')
     .sort((a,b)=>(b.lastPlayed||0)-(a.lastPlayed||0)||String(a.title).localeCompare(String(b.title),'uk'))
-    .map(game=>({id:game.id,title:game.title,cover:game.cover||null,lastPlayed:game.lastPlayed||0}));
+    .map(game=>({id:game.id,title:game.title,appId:String(game.steamAppId),cover:game.cover||null,lastPlayed:game.lastPlayed||0,playtime:game.playtime||0,hltb:miniTabHltb(game.hltb)}));
+}
+// HowLongToBeat minutes for the mini-tab's progress bar; none when hidden or unmatched.
+function miniTabHltb(hltb){
+  if(!hltb||hltb.hidden)return null;
+  const minutes=value=>Number.isFinite(Number(value))&&Number(value)>0?Number(value):null;
+  const times={main:minutes(hltb.mainStoryMinutes),extra:minutes(hltb.mainExtraMinutes),full:minutes(hltb.completionistMinutes)};
+  return times.main||times.extra||times.full?times:null;
 }
 function miniBarState(){
   const game=getGame(activeGameId);
   const style=getComputedStyle(document.documentElement);
   return {
-    active:Boolean(activeGameId),gameId:activeGameId||null,title:game?.title||'',startedAt:activeStart||0,
+    active:Boolean(activeGameId),gameId:activeGameId||null,title:game?.title||'',startedAt:activeStart||0,activePlaytime:game?.playtime||0,
     signedIn:Boolean(currentUser),lang:currentLanguage,games:miniTabGames(),
     theme:Object.fromEntries(MINI_THEME_VARS.map(name=>[name,style.getPropertyValue(name).trim()]).filter(([,value])=>value))
   };
@@ -1515,6 +1522,22 @@ function updateMiniBar(){
   if(signature===lastMiniSignature)return;
   lastMiniSignature=signature;
   window.launcher?.updateMiniBar?.(state);
+  queueMiniTabHltb([state.gameId,...state.games.map(game=>game.id)]);
+}
+// HLTB is otherwise looked up only when a game's card is opened. The mini-tab
+// asks for its games one at a time, running game first; cached matches and
+// recent failures are skipped by maybeLookupHltb.
+let miniHltbChain=Promise.resolve();
+const miniHltbQueued=new Set();
+function queueMiniTabHltb(ids){
+  if(!currentUser)return;
+  for(const id of ids){
+    if(!id||miniHltbQueued.has(id))continue;
+    const stored=getGame(id)?.hltb;
+    if(stored&&(stored.id||stored.hidden))continue;
+    miniHltbQueued.add(id);
+    miniHltbChain=miniHltbChain.then(()=>{const game=getGame(id);return game?maybeLookupHltb(game):null;}).catch(()=>{}).finally(()=>miniHltbQueued.delete(id));
+  }
 }
 function launchFromMiniTab(gameId){
   const game=getGame(gameId);
@@ -1756,7 +1779,8 @@ function hltbRenderMatchPicker(game,state){
   return `<div class="hltb-heading"><div><div class="hltb-title">${t('Choose the game version in HLTB')}</div><div class="hltb-subtitle">${t('There are several possible matches. Choose the correct version — it will be saved in your library.')}</div></div></div><div class="hltb-search-row"><input class="form-input" id="hltb-search-input" value="${escapeHltbHtml(state.query||game.title)}" maxlength="300" aria-label="${t('Search HLTB')}" placeholder="https://howlongtobeat.com/game/…"><button class="btn btn-ghost btn-sm" data-hltb-action="search">${t('Search HLTB')}</button></div>${empty}<div class="hltb-match-list">${rows}</div>`;
 }
 function renderHltbPanel(game){
-  const panel=document.getElementById('d-hltb');if(!panel||!game)return;
+  // Background lookups (the mini-tab) must not draw into another game's card.
+  const panel=document.getElementById('d-hltb');if(!panel||!game||detailId!==game.id)return;
   const stored=game.hltb||{};const picker=hltbCandidates.get(game.id);const isLoading=hltbLoadingIds.has(game.id);
   if(picker){panel.innerHTML=hltbRenderMatchPicker(game,picker);bindHltbPanelActions(game);return;}
   if(stored.hidden){
@@ -1807,8 +1831,8 @@ async function lookupHltb(id,query,alwaysPick){
 }
 function maybeLookupHltb(game){
   const stored=game.hltb||{};const age=Date.now()-Number(stored.checkedAt||0);
-  if(isGuest||stored.hidden||hltbLoadingIds.has(game.id)||hltbCandidates.has(game.id)||stored.id&&age<HLTB_POSITIVE_CACHE_MS||stored.error&&age<HLTB_FAILURE_CACHE_MS)return;
-  lookupHltb(game.id,game.title,false);
+  if(isGuest||stored.hidden||hltbLoadingIds.has(game.id)||hltbCandidates.has(game.id)||stored.id&&age<HLTB_POSITIVE_CACHE_MS||stored.error&&age<HLTB_FAILURE_CACHE_MS)return null;
+  return lookupHltb(game.id,game.title,false);
 }
 
 // ── GAME HISTORY ───────────────────────────────────────────────────────────

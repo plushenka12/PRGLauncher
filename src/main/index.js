@@ -14,7 +14,9 @@ const { runCommand } = require('./run-command')
 const { createSteamInstallScanner, readVdfNumber } = require('./steam-install-scan')
 const { createActivityScheduler, isGameProcessLog } = require('./steam-activity-scheduler')
 const { STEAM_GUARD_SCRIPT, createSteamWindowGuard } = require('./steam-window-guard')
-const { resolveMiniTabBounds, loadSavedBounds, saveBounds, isReachable, MIN_WIDTH, MIN_HEIGHT } = require('./mini-tab-bounds')
+const { resolveMiniTabBounds, loadSavedBounds, saveBounds, isReachable } = require('./mini-tab-bounds')
+const { createSteamLibraryArt } = require('./steam-library-art')
+const steamLibraryArt = createSteamLibraryArt({ fs, getSteamPath: () => steamPath })
 
 // Keep the Windows app identity and packaged process name discoverable.
 if (process.platform === 'win32') app.setAppUserModelId('com.prgtracker.launcher')
@@ -1252,7 +1254,7 @@ let miniBoundsSaveTimer = null
 const MINI_TAB_BOUNDS_FILE = () => path.join(app.getPath('userData'), 'mini-tab.json')
 
 function sendMiniState(state) {
-  if (state) lastMiniState = state
+  if (state) lastMiniState = steamLibraryArt.decorate(state)
   if (miniBar && !miniBar.isDestroyed() && !miniBar.webContents.isLoading() && lastMiniState) {
     miniBar.webContents.send('mini:state', lastMiniState)
   }
@@ -1273,10 +1275,13 @@ function rememberMiniTabBounds() {
   }, 400)
 }
 
-// After a monitor is unplugged or rearranged, bring the mini-tab back on screen.
+// After a monitor is unplugged or rearranged, bring the mini-tab back on screen
+// at its fixed size.
 function keepMiniTabOnScreen() {
   if (!miniBar || miniBar.isDestroyed()) return
-  if (!isReachable(miniBar.getBounds(), screen.getAllDisplays())) miniBar.setBounds(currentMiniTabBounds())
+  const bounds = currentMiniTabBounds()
+  if (!isReachable(miniBar.getBounds(), screen.getAllDisplays())) miniBar.setBounds(bounds)
+  else miniBar.setSize(bounds.width, bounds.height)
 }
 
 function createMiniBar() {
@@ -1284,10 +1289,8 @@ function createMiniBar() {
 
   miniBar = new BrowserWindow({
     ...currentMiniTabBounds(),
-    minWidth: MIN_WIDTH,
-    minHeight: MIN_HEIGHT,
     frame: false,
-    resizable: true,
+    resizable: false,
     alwaysOnTop: true,
     skipTaskbar: true,
     show: false,
@@ -1308,7 +1311,6 @@ function createMiniBar() {
   miniBar.webContents.on('did-finish-load', () => sendMiniState())
   miniBar.once('ready-to-show', () => miniBar?.showInactive())
   miniBar.on('moved', rememberMiniTabBounds)
-  miniBar.on('resized', rememberMiniTabBounds)
   // The mini-tab is not closed by the user; only quitting the app removes it.
   miniBar.on('close', event => { if (!isQuitting) event.preventDefault() })
   miniBar.on('closed', () => { clearTimeout(miniBoundsSaveTimer); miniBar = null })

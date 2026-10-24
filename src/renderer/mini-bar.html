@@ -2,168 +2,378 @@
 <html lang="uk">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://shared.akamai.steamstatic.com https://cdn.akamai.steamstatic.com https://media.rawg.io https://images.igdb.com">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: file: https://shared.akamai.steamstatic.com https://cdn.akamai.steamstatic.com https://media.rawg.io https://images.igdb.com">
 <title>PRGLauncher</title>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
 <style>
   /* Defaults match the Neon theme; the launcher sends its current theme. */
-  :root{--bg:#08080f;--bg2:#0d0d1a;--bg3:#121226;--bg4:#1a1a35;--border:rgba(190,184,219,.1);--border2:rgba(190,184,219,.2);--text:#f6f4ff;--text2:#c5c1d7;--text3:#a49dbb;--accent:#7b2fff;--accent2:#5a00ff;--green:#00ff41;--coral:#ff3366;--focus:color-mix(in srgb,var(--accent) 70%,#fff);--ease-out:cubic-bezier(.23,1,.32,1)}
+  :root{--bg:#08080f;--bg2:#0d0d1a;--bg3:#121226;--bg4:#1a1a35;--border:rgba(190,184,219,.1);--border2:rgba(190,184,219,.2);--text:#f6f4ff;--text2:#c5c1d7;--text3:#a49dbb;--accent:#7b2fff;--accent2:#5a00ff;--green:#00ff41;--coral:#ff3366;--focus:color-mix(in srgb,var(--accent) 70%,#fff);--ease-out:cubic-bezier(.23,1,.32,1);--on-art:rgba(255,255,255,.72)}
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%;overflow:hidden;background:var(--bg2);color:var(--text);font:600 13px/1.35 'Manrope','Segoe UI',sans-serif;-webkit-user-select:none;user-select:none}
-  body{display:flex;flex-direction:column;border:1px solid var(--border2)}
+  html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--text);font:600 13px/1.35 'Manrope','Segoe UI',sans-serif;-webkit-user-select:none;user-select:none}
+  body{display:flex;flex-direction:column;border:1px solid var(--border2);isolation:isolate}
   button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;-webkit-app-region:no-drag}
-  button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
-  svg{display:block;width:16px;height:16px;fill:currentColor}
+  button:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+  svg{display:block;width:16px;height:16px;fill:currentColor;flex:none}
+  .num{font-family:'Space Grotesk','Manrope',sans-serif;font-variant-numeric:tabular-nums}
 
-  #head{flex:none;display:flex;align-items:flex-start;gap:10px;padding:14px 12px 14px 16px;background:var(--bg3);-webkit-app-region:drag}
-  .session{min-width:0;flex:1}
-  #label{color:var(--text2);font-size:12px}
-  #timer{margin-top:2px;font:800 30px/1.1 'Manrope','Segoe UI',sans-serif;font-variant-numeric:tabular-nums;letter-spacing:-.02em;color:var(--text3)}
-  body.active #timer{color:var(--text)}
-  #session-title{margin-top:3px;font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  #session-title:empty{display:none}
-  .head-actions{display:flex;gap:6px}
-  .icon-btn{width:32px;height:32px;display:grid;place-items:center;border-radius:8px;color:var(--text2);background:var(--bg4);transition:background-color .15s,color .15s,transform .16s var(--ease-out)}
-  .icon-btn:active{transform:scale(.95)}
-  #stop{background:color-mix(in srgb,var(--coral) 22%,var(--bg4));color:var(--text)}
-  #stop[hidden]{display:none}
+  /* Ambient: the current game's cover, blurred, fills the window. */
+  .ambient{position:fixed;inset:0;z-index:-1;overflow:hidden;background:var(--bg)}
+  .ambient img{position:absolute;inset:-60px;width:calc(100% + 120px);height:calc(100% + 120px);object-fit:cover;filter:blur(40px) saturate(1.5) brightness(.55);opacity:0;transition:opacity .8s var(--ease-out)}
+  .ambient img.shown{opacity:1}
+  .ambient::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(6,6,12,.15),rgba(6,6,12,.5) 70%,rgba(6,6,12,.75))}
 
-  #list{flex:1;min-height:0;overflow-y:auto;padding:6px 6px 8px;scrollbar-width:thin;scrollbar-color:var(--border2) transparent}
-  .row{display:flex;align-items:center;gap:10px;padding:6px 6px 6px 8px;border-radius:9px}
-  .row.active{background:color-mix(in srgb,var(--accent) 16%,transparent)}
-  .cover{flex:none;width:68px;height:32px;border-radius:5px;object-fit:cover;background:var(--bg4)}
-  .cover-fallback{display:grid;place-items:center;font:800 12px 'Manrope','Segoe UI',sans-serif;color:var(--text3)}
-  .meta{min-width:0;flex:1}
-  .name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .sub{margin-top:1px;font-size:12px;font-weight:500;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .play{flex:none;width:34px;height:34px;display:grid;place-items:center;border-radius:9px;background:var(--accent2);color:#fff;transition:background-color .15s,transform .16s var(--ease-out)}
-  .play:active{transform:scale(.95)}
-  .row.active .play{background:color-mix(in srgb,var(--coral) 30%,var(--bg4))}
-  .play:disabled{opacity:.45;cursor:default}
+  .bar{flex:none;height:38px;display:flex;align-items:center;gap:8px;padding:0 8px 0 12px;-webkit-app-region:drag}
+  .brand{display:flex;align-items:center;gap:7px;font-weight:800}
+  .brand img{width:16px;height:16px;border-radius:4px}
+  .brand b{color:var(--green);font-weight:800}
+  .count{margin-left:auto;font-size:12px;color:var(--on-art)}
+  .ghost{width:28px;height:28px;display:grid;place-items:center;border-radius:8px;color:var(--on-art);transition:background-color .15s,color .15s,transform .16s var(--ease-out)}
+  .ghost:active{transform:scale(.94)}
 
-  #empty{flex:1;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:12px;padding:18px 16px;color:var(--text2)}
+  /* Now playing / last played. */
+  .now{flex:none;display:flex;gap:14px;padding:4px 14px 0}
+  .now[hidden]{display:none}
+  .cover{flex:none;position:relative;width:92px;aspect-ratio:2/3;border-radius:12px;overflow:hidden;background:var(--bg3);box-shadow:0 18px 40px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.08) inset}
+  .cover img{width:100%;height:100%;object-fit:cover;display:block}
+  .letterbox{position:relative;width:100%;height:100%;overflow:hidden}
+  .letterbox .bg{position:absolute;inset:-12px;width:calc(100% + 24px);height:calc(100% + 24px);object-fit:cover;filter:blur(12px) brightness(.55) saturate(1.3)}
+  .letterbox .fg{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+  .cover .initials{width:100%;height:100%;display:grid;place-items:center;font-weight:800;font-size:22px;color:var(--text3);background:color-mix(in srgb,var(--accent) 18%,var(--bg3))}
+  .side{min-width:0;flex:1;display:flex;flex-direction:column;justify-content:flex-end;padding-bottom:2px}
+  .label{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--on-art)}
+  .live{width:7px;height:7px;border-radius:50%;background:var(--green);animation:live 1.6s ease-in-out infinite}
+  .now:not(.active) .live{display:none}
+  @keyframes live{50%{opacity:.3}}
+  .title{margin-top:3px;font-size:18px;font-weight:800;line-height:1.15;letter-spacing:-.015em;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+  .timer{margin-top:8px;font-size:34px;font-weight:700;line-height:1;letter-spacing:-.02em}
+  .meta-line{margin-top:7px;font-size:12px;color:var(--on-art)}
+  .now:not(.active) .timer,.now.active .meta-line{display:none}
+
+  /* HowLongToBeat progress: total playtime against main / extras / 100%. */
+  .hltb{flex:none;margin:16px 14px 0}
+  .hltb[hidden]{display:none}
+  .track{position:relative;height:6px;border-radius:3px;background:rgba(255,255,255,.16)}
+  .fill{position:absolute;inset:0 auto 0 0;border-radius:3px;background:#fff;transition:width .6s var(--ease-out)}
+  .tick{position:absolute;top:-3px;width:2px;height:12px;border-radius:1px;background:rgba(255,255,255,.35);transform:translateX(-1px)}
+  .tick.done{background:#fff}
+  .hltb-labels{display:flex;justify-content:space-between;gap:10px;margin-top:8px;font-size:12px;color:var(--on-art)}
+  .hltb-labels b{color:#fff;font-weight:700}
+  .hltb-next{text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hltb-source{margin-top:2px;font-size:11px;color:rgba(255,255,255,.45)}
+
+  .controls{flex:none;display:flex;justify-content:center;margin:12px 0 4px}
+  .controls[hidden]{display:none}
+  .big{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;background:#fff;color:#0a0a12;box-shadow:0 10px 26px rgba(0,0,0,.35);transition:transform .16s var(--ease-out),background-color .15s}
+  .big svg{width:20px;height:20px}
+  .big:active{transform:scale(.94)}
+  .big.stop{background:var(--coral);color:#fff}
+  .big:disabled{opacity:.6;cursor:default}
+
+  /* The rest of the installed games. */
+  .shelf{flex:1;min-height:0;display:flex;flex-direction:column;margin:10px 8px 8px;padding:6px;border-radius:14px;background:rgba(10,10,20,.5);backdrop-filter:blur(14px)}
+  .shelf[hidden]{display:none}
+  .shelf-head{flex:none;display:flex;justify-content:space-between;padding:4px 6px 6px;font-size:12px;color:var(--on-art)}
+  #list{flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
+  .row{position:relative;display:flex;align-items:center;gap:10px;padding:5px 6px;border-radius:9px;transition:background-color .15s}
+  .row.entering{animation:rowIn .32s var(--ease-out) both}
+  @keyframes rowIn{from{opacity:0;transform:translateY(6px)}}
+  .thumb{flex:none;width:30px;height:45px;border-radius:5px;overflow:hidden;background:var(--bg3)}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumb .initials{width:100%;height:100%;display:grid;place-items:center;font-weight:800;font-size:10px;color:var(--text3);background:color-mix(in srgb,var(--accent) 18%,var(--bg3))}
+  .info{min-width:0;flex:1}
+  .name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sub{margin-top:1px;font-size:11px;color:var(--on-art);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mini-track{margin-top:5px;height:2px;border-radius:1px;background:rgba(255,255,255,.12)}
+  .mini-track i{display:block;height:100%;border-radius:1px;background:rgba(255,255,255,.75)}
+  .play{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.14);color:#fff;transition:background-color .15s,color .15s,transform .16s var(--ease-out)}
+  .play svg{width:13px;height:13px}
+  .play:active{transform:scale(.92)}
+  .play:disabled{opacity:.5;cursor:default}
+
+  #empty{flex:1;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:12px;padding:16px;color:var(--text2)}
   #empty[hidden]{display:none}
-  #empty-open{padding:9px 14px;border-radius:8px;background:var(--accent2);color:#fff}
+  .solid{padding:9px 14px;border-radius:999px;background:var(--accent2);color:#fff;font-weight:800}
 
   @media (hover:hover) and (pointer:fine){
-    .icon-btn:hover{background:var(--bg2);color:var(--text)}
-    .row:not(.active):hover{background:var(--bg3)}
-    .play:hover{background:var(--accent)}
+    .ghost:hover{background:rgba(255,255,255,.1);color:#fff}
+    .row:hover{background:rgba(255,255,255,.07)}
+    .row:hover .play{background:#fff;color:#0a0a12}
+    .big:not(.stop):hover{background:#eceaf6}
   }
-  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+  @media (prefers-reduced-motion:reduce){*,*::after{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<header id="head">
-  <div class="session">
-    <div id="label">Нічого не запущено</div>
-    <div id="timer" aria-live="off">00:00:00</div>
-    <div id="session-title"></div>
-  </div>
-  <div class="head-actions">
-    <button id="stop" class="icon-btn" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="4" y="4" width="8" height="8" rx="1.5"/></svg></button>
-    <button id="open" class="icon-btn"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9 2.5h4.5V7h-1.5V5.06L7.53 9.53 6.47 8.47 10.94 4H9V2.5ZM3 4.5A1.5 1.5 0 0 1 4.5 3H7v1.5H4.5v7h7V9H13v2.5a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 3 11.5v-7Z"/></svg></button>
-  </div>
+<div class="ambient" id="ambient"></div>
+<header class="bar">
+  <span class="brand"><img src="../../assets/icon.png" alt=""><span>PRG<b>Launcher</b></span></span>
+  <span class="count" id="count"></span>
+  <button id="open" class="ghost"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9 2.5h4.5V7h-1.5V5.06L7.53 9.53 6.47 8.47 10.94 4H9V2.5ZM3 4.5A1.5 1.5 0 0 1 4.5 3H7v1.5H4.5v7h7V9H13v2.5a1.5 1.5 0 0 1-1.5 1.5h-7A1.5 1.5 0 0 1 3 11.5v-7Z"/></svg></button>
 </header>
-<main id="list" role="list"></main>
-<div id="empty" hidden><p id="empty-text"></p><button id="empty-open"></button></div>
+<section class="now" id="now" aria-live="polite">
+  <div class="cover" id="cover"></div>
+  <div class="side">
+    <div class="label"><span class="live" aria-hidden="true"></span><span id="label"></span></div>
+    <div class="title" id="title"></div>
+    <div class="timer num" id="timer" aria-live="off">00:00:00</div>
+    <div class="meta-line" id="meta-line"></div>
+  </div>
+</section>
+<section class="hltb" id="hltb">
+  <div class="track" id="track"><div class="fill" id="fill"></div></div>
+  <div class="hltb-labels"><span id="played"></span><span class="hltb-next" id="next"></span></div>
+  <div class="hltb-source">HowLongToBeat</div>
+</section>
+<div class="controls" id="controls"><button class="big" id="big"></button></div>
+<section class="shelf" id="shelf">
+  <div class="shelf-head"><span id="shelf-title"></span></div>
+  <div id="list" role="list"></div>
+</section>
+<div id="empty" hidden><p id="empty-text"></p><button class="solid" id="empty-open"></button></div>
 <script>
   const TEXT = {
-    uk: { idle: 'Нічого не запущено', playing: 'Зараз граю', stop: 'Завершити сесію', open: 'Відкрити лаунчер', play: 'Запустити', running: 'Зупинити', never: 'Ще не запускали', today: 'Сьогодні', yesterday: 'Вчора', days: n => `${n} дн. тому`, weeks: n => `${n} тиж. тому`, months: n => `${n} міс. тому`, empty: 'Немає встановлених ігор Steam.', signedOut: 'Увійди в PRG Account у лаунчері, щоб бачити свої ігри.' },
-    en: { idle: 'Nothing running', playing: 'Now playing', stop: 'End session', open: 'Open launcher', play: 'Launch', running: 'Stop', never: 'Not played yet', today: 'Today', yesterday: 'Yesterday', days: n => `${n} days ago`, weeks: n => `${n} weeks ago`, months: n => `${n} months ago`, empty: 'No installed Steam games.', signedOut: 'Sign in to PRG Account in the launcher to see your games.' },
+    uk: {
+      playing: 'Зараз граю', last: 'Остання гра', play: 'Грати', stop: 'Завершити сесію', open: 'Відкрити лаунчер', launch: 'Запустити', installed: 'Встановлені',
+      never: 'Ще не запускали', today: 'Сьогодні', yesterday: 'Вчора', days: n => `${n} дн. тому`, weeks: n => `${n} тиж. тому`, months: n => `${n} міс. тому`,
+      h: n => `${n} год`, m: n => `${n} хв`, playedSuffix: ' зіграно',
+      main: 'сюжет', extra: 'сюжет + додатково', full: '100%', next: (name, d) => `${name} ~${d}`, beyond: d => `більше за 100% (~${d})`,
+      games: n => { const a = n % 10, b = n % 100; return `${n} ${a === 1 && b !== 11 ? 'гра' : a >= 2 && a <= 4 && (b < 12 || b > 14) ? 'гри' : 'ігор'}`; },
+      empty: 'Встановлених ігор Steam поки немає.', signedOut: 'Увійди в PRG Account у лаунчері, щоб бачити свої ігри.',
+    },
+    en: {
+      playing: 'Now playing', last: 'Last played', play: 'Play', stop: 'End session', open: 'Open launcher', launch: 'Launch', installed: 'Installed',
+      never: 'Not played yet', today: 'Today', yesterday: 'Yesterday', days: n => `${n} days ago`, weeks: n => `${n} weeks ago`, months: n => `${n} months ago`,
+      h: n => `${n} h`, m: n => `${n} min`, playedSuffix: ' played',
+      main: 'main story', extra: 'main + extras', full: 'completionist', next: (name, d) => `${name} ~${d}`, beyond: d => `past completionist (~${d})`,
+      games: n => `${n} ${n === 1 ? 'game' : 'games'}`,
+      empty: 'No installed Steam games yet.', signedOut: 'Sign in to PRG Account in the launcher to see your games.',
+    },
   };
-  const PLAY_ICON = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.2v9.6c0 .6.65.97 1.17.66l7.6-4.8a.78.78 0 0 0 0-1.32l-7.6-4.8A.78.78 0 0 0 5 3.2Z"/></svg>';
-  const STOP_ICON = '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="4" y="4" width="8" height="8" rx="1.5"/></svg>';
+  const ICON = {
+    play: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M5 3.2v9.6c0 .6.65.97 1.17.66l7.6-4.8a.78.78 0 0 0 0-1.32l-7.6-4.8A.78.78 0 0 0 5 3.2Z"/></svg>',
+    stop: '<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3.5" y="3.5" width="9" height="9" rx="2"/></svg>',
+  };
   const $ = id => document.getElementById(id);
   let state = { active: false, startedAt: 0, games: [], lang: 'uk', signedIn: false };
-  let listKey = '';
   let clock = null;
+  let artKey = '';
+  let listKey = '';
+  let firstList = true;
 
+  const t = () => TEXT[state.lang] || TEXT.uk;
   const pad = n => String(n).padStart(2, '0');
-  const fmt = ms => { const s = Math.max(0, Math.floor(ms / 1000)); return `${pad(Math.floor(s / 3600))}:${pad(Math.floor(s % 3600 / 60))}:${pad(s % 60)}`; };
-  const text = () => TEXT[state.lang] || TEXT.uk;
+  const fmtClock = ms => { const s = Math.max(0, Math.floor(ms / 1000)); return `${pad(Math.floor(s / 3600))}:${pad(Math.floor(s % 3600 / 60))}:${pad(s % 60)}`; };
+  const validAppId = id => /^\d+$/.test(String(id || ''));
+  const steamArt = (id, file) => validAppId(id) ? `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${id}/${file}` : null;
+  const legacyArt = (id, file) => validAppId(id) ? `https://cdn.akamai.steamstatic.com/steam/apps/${id}/${file}` : null;
+  const portraitSources = game => [game.art?.capsule, steamArt(game.appId, 'library_600x900.jpg'), legacyArt(game.appId, 'library_600x900.jpg'), game.cover, steamArt(game.appId, 'header.jpg')];
 
+  function duration(minutes) {
+    const x = t();
+    const total = Math.max(0, Math.round(minutes));
+    if (total < 60) return x.m(total);
+    const hours = total / 60;
+    return x.h(hours >= 10 ? Math.round(hours) : Math.round(hours * 10) / 10);
+  }
   function ago(timestamp) {
-    const t = text();
-    if (!timestamp) return t.never;
+    const x = t();
+    if (!timestamp) return x.never;
     const day = 864e5;
-    const startOfToday = new Date().setHours(0, 0, 0, 0);
-    if (timestamp >= startOfToday) return t.today;
-    if (timestamp >= startOfToday - day) return t.yesterday;
-    const days = Math.ceil((startOfToday - timestamp) / day);
-    if (days < 14) return t.days(days);
-    if (days < 60) return t.weeks(Math.round(days / 7));
-    return t.months(Math.round(days / 30));
+    const today = new Date().setHours(0, 0, 0, 0);
+    if (timestamp >= today) return x.today;
+    if (timestamp >= today - day) return x.yesterday;
+    const days = Math.ceil((today - timestamp) / day);
+    if (days < 14) return x.days(days);
+    if (days < 60) return x.weeks(Math.round(days / 7));
+    return x.months(Math.round(days / 30));
+  }
+  const playedMinutes = game => ((game.playtime || 0) + (state.active && state.gameId === game.id && state.startedAt ? Date.now() - state.startedAt : 0)) / 60000;
+  const subline = game => [ago(game.lastPlayed), game.playtime >= 60000 ? duration(game.playtime / 60000) : ''].filter(Boolean).join(' · ');
+
+  // HLTB milestones the game has, in order; the bar spans to the last one.
+  function milestones(game) {
+    const x = t();
+    const h = game.hltb || {};
+    return [['main', h.main], ['extra', h.extra], ['full', h.full]]
+      .filter(([, minutes]) => Number.isFinite(minutes) && minutes > 0)
+      .map(([key, minutes]) => ({ key, name: x[key], minutes }))
+      .filter((stone, index, list) => index === 0 || stone.minutes > list[index - 1].minutes);
   }
 
-  function tick() { $('timer').textContent = state.active && state.startedAt ? fmt(Date.now() - state.startedAt) : '00:00:00'; }
-
-  function renderHeader() {
-    const t = text();
-    document.documentElement.lang = state.lang === 'en' ? 'en' : 'uk';
-    document.body.classList.toggle('active', Boolean(state.active));
-    $('label').textContent = state.active ? t.playing : t.idle;
-    $('session-title').textContent = state.active ? state.title || '' : '';
-    $('stop').hidden = !state.active;
-    for (const [id, label] of [['stop', t.stop], ['open', t.open]]) { $(id).title = label; $(id).setAttribute('aria-label', label); }
-    $('empty-open').textContent = t.open;
-    clearInterval(clock);
-    clock = state.active ? setInterval(tick, 1000) : null;
-    tick();
+  function loadImage(sources) {
+    return new Promise(resolve => {
+      const queue = sources.filter(Boolean);
+      const next = () => {
+        const src = queue.shift();
+        if (!src) return resolve(null);
+        const img = new Image();
+        img.decoding = 'async';
+        img.onload = () => resolve(img);
+        img.onerror = next;
+        img.src = src;
+      };
+      next();
+    });
   }
-
-  function coverFor(game) {
-    if (game.cover) {
-      const img = document.createElement('img');
-      img.className = 'cover'; img.alt = ''; img.loading = 'lazy'; img.decoding = 'async'; img.src = game.cover;
-      img.onerror = () => img.replaceWith(fallbackCover(game));
-      return img;
-    }
-    return fallbackCover(game);
+  // Portrait art fills its frame; landscape art (a header used as a fallback)
+  // is shown whole over a blurred copy of itself instead of being cropped.
+  function fitPortrait(img) {
+    if (!(img.naturalWidth > img.naturalHeight)) return img;
+    const box = document.createElement('div');
+    box.className = 'letterbox';
+    const bg = new Image();
+    bg.className = 'bg'; bg.alt = ''; bg.src = img.src;
+    img.className = 'fg';
+    box.append(bg, img);
+    return box;
   }
-  function fallbackCover(game) {
+  function initials(game, className = 'initials') {
     const div = document.createElement('div');
-    div.className = 'cover cover-fallback';
+    div.className = className;
     div.textContent = String(game.title || '?').slice(0, 2).toUpperCase();
     return div;
   }
 
+  function heroGame() {
+    const games = state.games || [];
+    if (state.active) return games.find(game => game.id === state.gameId) || { id: state.gameId, title: state.title, playtime: state.activePlaytime || 0 };
+    return games[0] || null;
+  }
+
+  function renderProgress(game) {
+    const x = t();
+    const stones = game ? milestones(game) : [];
+    $('hltb').hidden = !stones.length;
+    if (!stones.length) return;
+    const played = playedMinutes(game);
+    const scale = stones[stones.length - 1].minutes;
+    $('fill').style.width = `${Math.min(100, played / scale * 100)}%`;
+    const track = $('track');
+    track.querySelectorAll('.tick').forEach(tick => tick.remove());
+    stones.slice(0, -1).forEach(stone => {
+      const tick = document.createElement('i');
+      tick.className = `tick${played >= stone.minutes ? ' done' : ''}`;
+      tick.style.left = `${stone.minutes / scale * 100}%`;
+      tick.title = `${stone.name} ~${duration(stone.minutes)}`;
+      track.append(tick);
+    });
+    const amount = document.createElement('b');
+    amount.textContent = duration(played);
+    $('played').replaceChildren(amount, x.playedSuffix);
+    const upcoming = stones.find(stone => played < stone.minutes);
+    $('next').textContent = upcoming ? x.next(upcoming.name, duration(upcoming.minutes)) : x.beyond(duration(scale));
+  }
+
+  function tick() {
+    const game = heroGame();
+    // Total time in the game across all sessions, the running one included.
+    $('timer').textContent = state.active && game ? fmtClock(playedMinutes(game) * 60000) : '00:00:00';
+    if (state.active && game) renderProgress(game);
+  }
+
+  function renderNow() {
+    const x = t();
+    const game = heroGame();
+    $('now').hidden = !game;
+    $('controls').hidden = !game || (!state.active && !state.signedIn);
+    $('now').classList.toggle('active', Boolean(state.active));
+    $('label').textContent = state.active ? x.playing : x.last;
+    $('title').textContent = game ? game.title : '';
+    $('meta-line').textContent = game && !state.active ? subline(game) : '';
+    const big = $('big');
+    big.className = `big${state.active ? ' stop' : ''}`;
+    big.innerHTML = state.active ? ICON.stop : ICON.play;
+    const label = game ? `${state.active ? x.stop : x.play}: ${game.title}` : '';
+    big.title = label; big.setAttribute('aria-label', label);
+    big.onclick = () => {
+      if (state.active) { window.launcher?.pauseMiniSession?.(); return; }
+      if (game) launch(game.id, big);
+    };
+    renderProgress(game);
+    clearInterval(clock);
+    clock = state.active ? setInterval(tick, 1000) : null;
+    tick();
+
+    const key = game ? `${game.id}|${game.appId || ''}|${game.cover || ''}` : '';
+    if (key === artKey) return;
+    artKey = key;
+    const cover = $('cover');
+    const ambient = $('ambient');
+    if (!game) { cover.replaceChildren(); ambient.replaceChildren(); return; }
+    cover.replaceChildren(initials(game));
+    loadImage(portraitSources(game)).then(img => {
+      if (artKey !== key) return;
+      if (!img) { ambient.replaceChildren(); return; }
+      img.alt = '';
+      cover.replaceChildren(fitPortrait(img));
+      const glow = new Image();
+      glow.alt = ''; glow.src = img.src;
+      ambient.replaceChildren(glow);
+      requestAnimationFrame(() => requestAnimationFrame(() => glow.classList.add('shown')));
+    });
+  }
+
+  function thumbFor(game) {
+    const box = document.createElement('div');
+    box.className = 'thumb';
+    box.append(initials(game));
+    loadImage(portraitSources(game)).then(img => { if (img) { img.alt = ''; box.replaceChildren(fitPortrait(img)); } });
+    return box;
+  }
+
+  function launch(id, button) {
+    button.disabled = true;
+    Promise.resolve(window.launcher?.launchFromMini?.(id)).finally(() => setTimeout(() => { button.disabled = false; }, 1500));
+  }
+
   function renderList() {
-    const t = text();
-    const games = Array.isArray(state.games) ? state.games : [];
-    const key = JSON.stringify([new Date().toDateString(), state.lang, state.signedIn, state.active, state.gameId, games]);
+    const x = t();
+    const all = Array.isArray(state.games) ? state.games : [];
+    const hero = heroGame();
+    const games = all.filter(game => game.id !== hero?.id);
+    $('count').textContent = all.length ? x.games(all.length) : '';
+    const key = JSON.stringify([new Date().toDateString(), state.lang, state.signedIn, state.active, state.gameId, all]);
     if (key === listKey) return;
     listKey = key;
+    $('empty').hidden = all.length > 0;
+    $('empty-text').textContent = state.signedIn ? x.empty : x.signedOut;
+    $('empty-open').textContent = x.open;
+    $('shelf').hidden = !games.length;
+    $('shelf-title').textContent = x.installed;
     const list = $('list');
     list.replaceChildren();
-    $('empty').hidden = games.length > 0;
-    list.hidden = games.length === 0;
-    $('empty-text').textContent = state.signedIn ? t.empty : t.signedOut;
-    for (const game of games) {
-      const active = state.active && state.gameId === game.id;
+    games.forEach((game, index) => {
       const row = document.createElement('div');
-      row.className = `row${active ? ' active' : ''}`;
+      row.className = 'row';
       row.setAttribute('role', 'listitem');
-      const meta = document.createElement('div');
-      meta.className = 'meta';
+      if (firstList) { row.classList.add('entering'); row.style.animationDelay = `${Math.min(index, 8) * 35}ms`; }
+      const info = document.createElement('div');
+      info.className = 'info';
       const name = document.createElement('div');
       name.className = 'name'; name.textContent = game.title;
       const sub = document.createElement('div');
-      sub.className = 'sub'; sub.textContent = ago(game.lastPlayed);
-      meta.append(name, sub);
+      sub.className = 'sub'; sub.textContent = subline(game);
+      info.append(name, sub);
+      const stones = milestones(game);
+      if (stones.length) {
+        const track = document.createElement('div');
+        track.className = 'mini-track';
+        const fill = document.createElement('i');
+        fill.style.width = `${Math.min(100, playedMinutes(game) / stones[0].minutes * 100)}%`;
+        track.title = `${duration(playedMinutes(game))} / ${stones[0].name} ~${duration(stones[0].minutes)}`;
+        track.append(fill);
+        info.append(track);
+      }
       const button = document.createElement('button');
       button.className = 'play';
-      button.innerHTML = active ? STOP_ICON : PLAY_ICON;
-      const label = `${active ? t.running : t.play}: ${game.title}`;
+      button.innerHTML = ICON.play;
+      const label = `${x.launch}: ${game.title}`;
       button.title = label; button.setAttribute('aria-label', label);
-      button.onclick = () => {
-        if (active) { window.launcher?.pauseMiniSession?.(); return; }
-        button.disabled = true;
-        Promise.resolve(window.launcher?.launchFromMini?.(game.id)).finally(() => setTimeout(() => { button.disabled = false; }, 1500));
-      };
-      row.append(coverFor(game), meta, button);
+      button.onclick = () => launch(game.id, button);
+      row.append(thumbFor(game), info, button);
       list.append(row);
-    }
+    });
+    if (games.length) firstList = false;
   }
 
   function applyTheme(theme) {
@@ -173,17 +383,22 @@
     }
   }
 
+  function render() {
+    const x = t();
+    document.documentElement.lang = state.lang === 'en' ? 'en' : 'uk';
+    $('open').title = x.open; $('open').setAttribute('aria-label', x.open);
+    renderNow();
+    renderList();
+  }
+
   window.launcher?.onMiniState?.(next => {
     state = { ...state, ...next };
     applyTheme(next.theme);
-    renderHeader();
-    renderList();
+    render();
   });
-  $('stop').onclick = () => window.launcher?.pauseMiniSession?.();
   $('open').onclick = () => window.launcher?.restoreMain?.();
   $('empty-open').onclick = () => window.launcher?.restoreMain?.();
-  renderHeader();
-  renderList();
+  render();
 </script>
 </body>
 </html>
