@@ -23,8 +23,17 @@ jobs:
           java-version: '21'
       - name: Install dependencies
         run: npm ci
+      # Browser UI tests skip themselves without PRG_TEST_BROWSER; the runner's
+      # Chrome is required here so they cannot be skipped silently in CI.
+      - name: Check Chrome for UI tests
+        shell: pwsh
+        run: if (-not (Test-Path $env:PRG_TEST_BROWSER)) { throw "Chrome not found at $env:PRG_TEST_BROWSER" }
+        env:
+          PRG_TEST_BROWSER: C:\Program Files\Google\Chrome\Application\chrome.exe
       - name: Run tests
         run: npm test
+        env:
+          PRG_TEST_BROWSER: C:\Program Files\Google\Chrome\Application\chrome.exe
       - name: Test Firestore rules and two-client sync
         run: npx.cmd firebase emulators:exec --only firestore --project demo-prglauncher "npm.cmd run test:emulator"
         env:
