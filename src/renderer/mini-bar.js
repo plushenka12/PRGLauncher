@@ -1,7 +1,7 @@
 // Mini-tab page script: player view, installed games and the daily Wrapped.
   const TEXT = {
     uk: {
-      playing: 'Зараз граю', last: 'Остання гра', play: 'Грати', stop: 'Завершити сесію', open: 'Відкрити лаунчер', launch: 'Запустити', installed: 'Встановлені',
+      playing: 'Зараз граю', last: 'Остання гра', play: 'Грати', stop: 'Завершити сесію', open: 'Відкрити лаунчер', switchView: 'Вікно Switch', launch: 'Запустити', installed: 'Встановлені',
       never: 'Ще не запускали', today: 'Сьогодні', yesterday: 'Вчора', days: n => `${n} дн. тому`, weeks: n => `${n} тиж. тому`, months: n => `${n} міс. тому`,
       h: n => `${n} год`, m: n => `${n} хв`, playedSuffix: ' зіграно',
       main: 'сюжет', extra: 'сюжет + додатково', full: '100%', next: (name, d) => `${name} ~${d}`, beyond: d => `більше за 100% (~${d})`,
@@ -9,7 +9,7 @@
       empty: 'Встановлених ігор Steam поки немає.', signedOut: 'Увійди в PRG Account у лаунчері, щоб бачити свої ігри.',
     },
     en: {
-      playing: 'Now playing', last: 'Last played', play: 'Play', stop: 'End session', open: 'Open launcher', launch: 'Launch', installed: 'Installed',
+      playing: 'Now playing', last: 'Last played', play: 'Play', stop: 'End session', open: 'Open launcher', switchView: 'Switch window', launch: 'Launch', installed: 'Installed',
       never: 'Not played yet', today: 'Today', yesterday: 'Yesterday', days: n => `${n} days ago`, weeks: n => `${n} weeks ago`, months: n => `${n} months ago`,
       h: n => `${n} h`, m: n => `${n} min`, playedSuffix: ' played',
       main: 'main story', extra: 'main + extras', full: 'completionist', next: (name, d) => `${name} ~${d}`, beyond: d => `past completionist (~${d})`,
@@ -255,6 +255,7 @@
     const x = t();
     document.documentElement.lang = state.lang === 'en' ? 'en' : 'uk';
     $('open').title = x.open; $('open').setAttribute('aria-label', x.open);
+    $('switch').title = x.switchView; $('switch').setAttribute('aria-label', x.switchView);
     renderNow();
     renderList();
   }
@@ -433,5 +434,6 @@
     }
   });
   $('open').onclick = () => window.launcher?.restoreMain?.();
+  $('switch').onclick = () => window.launcher?.openSwitchView?.();
   $('empty-open').onclick = () => window.launcher?.restoreMain?.();
   render();

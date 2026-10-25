@@ -16,6 +16,7 @@ function slice(marker, terminator = '\n})') {
 const handlerSource = [
   slice('function isMainSender', '\n}'),
   slice('function parseLaunchArguments', '\n}'),
+  slice('async function approveLocalExecutable', '\n}'),
   slice("ipcMain.handle('local:chooseExecutable'"),
   slice("ipcMain.handle('local:launchGame'"),
 ].join('\n');

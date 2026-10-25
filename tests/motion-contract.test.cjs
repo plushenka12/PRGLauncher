@@ -14,3 +14,8 @@ test('renderer motion follows the review rules', () => {
   const durations = [...css.matchAll(/transition:[^;}]*?(\d?\.\d+)s/g)].map(match => Number(match[1]));
   assert.ok(durations.every(seconds => seconds <= 0.3), `UI transitions stay under 300 ms: ${durations.filter(s => s > 0.3)}`);
 });
+
+test('no always-on full-window effects that cost the GPU every frame', () => {
+  assert.doesNotMatch(css, /html::after\{/, 'no full-window overlay above the app');
+  assert.doesNotMatch(css, /\.main-tabs\{[^}]*backdrop-filter/, 'the sticky tab bar is opaque, not blurred');
+});

@@ -145,7 +145,7 @@ UI_COPY.push(
 );
 UI_COPY.push(['Повторно увійти в Nintendo','Sign in to Nintendo again'],['Nintendo-сесія недійсна. Увійди повторно; ігри й час залишаться.','Nintendo session is no longer valid. Sign in again; your games and playtime will stay.']);
 // Static labels in the game card, time editor and add-game form.
-UI_COPY.push(['Час у грі','Playtime'],['Середня сесія','Avg Session'],['Остання гра','Last Played'],['Журнал сесій','Session Log'],['Змінити час','Edit Time'],['Зберегти нотатки','Save Notes'],['Деталі гри','Game details'],['Год','Hours'],['Сек','Sec'],['+ Додати','+ Add'],['Зберегти зміни','Save Changes'],['Інше','Other'],['наприклад, Elden Ring…','e.g. Elden Ring...'],['Назва гри','Game title'],['Заповнюється з RAWG або встав URL','Auto-filled from RAWG or paste URL'],['Особисті думки…','Personal thoughts...'],['Лаунчер запускає лише .exe. Відкрий картку гри й вибери .exe заново.','The launcher can only start .exe files. Open the game card and choose the .exe again.']);
+UI_COPY.push(['Час у грі','Playtime'],['Середня сесія','Avg Session'],['Остання гра','Last Played'],['Журнал сесій','Session Log'],['Змінити час','Edit Time'],['Зберегти нотатки','Save Notes'],['Деталі гри','Game details'],['Год','Hours'],['Сек','Sec'],['+ Додати','+ Add'],['Зберегти зміни','Save Changes'],['Інше','Other'],['наприклад, Elden Ring…','e.g. Elden Ring...'],['Назва гри','Game title'],['Заповнюється з RAWG або встав URL','Auto-filled from RAWG or paste URL'],['Особисті думки…','Personal thoughts...'],['Особисті нотатки...','Personal notes...'],['Вікно Switch','Switch window'],['Показує картку захоплення на весь екран вибраного монітора зі звуком у твоїх навушниках — замість OBS. Відкривається кнопкою 🎮 у міні-табі, Esc закриває. Картку може тримати лише одна програма, тож OBS при цьому має бути закритий.','Shows your capture card full screen on the chosen monitor with its sound in your headphones — instead of OBS. Open it with the 🎮 button in the mini-tab; Esc closes it. Only one app can hold the card, so OBS has to be closed.'],['Картка захоплення','Capture card'],['Звук','Sound'],['Монітор','Monitor'],['Якість','Quality'],['Відкрити вікно Switch','Open the Switch window'],['Оновити список пристроїв','Refresh devices'],['Відеопристрій','Video device'],['Аудіопристрій','Audio device'],['Відеопристроїв не знайдено','No video devices found'],['Авто — звук самої картки','Auto — the card\'s own sound'],['Без звуку','No sound'],['основний','main'],['Картку захоплення не видно. Підключи її та натисни «Оновити список пристроїв».','No capture card is visible. Plug it in and press “Refresh devices”.'],['Схожої на картку захоплення назви немає — вибери пристрій вручну.','No device looks like a capture card — choose one manually.'],['Спершу вибери картку захоплення.','Choose a capture card first.'],['Додатковий софт','Companion apps'],['+ Додати програму','+ Add program'],['Запускаються разом із грою одним кліком: з картки, з бібліотеки чи з міні-таба.','They start together with the game in one click: from the card, the library or the mini-tab.'],['Закривати з грою','Close with game'],['Прибрати програму','Remove program'],['Не знайдено на цьому ПК','Not found on this PC'],['Лише .exe — вибери програму заново','.exe only — choose the program again'],['Не вдалося запустити: ','Could not start: '],['Лаунчер запускає лише .exe. Відкрий картку гри й вибери .exe заново.','The launcher can only start .exe files. Open the game card and choose the .exe again.']);
 const UK_TEXT=new Map(UI_COPY.map(([uk,en])=>[en,uk]));
 const EN_TEXT=new Map(UI_COPY.map(([uk,en])=>[uk,en]));
 let currentLanguage=localStorage.getItem('gv-language')==='en'?'en':'uk';
@@ -658,12 +658,64 @@ function startTimer(gameId,source='manual'){
   clearInterval(timerInterval); timerInterval=setInterval(tickTimer,500);
   updateSessionBar(); renderGrid();updateStats();
 }
+// ── COMPANION PROGRAMS ────────────────────────────────────────────────────
+// Programs started together with a game (Path of Building, Awakened PoE Trade
+// with Path of Exile). Stored on the game; the main process launches them
+// through the same approval rules as a local game and skips one already open.
+const companionErrors=new Map();
+function companionName(filePath){return String(filePath||'').split(/[\\/]/).pop().replace(/\.exe$/i,'')||'Program';}
+async function launchCompanionsFor(game){
+  const list=Array.isArray(game?.companions)?game.companions:[];
+  if(!list.length||!window.launcher?.launchCompanion)return;
+  for(const app of list){
+    let result=null;
+    try{result=await window.launcher.launchCompanion({gameId:game.id,executable:app.path,closeWithGame:app.closeWithGame===true});}catch(error){result={action:'error',message:error.message};}
+    if(result?.action==='error')companionErrors.set(app.id,result.code==='unsupported-type'?'unsupported':'missing');
+    else companionErrors.delete(app.id);
+  }
+  if(detailId===game.id)renderCompanions(game);
+  const failed=list.filter(app=>companionErrors.has(app.id)).map(app=>app.name);
+  if(failed.length)feedbackUi.announce(t('Не вдалося запустити: ')+failed.join(', '),{kind:'error'});
+}
+function renderCompanions(game){
+  const list=document.getElementById('d-companions');if(!list||!game)return;
+  list.replaceChildren(...(Array.isArray(game.companions)?game.companions:[]).map(app=>{
+    const row=document.createElement('div');row.className='companion-row';
+    const info=document.createElement('div');info.style.minWidth='0';
+    const name=document.createElement('div');name.className='companion-name';name.textContent=app.name;
+    const where=document.createElement('div');where.className='companion-path';where.textContent=app.path;where.title=app.path;
+    info.append(name,where);
+    const error=companionErrors.get(app.id);
+    if(error){const note=document.createElement('div');note.className='companion-error';note.textContent=t(error==='unsupported'?'Лише .exe — вибери програму заново':'Не знайдено на цьому ПК');info.append(note);}
+    const close=document.createElement('label');close.className='companion-close';
+    const check=document.createElement('input');check.type='checkbox';check.checked=app.closeWithGame===true;
+    check.onchange=()=>{app.closeWithGame=check.checked;save();};
+    close.append(check,document.createTextNode(t('Закривати з грою')));
+    const remove=document.createElement('button');remove.type='button';remove.className='companion-remove';remove.textContent='✕';
+    remove.title=t('Прибрати програму');remove.setAttribute('aria-label',`${t('Прибрати програму')}: ${app.name}`);
+    remove.onclick=()=>{game.companions=game.companions.filter(item=>item.id!==app.id);companionErrors.delete(app.id);save();renderCompanions(game);};
+    row.append(info,close,remove);
+    return row;
+  }));
+}
+async function addCompanion(gameId){
+  const game=getGame(gameId);if(!game||guestBlock()||!window.launcher?.chooseExecutable)return;
+  const result=await window.launcher.chooseExecutable();
+  if(!result||result.canceled||!result.path)return;
+  const key=result.path.toLowerCase();
+  if(key===String(game.localExecutable||'').toLowerCase())return;
+  if(!Array.isArray(game.companions))game.companions=[];
+  if(game.companions.some(app=>String(app.path).toLowerCase()===key))return;
+  game.companions.push({id:`c${Date.now().toString(36)}${Math.random().toString(36).slice(2,6)}`,path:result.path,name:companionName(result.path),closeWithGame:false});
+  save();renderCompanions(game);
+}
+
 async function launchAndTrack(gameId){
   const game=getGame(gameId);
   if(!game)return;
 
   if(game.localExecutable&&window.launcher?.launchLocalGame){
-    try{const result=await window.launcher.launchLocalGame({executable:game.localExecutable,workingDirectory:game.workingDirectory||'',arguments:game.launchArguments||''});if(result?.action==='requested'){startTimer(gameId,'local');return;}if(result?.action==='cancelled')return;alert(result?.code==='unsupported-type'?t('Лаунчер запускає лише .exe. Відкрий картку гри й вибери .exe заново.'):(result?.message||'Не вдалося запустити гру з пристрою.'));}catch(error){console.error('[Local] Launch failed:',error);alert('Не вдалося запустити гру з пристрою.');}return;
+    try{const result=await window.launcher.launchLocalGame({executable:game.localExecutable,workingDirectory:game.workingDirectory||'',arguments:game.launchArguments||''});if(result?.action==='requested'){startTimer(gameId,'local');launchCompanionsFor(game);return;}if(result?.action==='cancelled')return;alert(result?.code==='unsupported-type'?t('Лаунчер запускає лише .exe. Відкрий картку гри й вибери .exe заново.'):(result?.message||'Не вдалося запустити гру з пристрою.'));}catch(error){console.error('[Local] Launch failed:',error);alert('Не вдалося запустити гру з пристрою.');}return;
   }
 
   // Games without an App ID remain usable as a manual timer.
@@ -674,7 +726,7 @@ async function launchAndTrack(gameId){
     const status=await window.launcher.installStatus(game.steamAppId);
     if(status?.state==='ready'){
       const result=await window.launcher.launchGame(game.steamAppId);
-      if(result?.action==='requested')return;
+      if(result?.action==='requested'){launchCompanionsFor(game);return;}
       alert(result?.message||'Не вдалося запустити гру через Steam.');
       return;
     }
@@ -853,6 +905,7 @@ function stopTimer(silent){
   if(!activeGameId)return;
   clearInterval(timerInterval);
   const elapsed=Date.now()-activeStart,game=getGame(activeGameId);
+  window.launcher?.closeCompanions?.(activeGameId);
   if(game&&elapsed>1000){game.playtime=(game.playtime||0)+elapsed;if(!game.sessions)game.sessions=[];game.sessions.push({start:activeStart,end:Date.now(),dur:elapsed,source:activeSource==='steam'?'steam':'manual'});game.lastPlayed=Date.now();const _si=games.findIndex(g=>g.id===activeGameId);if(_si>0){const[_g]=games.splice(_si,1);games.unshift(_g);}save();pushToFb();}
   activeGameId=null; activeStart=null;
   activeSource='manual';localStorage.removeItem('gv-active'); localStorage.removeItem('gv-start');localStorage.removeItem('gv-active-source');
@@ -1317,6 +1370,7 @@ function renderGameSources(game){const box=document.getElementById('d-sources');
 function openDetail(id){
   detailId=id;const game=getGame(id);if(!game)return;
   setDetailTab('overview');
+  renderCompanions(game);
   detailUi.renderGameDetail(game,{activeGameId,activeStart,createStatusButton,platformIcons:PLATFORM_ICONS,renderGameSources,setRatingUI,renderHltbPanel,renderGameHistory,fmtTime,fmtDate,translate:t});
   renderReviewEditor(game);
   detailFocus.open(document.getElementById('detail-modal'));
@@ -1602,6 +1656,7 @@ document.getElementById('f-executable-choose')?.addEventListener('click',async()
 document.getElementById('modal-cancel').onclick=closeModal;
 document.getElementById('modal-save').onclick=()=>{if(!guestBlock())saveModal();};
 document.getElementById('d-close').onclick=closeDetail;
+document.getElementById('d-companion-add').onclick=()=>addCompanion(detailId);
 document.querySelectorAll('.detail-tab').forEach(button=>button.onclick=()=>setDetailTab(button.dataset.detailTab));
 document.getElementById('d-review-input').addEventListener('input',event=>{
   document.getElementById('d-review-preview').innerHTML=PRGReviewMarkdown.render(event.target.value);
@@ -1885,7 +1940,47 @@ Promise.resolve(null).then(status=>{
 }).catch(()=>{});
 document.querySelectorAll('.main-tab').forEach(btn=>{btn.onclick=()=>setMainPage(btn.dataset.page);});
 function setSettingsTab(tab){return settingsUi.setTab(tab);}
-function openSettings(){return settingsUi.open();}
+function openSettings(){loadSwitchSettings();return settingsUi.open();}
+// ── SWITCH WINDOW SETTINGS ────────────────────────────────────────────────
+// Which capture card, sound, monitor and quality the Switch window uses. The
+// main process stores the choice; device labels need one camera permission,
+// which only the launcher's own windows are granted.
+const SWITCH_CAPTURE=/(cam ?link|elgato|avermedia|live gamer|capture|hdmi|usb video|game ?capture|hd60|4k60|ezcap|ripsaw|magewell)/i;
+async function loadSwitchSettings(probe=false){
+  if(!window.launcher?.getSwitchConfig||!navigator.mediaDevices?.enumerateDevices)return;
+  const status=document.getElementById('switch-status');
+  const {config,displays}=await window.launcher.getSwitchConfig();
+  let devices=await navigator.mediaDevices.enumerateDevices();
+  if(probe||devices.some(device=>!device.label)){
+    try{const stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});stream.getTracks().forEach(track=>track.stop());}catch{}
+    devices=await navigator.mediaDevices.enumerateDevices();
+  }
+  const videos=devices.filter(device=>device.kind==='videoinput').sort((a,b)=>SWITCH_CAPTURE.test(b.label)-SWITCH_CAPTURE.test(a.label));
+  const audios=devices.filter(device=>device.kind==='audioinput');
+  const fill=(id,options,selected)=>{const select=document.getElementById(id);select.replaceChildren(...options.map(([value,label])=>{const option=document.createElement('option');option.value=value;option.textContent=label;return option;}));if(options.some(([value])=>value===selected))select.value=selected;};
+  const videoSelected=videos.find(device=>device.deviceId===config.videoId)||videos.find(device=>device.label&&device.label===config.videoLabel)||videos[0];
+  fill('switch-video',videos.length?videos.map((device,index)=>[device.deviceId,device.label||`${t('Відеопристрій')} ${index+1}`]):[['',t('Відеопристроїв не знайдено')]],videoSelected?.deviceId||'');
+  const audioSelected=['auto','none'].includes(config.audioId)?config.audioId:(audios.find(device=>device.deviceId===config.audioId)||audios.find(device=>device.label&&device.label===config.audioLabel))?.deviceId||'auto';
+  fill('switch-audio',[['auto',t('Авто — звук самої картки')],['none',t('Без звуку')],...audios.map((device,index)=>[device.deviceId,device.label||`${t('Аудіопристрій')} ${index+1}`])],audioSelected);
+  const displaySelected=displays.find(display=>display.id===config.displayId)||displays.find(display=>!display.primary)||displays[0];
+  fill('switch-display',displays.map(display=>[String(display.id),`${t('Монітор')} ${display.index} · ${display.width}×${display.height}${display.primary?` (${t('основний')})`:''}`]),String(displaySelected?.id??''));
+  document.getElementById('switch-quality').value=config.quality||'1080p60';
+  status.textContent=!videos.length?t('Картку захоплення не видно. Підключи її та натисни «Оновити список пристроїв».'):!videos.some(device=>SWITCH_CAPTURE.test(device.label))?t('Схожої на картку захоплення назви немає — вибери пристрій вручну.'):'';
+  if(!config.videoId&&videoSelected)saveSwitchSettings();
+}
+function saveSwitchSettings(){
+  const pick=id=>document.getElementById(id);
+  const video=pick('switch-video'),audio=pick('switch-audio');
+  return window.launcher?.saveSwitchConfig?.({
+    videoId:video.value,videoLabel:video.selectedOptions[0]?.textContent||'',
+    audioId:audio.value,audioLabel:['auto','none'].includes(audio.value)?'':audio.selectedOptions[0]?.textContent||'',
+    displayId:Number(pick('switch-display').value),quality:pick('switch-quality').value,
+  });
+}
+['switch-video','switch-audio','switch-display','switch-quality'].forEach(id=>document.getElementById(id).addEventListener('change',saveSwitchSettings));
+document.getElementById('switch-refresh').onclick=()=>loadSwitchSettings(true);
+document.getElementById('switch-open').onclick=async()=>{await saveSwitchSettings();const result=await window.launcher?.openSwitchView?.();if(result&&!result.ok)document.getElementById('switch-status').textContent=t('Спершу вибери картку захоплення.');};
+window.launcher?.onOpenSwitchSettings?.(()=>{openSettings();setSettingsTab('general');requestAnimationFrame(()=>{document.getElementById('switch-settings-title')?.scrollIntoView({block:'start'});document.getElementById('switch-video')?.focus({preventScroll:true});});});
 document.getElementById('settings-btn').onclick=openSettings;
 document.getElementById('settings-close').onclick=()=>settingsUi.close();
 document.querySelectorAll('.settings-tab').forEach(button=>{button.onclick=()=>setSettingsTab(button.dataset.settingsTab);button.addEventListener('keydown',settingsUi.onTabKeydown);});

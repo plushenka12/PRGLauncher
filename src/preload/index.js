@@ -20,6 +20,8 @@ contextBridge.exposeInMainWorld('launcher', {
   // Local executables
   chooseExecutable: () => ipcRenderer.invoke('local:chooseExecutable'),
   launchLocalGame: (payload) => ipcRenderer.invoke('local:launchGame', payload),
+  launchCompanion: (payload) => ipcRenderer.invoke('local:launchCompanion', payload),
+  closeCompanions: (gameId) => ipcRenderer.invoke('local:closeCompanions', gameId),
 
   // HowLongToBeat (keyless, on-demand metadata lookup)
   searchHltb: (query) => ipcRenderer.invoke('hltb:search', query),
@@ -62,6 +64,12 @@ contextBridge.exposeInMainWorld('launcher', {
   updateMiniBar:(state) => ipcRenderer.invoke('mini:update', state),
   restoreMain:  () => ipcRenderer.invoke('mini:restore'),
   launchFromMini: (gameId) => ipcRenderer.invoke('mini:launch', gameId),
+
+  // Switch window (capture card full screen, instead of OBS)
+  openSwitchView: () => ipcRenderer.invoke('switch:open'),
+  getSwitchConfig: () => ipcRenderer.invoke('switch:getConfig'),
+  saveSwitchConfig: (config) => ipcRenderer.invoke('switch:saveConfig', config),
+  onOpenSwitchSettings: (callback) => ipcRenderer.on('app:openSwitchSettings', () => callback()),
   onMiniLaunch: (callback) => ipcRenderer.on('mini:launch', (_, gameId) => callback(gameId)),
   pauseMiniSession: () => ipcRenderer.send('mini:pause'),
   onMiniState:  (callback) => ipcRenderer.on('mini:state', (_, state) => callback(state)),

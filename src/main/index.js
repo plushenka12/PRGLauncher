@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, shell, Tray, Menu, nativeImage, screen, safeStorage, dialog } = require('electron')
+const { app, BrowserWindow, ipcMain, shell, Tray, Menu, nativeImage, screen, safeStorage, dialog, session } = require('electron')
 const { autoUpdater } = require('electron-updater')
 const path = require('path')
 const os = require('os')
@@ -16,6 +16,8 @@ const { createActivityScheduler, isGameProcessLog } = require('./steam-activity-
 const { STEAM_GUARD_SCRIPT, createSteamWindowGuard } = require('./steam-window-guard')
 const { resolveMiniTabBounds, loadSavedBounds, saveBounds, isReachable } = require('./mini-tab-bounds')
 const { createSteamLibraryArt } = require('./steam-library-art')
+const { createCompanionApps } = require('./companion-apps')
+const { sanitizeSwitchConfig, isConfigured, pickSwitchDisplay, allowPermission } = require('./switch-view')
 const steamLibraryArt = createSteamLibraryArt({ fs, getSteamPath: () => steamPath })
 
 // Keep the Windows app identity and packaged process name discoverable.
@@ -66,7 +68,7 @@ const launchedAtLogin = process.argv.includes('--hidden')
 // ── IPC SENDERS ───────────────────────────────────────────────────────────
 // The main window and the mini-bar share the preload bridge. Every channel
 // belongs to the main window's top frame except the two the mini-bar uses.
-const MINI_BAR_CHANNELS = new Set(['mini:restore', 'mini:launch'])
+const MINI_BAR_CHANNELS = new Set(['mini:restore', 'mini:launch', 'switch:open'])
 
 function isMainSender(event) {
   return Boolean(mainWindow) && event?.sender === mainWindow.webContents && event.senderFrame === mainWindow.webContents.mainFrame
@@ -805,7 +807,10 @@ function getLaunchAllowlist() {
 async function confirmUnknownExecutable(executable, args) {
   const uk = String(app.getLocale() || '').toLowerCase().startsWith('uk')
   const detail = [executable, args.length ? args.join(' ') : ''].filter(Boolean).join('\n')
-  const result = await dialog.showMessageBox(mainWindow, {
+  // A launch from the mini-tab can happen while the big window is hidden; a
+  // dialog parented to a hidden window would be invisible, so it stands alone.
+  const parent = mainWindow && !mainWindow.isDestroyed() && mainWindow.isVisible() ? mainWindow : null
+  const result = await dialog.showMessageBox(...(parent ? [parent] : []), {
     type: 'warning',
     title: 'PRGLauncher',
     message: uk ? 'Дозволити PRGLauncher запустити цю програму?' : 'Allow PRGLauncher to run this program?',
@@ -842,19 +847,28 @@ function parseLaunchArguments(value) {
   return args.slice(0, 32)
 }
 
-ipcMain.handle('local:launchGame', async (event, payload) => {
-  if (!isMainSender(event)) return { action: 'error', message: 'Launch request was rejected' }
-  const data = typeof payload === 'string' ? { executable: payload } : (payload || {})
-  const executable = String(data.executable || '')
+// Shared rules for anything the launcher starts from a path: it must exist,
+// be a program Windows can start without a shell, and be approved on this PC
+// (picked in the file dialog or confirmed once). Returns null when it may run.
+async function approveLocalExecutable(executable, args) {
   if (!executable || !path.isAbsolute(executable) || !fs.existsSync(executable)) return { action: 'error', message: 'Executable was not found' }
   // Node and Electron refuse to spawn .bat/.cmd without a shell (EINVAL), and
   // passing renderer-supplied arguments through cmd.exe would be unsafe.
   if (process.platform === 'win32' && /\.(bat|cmd)$/i.test(executable)) return { action: 'error', code: 'unsupported-type', message: 'Only .exe files can be launched' }
   const allowlist = getLaunchAllowlist()
   if (!allowlist.has(executable)) {
-    if (!(await confirmUnknownExecutable(executable, parseLaunchArguments(data.arguments)))) return { action: 'cancelled' }
+    if (!(await confirmUnknownExecutable(executable, args))) return { action: 'cancelled' }
     allowlist.add(executable)
   }
+  return null
+}
+
+ipcMain.handle('local:launchGame', async (event, payload) => {
+  if (!isMainSender(event)) return { action: 'error', message: 'Launch request was rejected' }
+  const data = typeof payload === 'string' ? { executable: payload } : (payload || {})
+  const executable = String(data.executable || '')
+  const refused = await approveLocalExecutable(executable, parseLaunchArguments(data.arguments))
+  if (refused) return refused
   if (process.platform === 'darwin' && executable.toLowerCase().endsWith('.app')) {
     const error = await shell.openPath(executable)
     return error ? { action: 'error', message: error } : { action: 'requested' }
@@ -865,6 +879,20 @@ ipcMain.handle('local:launchGame', async (event, payload) => {
   child.unref()
   return { action: 'requested' }
 })
+
+// Companion programs: started with a game, optionally closed when it ends.
+const companionApps = createCompanionApps({ runCommand, spawn })
+
+handleFromMain('local:launchCompanion', async (_, payload) => {
+  const gameId = String(payload?.gameId || '')
+  const executable = String(payload?.executable || '')
+  if (!gameId || gameId.length > 128) return { action: 'error', message: 'Invalid game' }
+  const refused = await approveLocalExecutable(executable, [])
+  if (refused) return refused
+  return companionApps.launch({ gameId, executable, closeWithGame: payload?.closeWithGame === true })
+})
+
+handleFromMain('local:closeCompanions', async (_, gameId) => companionApps.closeFor(String(gameId || '')))
 
 handleFromMain('hltb:search', async (_, query) => searchHltb(query))
 handleFromMain('hltb:fetchGame', async (_, url) => {
@@ -1353,6 +1381,80 @@ handleFromMain('mini:launch', (_, gameId) => {
   return true
 })
 
+// ── SWITCH WINDOW ─────────────────────────────────────────────────────────
+// A capture card shown full screen on a chosen monitor with its sound on the
+// PC's output, instead of OBS. The page gets no preload bridge: it only plays
+// the device named in its URL, and Esc closes it.
+let switchWindow = null
+let miniHiddenForSwitch = false
+const SWITCH_CONFIG_FILE = () => path.join(app.getPath('userData'), 'switch-view.json')
+
+function loadSwitchConfig() {
+  try { return sanitizeSwitchConfig(JSON.parse(fs.readFileSync(SWITCH_CONFIG_FILE(), 'utf8'))) } catch { return sanitizeSwitchConfig({}) }
+}
+
+function saveSwitchConfig(config) {
+  const clean = sanitizeSwitchConfig(config)
+  fs.writeFileSync(`${SWITCH_CONFIG_FILE()}.tmp`, JSON.stringify(clean))
+  fs.renameSync(`${SWITCH_CONFIG_FILE()}.tmp`, SWITCH_CONFIG_FILE())
+  return clean
+}
+
+function switchDisplays() {
+  const primaryId = screen.getPrimaryDisplay().id
+  return screen.getAllDisplays().map((display, index) => ({ id: display.id, index: index + 1, primary: display.id === primaryId, width: display.size.width, height: display.size.height }))
+}
+
+function openSwitchWindow() {
+  const config = loadSwitchConfig()
+  if (!isConfigured(config)) return { ok: false, code: 'not-configured' }
+  if (switchWindow && !switchWindow.isDestroyed()) { switchWindow.focus(); return { ok: true } }
+  const display = pickSwitchDisplay(screen.getAllDisplays(), screen.getPrimaryDisplay().id, config.displayId)
+  const file = path.join(__dirname, '..', 'renderer', 'switch-view.html')
+  switchWindow = new BrowserWindow({
+    ...display.bounds,
+    frame: false,
+    fullscreen: true,
+    autoHideMenuBar: true,
+    show: false,
+    title: 'Nintendo Switch',
+    backgroundColor: '#000000',
+    webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true },
+  })
+  attachNavigationGuard(switchWindow.webContents, file)
+  switchWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.type === 'keyDown' && input.key === 'Escape') { event.preventDefault(); switchWindow?.close() }
+  })
+  // The mini-tab stays above everything; keep it off the Switch picture.
+  if (miniBar && !miniBar.isDestroyed() && miniBar.isVisible() && screen.getDisplayMatching(miniBar.getBounds()).id === display.id) {
+    miniBar.hide()
+    miniHiddenForSwitch = true
+  }
+  switchWindow.once('ready-to-show', () => { switchWindow?.show(); switchWindow?.focus() })
+  switchWindow.on('closed', () => {
+    switchWindow = null
+    if (miniHiddenForSwitch && miniBar && !miniBar.isDestroyed()) miniBar.showInactive()
+    miniHiddenForSwitch = false
+  })
+  switchWindow.loadFile(file, { query: {
+    video: config.videoId, videoLabel: config.videoLabel, audio: config.audioId, audioLabel: config.audioLabel,
+    quality: config.quality, lang: lastMiniState?.lang === 'en' ? 'en' : 'uk',
+  } })
+  return { ok: true }
+}
+
+handleFromMain('switch:open', () => {
+  const result = openSwitchWindow()
+  // Not set up yet: open the launcher at the Switch window settings.
+  if (!result.ok && result.code === 'not-configured' && mainWindow && !mainWindow.isDestroyed()) {
+    showMainWindow()
+    mainWindow.webContents.send('app:openSwitchSettings')
+  }
+  return result
+})
+handleFromMain('switch:getConfig', () => ({ config: loadSwitchConfig(), displays: switchDisplays() }))
+handleFromMain('switch:saveConfig', (_, config) => saveSwitchConfig(config))
+
 ipcMain.on('mini:pause', (event) => {
   if (!isMiniBarSender(event)) return
   mainWindow?.webContents.send('mini:pause')
@@ -1432,6 +1534,11 @@ app.on('web-contents-created', (_, contents) => {
 })
 
 app.whenReady().then(async () => {
+  // Permissions are denied unless switch-view.allowPermission grants them.
+  const roleOf = contents => contents && contents === mainWindow?.webContents ? 'main' : contents && contents === switchWindow?.webContents ? 'switch' : contents && contents === miniBar?.webContents ? 'mini' : null
+  session.defaultSession.setPermissionRequestHandler((contents, permission, callback, details) => callback(allowPermission({ permission, url: details?.requestingUrl || contents?.getURL(), role: roleOf(contents) })))
+  session.defaultSession.setPermissionCheckHandler((contents, permission, requestingOrigin, details) => allowPermission({ permission, url: details?.requestingUrl || contents?.getURL() || requestingOrigin, role: roleOf(contents) }))
+
   steamPath = await findSteamPath()
   console.log('[Steam] Path:', steamPath || 'not found')
 
