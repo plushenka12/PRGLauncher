@@ -1,11 +1,12 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
+const { rendererSource } = require('./helpers/renderer-source.cjs');
 
 const ownerUid = 'Qf6BCLccnvfJv5JEjROoxYlwhSv1';
 
 test('launcher, Firestore and Steam endpoint use the same owner UID', () => {
-  const renderer = fs.readFileSync('src/renderer/index.html', 'utf8');
+  const renderer = rendererSource();
   const rules = fs.readFileSync('firestore.rules', 'utf8');
   const steamFunction = fs.readFileSync('netlify/functions/steam-library.js', 'utf8');
   const rawgFunction = fs.readFileSync('netlify/functions/rawg-search.js', 'utf8');

@@ -3,10 +3,11 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { chromium } = require('playwright-core');
+const { rendererSource } = require('./helpers/renderer-source.cjs');
 
 const executablePath = process.env.PRG_TEST_BROWSER;
 test('review tab fits the game dialog at 90–120% scale and previews safe Markdown', { skip: !executablePath }, async () => {
-  const html = fs.readFileSync(path.join(__dirname, '..', 'src', 'renderer', 'index.html'), 'utf8');
+  const html = rendererSource();
   const styles = fs.readFileSync(path.join(__dirname, '..', 'src', 'renderer', 'styles.css'), 'utf8');
   const dialog = html.split('<div class="modal-overlay hidden" id="detail-modal">')[1]?.split('<!-- TIME EDITOR MODAL -->')[0];
   assert.ok(styles && dialog);

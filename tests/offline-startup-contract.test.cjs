@@ -1,9 +1,10 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
+const { rendererSource } = require('./helpers/renderer-source.cjs');
 
 test('owner cache becomes visible before native account and cloud requests', () => {
-  const source = fs.readFileSync('src/renderer/index.html', 'utf8');
+  const source = rendererSource();
   const authStart = source.indexOf('onAuthStateChanged(fbAuth,async user=>{');
   const authEnd = source.indexOf('function userLibraryRef()', authStart);
   assert.ok(authStart >= 0 && authEnd > authStart);
@@ -19,7 +20,7 @@ test('owner cache becomes visible before native account and cloud requests', () 
 });
 
 test('pending local edits survive restart and block an automatic cloud overwrite', () => {
-  const source = fs.readFileSync('src/renderer/index.html', 'utf8');
+  const source = rendererSource();
   assert.match(source, /const syncPendingKey=\(\)=>profileStorageKey\('gv-sync-pending-v1'\)/);
   assert.match(source, /function queueLibrarySync\(\)\{[\s\S]*?markPendingLibrarySync\(\)/);
   assert.match(source, /reconcileLibraries\(loadSyncBase\(\),localGames,remoteGames\)/);

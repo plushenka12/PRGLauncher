@@ -2,6 +2,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
+const { rendererSource } = require('./helpers/renderer-source.cjs');
 
 const source = fs.readFileSync('src/renderer/ui-game-detail.js', 'utf8');
 
@@ -79,7 +80,7 @@ test('game detail falls back to a current card when its opener was re-rendered',
 });
 
 test('game detail markup exposes a named dialog and labeled notes field', () => {
-  const html = fs.readFileSync('src/renderer/index.html', 'utf8');
+  const html = rendererSource();
   assert.ok(/class="detail-modal-inner"[^>]*role="dialog"[^>]*aria-modal="true"[^>]*aria-labelledby="d-title"/.test(html));
   assert.ok(/<label[^>]*for="d-notes-input"[^>]*>Notes<\/label>/.test(html));
 });

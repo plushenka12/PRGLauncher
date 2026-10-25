@@ -1,6 +1,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
+const { rendererSource } = require('./helpers/renderer-source.cjs');
 
 test('launcher uses a local Firebase bundle while the public site keeps the tested CDN SDK', () => {
   const manifest = JSON.parse(fs.readFileSync('package.json', 'utf8'));
@@ -9,7 +10,7 @@ test('launcher uses a local Firebase bundle while the public site keeps the test
   assert.ok(manifest.build.files.includes('src/**/*'), 'the installer must include the generated renderer bundle');
   const lock = JSON.parse(fs.readFileSync('package-lock.json', 'utf8'));
   const installedVersion = lock.packages['node_modules/firebase'].version;
-  const launcher = fs.readFileSync('src/renderer/index.html', 'utf8');
+  const launcher = rendererSource();
   assert.match(launcher, /<script src="\.\/firebase-bundle\.js"><\/script>/);
   assert.doesNotMatch(launcher, /https:\/\/www\.gstatic\.com\/firebasejs\//);
   const site = fs.readFileSync('web-dashboard/index.html', 'utf8');

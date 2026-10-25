@@ -115,5 +115,70 @@
     };
   }
 
-  global.createRecapUtils = () => ({ buildStatsDashboard, buildPublicReviews, buildPublicLibrary, choosePublicLibraryConsent });
+  // The mini-tab's daily "Wrapped": the last seven days ending now. Nintendo
+  // Sync stores one record per played day, so those count towards time and
+  // active days but never as the "longest session".
+  function buildWeeklyWrapped({ games = [], now = Date.now() } = {}) {
+    const day = 86400000;
+    const from = now - 7 * day;
+    const previousFrom = from - 7 * day;
+    const dateKey = stamp => { const d = new Date(stamp); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+    const startOfToday = new Date(now).setHours(0, 0, 0, 0);
+    const days = Array.from({ length: 7 }, (_, index) => {
+      const stamp = startOfToday - (6 - index) * day;
+      return { date: dateKey(stamp), weekday: new Date(stamp).getDay(), playtime: 0 };
+    });
+    const byDate = new Map(days.map(entry => [entry.date, entry]));
+    const perGame = new Map();
+    let playtime = 0;
+    let previousPlaytime = 0;
+    let sessions = 0;
+    let longest = null;
+    (Array.isArray(games) ? games : []).forEach(game => {
+      (Array.isArray(game.sessions) ? game.sessions : []).forEach(session => {
+        const start = Number(session.start) || 0;
+        const dur = Math.max(0, Number(session.dur) || 0);
+        if (!start || !dur || start > now) return;
+        if (start >= previousFrom && start < from) { previousPlaytime += dur; return; }
+        if (start < from) return;
+        playtime += dur;
+        const bucket = byDate.get(dateKey(start));
+        if (bucket) bucket.playtime += dur;
+        const stats = perGame.get(game.id) || { playtime: 0, sessions: 0 };
+        stats.playtime += dur;
+        if (session.source !== 'nintendo-sync') {
+          stats.sessions++;
+          sessions++;
+          if (!longest || dur > longest.dur) longest = { gameId: String(game.id), title: game.title, dur, start };
+        }
+        perGame.set(game.id, stats);
+      });
+    });
+    if (!playtime) return null;
+    const ranked = [...perGame.entries()].sort((a, b) => b[1].playtime - a[1].playtime);
+    const [topId, topStats] = ranked[0];
+    const topGame = (Array.isArray(games) ? games : []).find(game => game.id === topId) || {};
+    return {
+      id: dateKey(now),
+      from,
+      to: now,
+      playtime,
+      previousPlaytime,
+      sessions,
+      games: ranked.length,
+      activeDays: days.filter(entry => entry.playtime > 0).length,
+      days,
+      top: {
+        gameId: String(topId),
+        title: topGame.title || '',
+        appId: topGame.steamAppId ? String(topGame.steamAppId) : null,
+        cover: topGame.cover || null,
+        playtime: topStats.playtime,
+        share: Math.round(topStats.playtime / playtime * 100),
+      },
+      longest,
+    };
+  }
+
+  global.createRecapUtils = () => ({ buildStatsDashboard, buildPublicReviews, buildPublicLibrary, choosePublicLibraryConsent, buildWeeklyWrapped });
 })(window);

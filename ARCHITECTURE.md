@@ -44,7 +44,7 @@ The preload exposes a deliberately small, named bridge. It must not expose `ipcR
 
 ### Renderer
 
-The renderer now has a roughly 300 KB HTML entry point containing markup and many state/event handlers. Its roughly 86 KB stylesheet is separate in `src/renderer/styles.css`; pure sync/model, integration and UI helpers are also adjacent modules. The remaining JavaScript in the entry point is still the primary refactoring target.
+The renderer's markup lives in `src/renderer/index.html` (about 55 KB), its stylesheet in `styles.css`, and its main script in `app.js` (about 245 KB of state and event handlers, loaded as a classic script in page order); pure sync/model, integration and UI helpers are adjacent modules. Both launcher pages run with `script-src 'self'`: no inline scripts or inline event handlers. Fonts are bundled under `src/renderer/fonts/`. `app.js` remains the primary refactoring target.
 
 ### Web dashboard and functions
 

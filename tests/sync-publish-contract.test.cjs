@@ -1,9 +1,10 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
+const { rendererSource } = require('./helpers/renderer-source.cjs');
 
 test('public recap is published on changes rather than a 30-second loop', () => {
-  const source = fs.readFileSync('src/renderer/index.html', 'utf8');
+  const source = rendererSource();
   assert.doesNotMatch(source, /setInterval\(\(\)=>publishStatsDashboard\(/);
   const start = source.indexOf('async function pushToFb(');
   const end = source.indexOf('function setSyncBadge(', start);
@@ -16,7 +17,7 @@ test('public recap is published on changes rather than a 30-second loop', () => 
 });
 
 test('cloud library deletion includes per-game documents before removing the root', () => {
-  const source = fs.readFileSync('src/renderer/index.html', 'utf8');
+  const source = rendererSource();
   const start = source.indexOf("document.getElementById('delete-cloud-data-btn')");
   const end = source.indexOf("document.getElementById('sign-out-btn')", start);
   const handler = source.slice(start, end);

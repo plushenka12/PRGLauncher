@@ -3,9 +3,10 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
+const { rendererSource } = require('./helpers/renderer-source.cjs');
 
 test('year overview keeps yearly details without repeating library-wide status panels', () => {
-  const source = fs.readFileSync(path.join(__dirname, '..', 'src', 'renderer', 'index.html'), 'utf8');
+  const source = rendererSource();
   const start = source.indexOf('function renderStatsOverview(){');
   const end = source.indexOf('function addMostReturnedStatsCard(', start);
   assert.ok(start >= 0 && end > start);

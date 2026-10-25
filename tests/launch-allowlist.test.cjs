@@ -128,3 +128,15 @@ test('missing or relative executables never reach the prompt or spawn', async ()
   assert.deepEqual(spawned, []);
   assert.deepEqual(prompts, []);
 });
+
+test('batch files are refused with a clear code instead of crashing spawn', { skip: process.platform !== 'win32' }, async () => {
+  const { handlers, spawned, prompts, mainEvent, dir } = loadHandlers({ confirm: true });
+  for (const name of ['setup.bat', 'Run.CMD']) {
+    const executable = fakeExecutable(dir, name);
+    const result = plain(await handlers['local:launchGame'](mainEvent, { executable }));
+    assert.equal(result.code, 'unsupported-type', name);
+  }
+  assert.deepEqual(spawned, []);
+  assert.deepEqual(prompts, [], 'no confirmation is asked for a file that cannot run');
+  assert.match(source, /extensions: \['exe'\] \}\]/, 'the picker offers .exe only');
+});

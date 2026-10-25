@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
 const { handler, parseRequest } = require('../netlify/functions/rawg-search');
+const { rendererSource } = require('./helpers/renderer-source.cjs');
 
 const ownerUid = 'Qf6BCLccnvfJv5JEjROoxYlwhSv1';
 const request = { httpMethod: 'POST', headers: { authorization: 'Bearer demo.token' }, body: JSON.stringify({ query: 'Example Game', pageSize: 8 }) };
@@ -51,7 +52,7 @@ test('RAWG proxy authenticates the owner, projects results, and never returns ke
 });
 
 test('launcher routes RAWG through a narrow owner-only IPC bridge, never a renderer key', () => {
-  const renderer = fs.readFileSync('src/renderer/index.html', 'utf8');
+  const renderer = rendererSource();
   const main = fs.readFileSync('src/main/index.js', 'utf8');
   const preload = fs.readFileSync('src/preload/index.js', 'utf8');
   assert.doesNotMatch(renderer, /RAWG_KEY|api\.rawg\.io\/api/);
@@ -62,7 +63,7 @@ test('launcher routes RAWG through a narrow owner-only IPC bridge, never a rende
 });
 
 test('renderer RAWG lookup keeps normalized-title fallback and authenticates each request', async () => {
-  const html = fs.readFileSync('src/renderer/index.html', 'utf8');
+  const html = rendererSource();
   const start = html.indexOf('async function requestRawg(');
   const end = html.indexOf('function showSearchResults(', start);
   assert.ok(start >= 0 && end > start);

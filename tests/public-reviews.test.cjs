@@ -2,6 +2,7 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
+const { rendererSource } = require('./helpers/renderer-source.cjs');
 
 const context = { window: {} };
 vm.runInNewContext(fs.readFileSync('src/renderer/recap-utils.js', 'utf8'), context);
@@ -59,7 +60,7 @@ test('overlong published text is not silently truncated in public', () => {
 });
 
 test('merging duplicate games keeps both distinct reviews privately', () => {
-  const source = fs.readFileSync('src/renderer/index.html', 'utf8');
+  const source = rendererSource();
   const mergeSource = source.split('function mergeGameRecord(')[1].split('\n')[0];
   const mergeContext = {
     ensureGameSources: game => { game.sources ||= []; },

@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const { FIREBASE_AUTH_ORIGIN, isAllowedAppNavigation, isFirebaseAuthPopup, attachNavigationGuard } = require('../src/main/navigation-guard.js');
+const { rendererSource } = require('./helpers/renderer-source.cjs');
 
 const source = fs.readFileSync('src/main/index.js', 'utf8');
 const appFile = path.resolve('src/renderer/index.html');
@@ -64,7 +65,7 @@ test('only the Firebase auth handler may open a popup', () => {
   for (const bad of [`${FIREBASE_AUTH_ORIGIN}/other`, 'https://gametracker-30c93.firebaseapp.com.evil.example/__/auth/handler', 'http://gametracker-30c93.firebaseapp.com/__/auth/handler', 'https://prgtracker.netlify.app/', 'about:blank']) {
     assert.equal(isFirebaseAuthPopup(bad), false, bad);
   }
-  const renderer = fs.readFileSync('src/renderer/index.html', 'utf8');
+  const renderer = rendererSource();
   const authDomain = renderer.match(/authDomain:\s*'([^']+)'/)?.[1];
   assert.equal(`https://${authDomain}`, FIREBASE_AUTH_ORIGIN, 'navigation guard matches the Firebase config');
 });

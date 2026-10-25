@@ -6,7 +6,7 @@ Audit updated 21 October 2026. Priorities describe engineering risk, not user-fa
 
 ### TD-001 — Monolithic renderer
 
-`src/renderer/index.html` is roughly 300 KB after its 86 KB stylesheet moved to `styles.css`, but still mixes markup, state and event handlers. Sync/model, integration and UI helpers have been extracted; continue separating remaining state and handlers without changing the product contract.
+The renderer script moved out of `src/renderer/index.html` into `app.js` (about 245 KB), so the page now runs without `'unsafe-inline'` scripts. `app.js` still mixes state and event handlers in one file. Sync/model, integration and UI helpers have been extracted; continue separating remaining state and handlers without changing the product contract.
 
 ### TD-002 — Whole-snapshot cloud writes
 

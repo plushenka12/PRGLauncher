@@ -821,7 +821,7 @@ async function confirmUnknownExecutable(executable, args) {
 ipcMain.handle('local:chooseExecutable', async (event) => {
   if (!isMainSender(event)) return { canceled: true }
   const filters = process.platform === 'win32'
-    ? [{ name: 'Executable', extensions: ['exe', 'bat', 'cmd'] }]
+    ? [{ name: 'Executable', extensions: ['exe'] }]
     : process.platform === 'darwin'
       ? [{ name: 'Application', extensions: ['app'] }]
       : []
@@ -847,6 +847,9 @@ ipcMain.handle('local:launchGame', async (event, payload) => {
   const data = typeof payload === 'string' ? { executable: payload } : (payload || {})
   const executable = String(data.executable || '')
   if (!executable || !path.isAbsolute(executable) || !fs.existsSync(executable)) return { action: 'error', message: 'Executable was not found' }
+  // Node and Electron refuse to spawn .bat/.cmd without a shell (EINVAL), and
+  // passing renderer-supplied arguments through cmd.exe would be unsafe.
+  if (process.platform === 'win32' && /\.(bat|cmd)$/i.test(executable)) return { action: 'error', code: 'unsupported-type', message: 'Only .exe files can be launched' }
   const allowlist = getLaunchAllowlist()
   if (!allowlist.has(executable)) {
     if (!(await confirmUnknownExecutable(executable, parseLaunchArguments(data.arguments)))) return { action: 'cancelled' }

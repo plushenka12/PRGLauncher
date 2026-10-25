@@ -2,6 +2,7 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const vm = require('node:vm');
+const { rendererSource } = require('./helpers/renderer-source.cjs');
 
 const context = { window: {} };
 vm.runInNewContext(fs.readFileSync('src/renderer/perf-metrics.js', 'utf8'), context);
@@ -22,7 +23,7 @@ test('diagnostic timings contain only bounded numeric summaries', () => {
 });
 
 test('renderer includes numeric timings in opt-in diagnostics export', () => {
-  const html = fs.readFileSync('src/renderer/index.html', 'utf8');
+  const html = rendererSource();
   assert.match(html, /<script src="\.\/perf-metrics\.js"><\/script>/);
   assert.match(html, /performance:perfMetrics\.snapshot\(\)/);
   assert.match(html, /perfMetrics\.record\('initialReady'/);

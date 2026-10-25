@@ -2,9 +2,10 @@ const test = require('node:test')
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const vm = require('node:vm')
+const { rendererSource } = require('./helpers/renderer-source.cjs');
 
 test('expired Nintendo grant stops retries and offers a new sign-in', () => {
-  const html = fs.readFileSync('src/renderer/index.html', 'utf8')
+  const html = rendererSource()
   const start = html.indexOf('let nintendoSyncTimer=null,nintendoProfileReady=false,nintendoAuthRequired=false;')
   const end = html.indexOf('function startNintendoAutoSync()', start)
   assert.ok(start >= 0 && end > start)

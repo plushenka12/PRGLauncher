@@ -1,6 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
+const { rendererSource } = require('./helpers/renderer-source.cjs');
 
 require('../src/renderer/ui-library-grid.js');
 const { createLibraryGrid } = globalThis;
@@ -125,7 +126,7 @@ test('deleted games are evicted from the cache', () => {
 });
 
 test('renderer wires the keyed grid and a card signature covering what a card shows', () => {
-  const html = fs.readFileSync('src/renderer/index.html', 'utf8');
+  const html = rendererSource();
   const grid = html.slice(html.indexOf('function renderGrid()'), html.indexOf('function resetLibraryFilters()'));
   assert.match(grid, /libraryGrid\.render\(grid,list,new Set\(games\.map\(game=>game\.id\)\)\)/);
   assert.doesNotMatch(grid, /grid\.innerHTML=''/);

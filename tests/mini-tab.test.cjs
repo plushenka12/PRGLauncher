@@ -7,9 +7,10 @@ const vm = require('node:vm');
 const { resolveMiniTabBounds, loadSavedBounds, saveBounds, isReachable, MINI_TAB_SIZE } = require('../src/main/mini-tab-bounds.js');
 const { createSteamLibraryArt } = require('../src/main/steam-library-art.js');
 const { STEAM_GUARD_SCRIPT, createSteamWindowGuard } = require('../src/main/steam-window-guard.js');
+const { rendererSource } = require('./helpers/renderer-source.cjs');
 
 const main = fs.readFileSync('src/main/index.js', 'utf8');
-const html = fs.readFileSync('src/renderer/index.html', 'utf8');
+const html = rendererSource();
 
 const primary = { id: 1, workArea: { x: 0, y: 0, width: 2560, height: 1400 } };
 const second = { id: 2, workArea: { x: 2560, y: 0, width: 1920, height: 1040 } };
@@ -158,4 +159,41 @@ test('renderer lists installed Steam games by last played and launches only know
   assert.equal(context.miniTabHltb({ mainStoryMinutes: 1500, hidden: true }), null, 'hidden HLTB stays hidden');
   assert.equal(context.miniTabHltb({ error: 'not found' }), null);
   assert.equal(context.miniTabHltb(undefined), null);
+});
+
+test('Wrapped is prepared once, on the first launch of the day only', () => {
+  const pick = name => { const start = html.indexOf(`function ${name}(`); return html.slice(start, html.indexOf('\n}', start) + 2); };
+  const make = ({ storedDay = null, launchDay = '2026-10-25', today = '2026-10-25', user = { uid: 'me' }, gameList = [{ id: 'a' }] } = {}) => {
+    const values = new Map(storedDay ? [['me:gv-wrapped-day', storedDay]] : []);
+    const built = [];
+    const context = {
+      currentUser: user, games: gameList, WRAPPED_LAUNCH_DAY: launchDay, pendingWrapped: null, wrappedChecked: false,
+      localStorage: { getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, value) },
+      profileStorageKey: name => `me:${name}`,
+      localDayKey: () => today,
+      window: { createRecapUtils: () => ({ buildWeeklyWrapped: input => { built.push(input); return { id: today }; } }) },
+      setTimeout: () => 0, updateMiniBar: () => {}, Date,
+    };
+    vm.runInNewContext(`${pick('checkDailyWrapped')}\nthis.check = checkDailyWrapped`, context);
+    return { context, built, values };
+  };
+  const first = make();
+  first.context.check();
+  first.context.check();
+  assert.equal(first.built.length, 1, 'built once per launch');
+  assert.equal(first.values.get('me:gv-wrapped-day'), '2026-10-25');
+  assert.deepEqual({ ...first.context.pendingWrapped }, { id: '2026-10-25' });
+
+  const again = make({ storedDay: '2026-10-25' });
+  again.context.check();
+  assert.equal(again.built.length, 0, 'already shown today');
+
+  const overnight = make({ launchDay: '2026-10-24', today: '2026-10-25' });
+  overnight.context.check();
+  assert.equal(overnight.built.length, 0, 'a launcher left running overnight does not replay it');
+
+  const signedOut = make({ user: null });
+  signedOut.context.check();
+  assert.equal(signedOut.built.length, 0);
+  assert.equal(signedOut.context.wrappedChecked, false, 'checked again once the library is ready');
 });
