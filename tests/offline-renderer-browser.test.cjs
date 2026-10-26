@@ -47,6 +47,9 @@ test('keeping local data leaves the conflict visible until the upload succeeds',
     await page.route(/^https?:/, route => route.abort());
     await page.goto(pathToFileURL(path.join(__dirname, '..', 'src', 'renderer', 'index.html')).href);
     await page.waitForFunction(() => Boolean(window._fbImports?.getAuth && window._fbImports?.runTransaction));
+    // The signed-out start-up resets sync state and closes the conflict dialog
+    // once Firebase answers; the test sets its state after that.
+    await page.waitForFunction(() => document.getElementById('login-overlay')?.style.display === 'flex', null, { timeout: 15000 });
     await page.evaluate(() => {
       document.getElementById('login-overlay').classList.add('hidden');
       currentLanguage = 'uk';
@@ -88,6 +91,9 @@ test('a local conflict choice waits for an active write and then publishes once'
     await page.route(/^https?:/, route => route.abort());
     await page.goto(pathToFileURL(path.join(__dirname, '..', 'src', 'renderer', 'index.html')).href);
     await page.waitForFunction(() => Boolean(window._fbImports?.getAuth && window._fbImports?.runTransaction));
+    // The signed-out start-up resets sync state and closes the conflict dialog
+    // once Firebase answers; the test sets its state after that.
+    await page.waitForFunction(() => document.getElementById('login-overlay')?.style.display === 'flex', null, { timeout: 15000 });
     await page.evaluate(() => {
       document.getElementById('login-overlay').style.display = 'none';
       currentUser = { uid: 'demo' };
