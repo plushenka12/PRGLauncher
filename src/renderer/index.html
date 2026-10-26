@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://media.rawg.io https://shared.akamai.steamstatic.com https://cdn.akamai.steamstatic.com https://backloggd.com https://*.backloggd.com https://images.igdb.com; connect-src 'self' https://store.steampowered.com https://www.gstatic.com https://*.googleapis.com https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com wss://*.googleapis.com;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://www.gstatic.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: file: https://media.rawg.io https://shared.akamai.steamstatic.com https://cdn.akamai.steamstatic.com https://backloggd.com https://*.backloggd.com https://images.igdb.com; connect-src 'self' https://store.steampowered.com https://www.gstatic.com https://*.googleapis.com https://*.firebaseio.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com wss://*.googleapis.com;">
 <title>PRGLauncher</title>
 <link href="./fonts/fonts.css" rel="stylesheet">
 <link rel="stylesheet" href="./styles.css">
@@ -36,6 +36,7 @@
   </div>
   <div class="bar-right">
     <button class="sync-badge report" id="sync-badge" type="button" title="Відкрити звіт" data-tooltip="Відкрити персональний звіт на PRGTracker">Звіт</button>
+    <button class="settings-trigger couch-trigger" id="couch-btn" type="button" title="Режим геймпада" aria-label="Режим геймпада" data-tooltip="Режим геймпада: бібліотека на весь екран для гри з дивана">🎮</button>
     <button class="settings-trigger" id="settings-btn" title="Налаштування" aria-label="Відкрити налаштування" data-tooltip="Відкрити налаштування">⚙</button>
   </div>
   <div class="win-controls">
@@ -89,6 +90,14 @@
         <option value="3">★ 3</option>
         <option value="2">★ 2</option>
         <option value="1">★ 1</option>
+      </select>
+      <select class="filter-select" id="f-bar-length" aria-label="Довжина за HLTB Main Story">
+        <option value="all">Будь-яка довжина</option>
+        <option value="short">До 5 год</option>
+        <option value="medium">5–20 год</option>
+        <option value="long">20–50 год</option>
+        <option value="epic">Понад 50 год</option>
+        <option value="unknown">Без даних HLTB</option>
       </select>
       <select class="filter-select" id="f-bar-platform">
         <option value="all">All platforms</option>
@@ -174,11 +183,13 @@
       <div class="switch-grid">
         <label class="form-label">Картка захоплення<select id="switch-video" class="form-select"></select></label>
         <label class="form-label">Звук<select id="switch-audio" class="form-select"></select></label>
+        <label class="form-label">Куди виводити звук<select id="switch-output" class="form-select"></select></label>
         <label class="form-label">Монітор<select id="switch-display" class="form-select"></select></label>
+        <label class="form-label">Режим<select id="switch-mode" class="form-select"><option value="fullscreen">На весь екран</option><option value="window">У вікні</option></select></label>
         <label class="form-label">Якість<select id="switch-quality" class="form-select"><option value="1080p60">1080p · 60 fps</option><option value="720p60">720p · 60 fps</option><option value="1080p30">1080p · 30 fps</option></select></label>
         <label class="form-label">Буфер повтору<select id="switch-replay" class="form-select"><option value="0">Вимкнено</option><option value="30">Останні 30 с</option><option value="60">Останні 60 с</option></select></label>
       </div>
-      <p class="nintendo-manual-help">Буфер тримає останні секунди гри в пам’яті: S у вікні Switch зберігає кліп у «Відео → PRGLauncher Switch». Вмикай лише за потреби — запис додатково навантажує відеокарту.</p>
+      <p class="nintendo-manual-help">Буфер тримає останні секунди гри в пам’яті: S у вікні Switch зберігає кліп у «Відео → PRGLauncher Switch», P — скріншот туди ж. Вмикай лише за потреби — запис додатково навантажує відеокарту.</p>
       <div class="switch-actions"><button class="btn btn-primary btn-sm" id="switch-open" type="button">Відкрити вікно Switch</button><button class="btn btn-ghost btn-sm" id="switch-refresh" type="button">Оновити список пристроїв</button></div>
       <p class="nintendo-manual-help" id="switch-status" role="status"></p>
       </section>
@@ -249,6 +260,7 @@
     <section class="settings-pane" role="tabpanel" id="settings-pane-data" aria-labelledby="settings-tab-data" data-settings-pane="data" hidden>
     <div class="settings-section-title">Зберігання та безпека</div>
     <div class="settings-data-row"><div><div class="settings-data-title">Резервна копія</div><div class="nintendo-manual-help">Зберігає каталог, сесії, тему та списки ігнорування.</div></div><div class="settings-data-actions"><button class="btn btn-ghost btn-sm" id="export-backup-btn">Експортувати JSON</button><button class="btn btn-ghost btn-sm" id="import-backup-btn">Імпортувати JSON</button></div></div>
+    <div class="settings-data-row"><div><div class="settings-data-title">Експорт бібліотеки</div><div class="nintendo-manual-help">Таблиця для Excel чи Google Sheets: назви, платформи, статуси, оцінки, час і сесії. Нотатки, шляхи запуску й акаунти не потрапляють.</div></div><div class="settings-data-actions"><button class="btn btn-ghost btn-sm" id="export-library-csv">CSV</button><button class="btn btn-ghost btn-sm" id="export-library-json">JSON</button></div></div>
     <div class="settings-data-row"><div><div class="settings-data-title">Діагностика</div><div class="nintendo-manual-help">Експортує технічний стан без нотаток, Steam ID, токенів і повної бібліотеки.</div></div><div class="settings-data-actions"><button class="btn btn-ghost btn-sm" id="export-diagnostics-btn">Експортувати діагностику</button></div></div>
     <details class="settings-fold"><summary>Видалення даних</summary><div class="settings-fold-body"><p class="settings-description">Локальне очищення залишає хмару. Видалення хмарної бібліотеки прибирає також локальну копію та публічний Recap.</p><div class="settings-data-actions"><button class="btn btn-ghost btn-sm" id="clear-local-data-btn">Очистити локальні</button><button class="btn btn-danger btn-sm" id="delete-cloud-data-btn">Видалити хмарні</button></div></div></details>
     <div class="settings-section-title">Оновлення</div>
@@ -629,6 +641,9 @@
 <script src="./hltb-utils.js"></script>
 <script src="./progress-utils.js"></script>
 <script src="./n3ds-utils.js"></script>
+<script src="./library-export.js"></script>
+<script src="./accent-color.js"></script>
+<script src="./couch-mode.js"></script>
 <script src="./a11y.js"></script>
 <script src="./ui-feedback.js"></script>
 <script src="./perf-metrics.js"></script>

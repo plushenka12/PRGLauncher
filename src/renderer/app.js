@@ -20,6 +20,7 @@ const steamStatusCache = new Map();
 let filter = 'all';
 let yearFilter = 'all';
 let ratingFilter = 'all';
+let lengthFilter = 'all';
 let platformFilter = 'all';
 let libraryQuery = '';
 let librarySort = localStorage.getItem('gv-library-sort-v1') || 'recent';
@@ -148,7 +149,7 @@ UI_COPY.push(
 UI_COPY.push(['Повторно увійти в Nintendo','Sign in to Nintendo again'],['Nintendo-сесія недійсна. Увійди повторно; ігри й час залишаться.','Nintendo session is no longer valid. Sign in again; your games and playtime will stay.']);
 // Static labels in the game card, time editor and add-game form.
 UI_COPY.push(['Час у грі','Playtime'],['Середня сесія','Avg Session'],['Остання гра','Last Played'],['Журнал сесій','Session Log'],['Змінити час','Edit Time'],['Зберегти нотатки','Save Notes'],['Деталі гри','Game details'],['Год','Hours'],['Сек','Sec'],['+ Додати','+ Add'],['Зберегти зміни','Save Changes'],['Інше','Other'],['наприклад, Elden Ring…','e.g. Elden Ring...'],['Назва гри','Game title'],['Заповнюється з RAWG або встав URL','Auto-filled from RAWG or paste URL'],['Особисті думки…','Personal thoughts...'],['Особисті нотатки...','Personal notes...'],['Вікно Switch','Switch window'],['Показує картку захоплення на весь екран вибраного монітора зі звуком у твоїх навушниках — замість OBS. Відкривається кнопкою 🎮 у міні-табі, Esc закриває. Картку може тримати лише одна програма, тож OBS при цьому має бути закритий.','Shows your capture card full screen on the chosen monitor with its sound in your headphones — instead of OBS. Open it with the 🎮 button in the mini-tab; Esc closes it. Only one app can hold the card, so OBS has to be closed.'],['Картка захоплення','Capture card'],['Звук','Sound'],['Монітор','Monitor'],['Якість','Quality'],['Відкрити вікно Switch','Open the Switch window'],['Оновити список пристроїв','Refresh devices'],['Відеопристрій','Video device'],['Аудіопристрій','Audio device'],['Відеопристроїв не знайдено','No video devices found'],['Авто — звук самої картки','Auto — the card\'s own sound'],['Без звуку','No sound'],['основний','main'],['Картку захоплення не видно. Підключи її та натисни «Оновити список пристроїв».','No capture card is visible. Plug it in and press “Refresh devices”.'],['Схожої на картку захоплення назви немає — вибери пристрій вручну.','No device looks like a capture card — choose one manually.'],['Спершу вибери картку захоплення.','Choose a capture card first.'],['Додатковий софт','Companion apps'],['+ Додати програму','+ Add program'],['Запускаються разом із грою одним кліком: з картки, з бібліотеки чи з міні-таба.','They start together with the game in one click: from the card, the library or the mini-tab.'],['Закривати з грою','Close with game'],['Прибрати програму','Remove program'],['Не знайдено на цьому ПК','Not found on this PC'],['Лише .exe — вибери програму заново','.exe only — choose the program again'],['Не вдалося запустити: ','Could not start: '],['Лаунчер запускає лише .exe. Відкрий картку гри й вибери .exe заново.','The launcher can only start .exe files. Open the game card and choose the .exe again.']);
-UI_COPY.push(['Сховати підказку','Dismiss suggestion'],['Є підказка щодо статусу','Status suggestion available'],['Темп і беклог','Pace and backlog'],['Твій темп','Your pace'],['Залишилось у беклозі','Left in the backlog'],['Прогноз беклогу','Backlog forecast'],['Найближче до фінішу','Closest to the finish'],['Немає ігор «Граю» з даними HLTB','No Playing games with HLTB data'],['Буфер повтору','Replay buffer'],['Вимкнено','Off'],['Останні 30 с','Last 30 s'],['Останні 60 с','Last 60 s'],['Буфер тримає останні секунди гри в пам’яті: S у вікні Switch зберігає кліп у «Відео → PRGLauncher Switch». Вмикай лише за потреби — запис додатково навантажує відеокарту.','The buffer keeps the last seconds of play in memory: S in the Switch window saves a clip to “Videos → PRGLauncher Switch”. Turn it on only when needed — recording adds load on the graphics card.']);
+UI_COPY.push(['Деталі','Details'],['← → статус · A змінити · B або Y закрити','← → status · A to change · B or Y to close'],['Режим геймпада','Gamepad mode'],['Режим геймпада: бібліотека на весь екран для гри з дивана','Gamepad mode: the library full screen for playing from the couch'],['Нещодавні','Recent'],['Усі ігри','All games'],['Грати','Play'],['Вийти','Exit'],['Розділи','Sections'],['Вибір','Select'],['Зараз граєш','Playing now'],['Тут поки порожньо','Nothing here yet'],['Перемкни розділ кнопками LB / RB.','Switch sections with LB / RB.'],['від HLTB Main Story','of HLTB Main Story'],['Запуску немає — A запустить таймер','No launcher for this game — A starts the timer'],['Нещодавні ігри','Recent games'],['Режим','Mode'],['На весь екран','Full screen'],['У вікні','In a window'],['Довжина за HLTB Main Story','Length by HLTB Main Story'],['Будь-яка довжина','Any length'],['До 5 год','Up to 5 h'],['5–20 год','5–20 h'],['20–50 год','20–50 h'],['Понад 50 год','Over 50 h'],['Без даних HLTB','No HLTB data'],['Сховати підказку','Dismiss suggestion'],['Є підказка щодо статусу','Status suggestion available'],['Темп і беклог','Pace and backlog'],['Твій темп','Your pace'],['Залишилось у беклозі','Left in the backlog'],['Прогноз беклогу','Backlog forecast'],['Найближче до фінішу','Closest to the finish'],['Немає ігор «Граю» з даними HLTB','No Playing games with HLTB data'],['Буфер повтору','Replay buffer'],['Вимкнено','Off'],['Останні 30 с','Last 30 s'],['Останні 60 с','Last 60 s'],['Буфер тримає останні секунди гри в пам’яті: S у вікні Switch зберігає кліп у «Відео → PRGLauncher Switch», P — скріншот туди ж. Вмикай лише за потреби — запис додатково навантажує відеокарту.','The buffer keeps the last seconds of play in memory: S in the Switch window saves a clip to “Videos → PRGLauncher Switch”, P saves a screenshot there. Turn it on only when needed — recording adds load on the graphics card.'],['Куди виводити звук','Sound output'],['Експорт бібліотеки','Library export'],['Таблиця для Excel чи Google Sheets: назви, платформи, статуси, оцінки, час і сесії. Нотатки, шляхи запуску й акаунти не потрапляють.','A table for Excel or Google Sheets: titles, platforms, statuses, ratings, time and sessions. Notes, launch paths and accounts are left out.'],['Як у Windows','Windows default'],['Аудіовихід','Audio output']);
 UI_COPY.push(['Приймає час гри з 3DS із Luma3DS через домашню мережу. Поклади prg3ds.3dsx у папку /3ds на SD-картці, відкрий його в Homebrew Launcher і введи адресу, порт і код звідси.','Receives play time from a 3DS running Luma3DS over your home network. Put prg3ds.3dsx in the /3ds folder on the SD card, open it in the Homebrew Launcher and enter the address, port and code shown here.'],['Приймати дані з 3DS','Receive data from the 3DS'],['Вимкнено. Увімкни, коли надсилатимеш дані з 3DS.','Off. Turn it on when you send data from the 3DS.'],['Новий код','New code'],['Даних з 3DS ще не було.','No data from the 3DS yet.'],['Під час першого ввімкнення Windows може спитати про доступ до мережі — дозволь його для приватних мереж. Повторне надсилання не дублює сесії.','The first time, Windows may ask about network access — allow it for private networks. Sending again does not duplicate sessions.'],['Адреса ПК','PC address'],['Порт','Port'],['Код спарювання','Pairing code'],['Немає підключення до мережі','No network connection'],['Не вдалося ввімкнути приймання даних.','Could not turn on receiving.']);
 const UK_TEXT=new Map(UI_COPY.map(([uk,en])=>[en,uk]));
 const EN_TEXT=new Map(UI_COPY.map(([uk,en])=>[uk,en]));
@@ -231,7 +232,7 @@ function buildFilterBar() {
   // Restore platform value
   if(curP) psel.value = curP;
   // Active styling
-  [ysel, document.getElementById('f-bar-rating'), psel].forEach(sel => {
+  [ysel, document.getElementById('f-bar-rating'), document.getElementById('f-bar-length'), psel].forEach(sel => {
     sel.classList.toggle('active', sel.value !== 'all');
   });
   // Count label
@@ -295,7 +296,7 @@ function initFb(cfg) {
       if(currentUser?.uid!==user?.uid)return;
       nintendoProfileReady=Boolean(user&&status);
       if(status?.connected){setNintendoSyncStatus('Nintendo Account авторизовано',true);nintendoConnectBtn.textContent='Завантажити play activity';nintendoConnectBtn.dataset.checking='2';startNintendoAutoSync();}
-      updateProfileUI();if(user){await startUserSync(user);if(currentUser?.uid===user.uid)importN3dsPending();}else{setSyncBadge('off');showLogin();if(deniedAccountLogin){showAuthError(t('Цей PRG Account не має доступу до лаунчера.'));deniedAccountLogin=false;}}
+      updateProfileUI();if(user){await startUserSync(user);if(currentUser?.uid===user.uid){importN3dsPending();runPendingJumpLaunch();loadSteamArt().then(found=>{if(!found)return;renderGrid();if(detailId&&!document.getElementById('detail-modal').classList.contains('hidden'))openDetail(detailId);});}}else{setSyncBadge('off');showLogin();if(deniedAccountLogin){showAuthError(t('Цей PRG Account не має доступу до лаунчера.'));deniedAccountLogin=false;}}
     });
   } catch(e){setSyncBadge('err');}
 }
@@ -911,6 +912,8 @@ function stopTimer(silent){
   clearInterval(timerInterval);
   const elapsed=Date.now()-activeStart,game=getGame(activeGameId);
   window.launcher?.closeCompanions?.(activeGameId);
+  // A session of a minute or more gets the mini-tab's "session ended" card.
+  if(game&&elapsed>=60000){const main=game.hltb&&!game.hltb.hidden?Number(game.hltb.mainStoryMinutes):0;lastSessionSummary={id:`${game.id}:${activeStart}`,title:game.title,dur:elapsed,total:(game.playtime||0)+elapsed,hltbPct:main>0?Math.round(((game.playtime||0)+elapsed)/(main*60000)*100):null,at:Date.now()};}
   if(game&&elapsed>1000){game.playtime=(game.playtime||0)+elapsed;if(!game.sessions)game.sessions=[];game.sessions.push({start:activeStart,end:Date.now(),dur:elapsed,source:activeSource==='steam'?'steam':'manual'});game.lastPlayed=Date.now();const _si=games.findIndex(g=>g.id===activeGameId);if(_si>0){const[_g]=games.splice(_si,1);games.unshift(_g);}save();pushToFb();}
   activeGameId=null; activeStart=null;
   activeSource='manual';localStorage.removeItem('gv-active'); localStorage.removeItem('gv-start');localStorage.removeItem('gv-active-source');
@@ -975,7 +978,7 @@ function miniBarState(){
   const style=getComputedStyle(document.documentElement);
   return {
     active:Boolean(activeGameId),gameId:activeGameId||null,title:game?.title||'',startedAt:activeStart||0,activePlaytime:game?.playtime||0,
-    signedIn:Boolean(currentUser),lang:currentLanguage,games:miniTabGames(),wrapped:pendingWrapped,
+    signedIn:Boolean(currentUser),lang:currentLanguage,games:miniTabGames(),wrapped:pendingWrapped,session:lastSessionSummary,
     theme:Object.fromEntries(MINI_THEME_VARS.map(name=>[name,style.getPropertyValue(name).trim()]).filter(([,value])=>value))
   };
 }
@@ -984,6 +987,9 @@ function miniBarState(){
 // launcher left running overnight does not replay it at midnight.
 const WRAPPED_LAUNCH_DAY=localDayKey();
 let pendingWrapped=null;
+// The last finished session, for the mini-tab's "session ended" card. `var`:
+// stopTimer can run during start-up, before this line.
+var lastSessionSummary=null;
 let wrappedChecked=false;
 function localDayKey(stamp=Date.now()){const d=new Date(stamp);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function checkDailyWrapped(){
@@ -996,8 +1002,75 @@ function checkDailyWrapped(){
   // The mini-tab plays it once; drop it from the state afterwards.
   if(pendingWrapped)setTimeout(()=>{pendingWrapped=null;updateMiniBar();},5*60000);
 }
+// STEAM ART: Steam's local capsule and hero art per app id, with an accent
+// colour (null: Steam has none cached). Asked for once per id. `var`, because
+// updateMiniBar and renderGrid can run during start-up, before these lines.
+var steamArt=new Map();
+function artFor(game){return game?.steamAppId?steamArt.get(String(game.steamAppId))||null:null;}
+var steamArtLoading=null;
+function loadSteamArt(){
+  const ids=[...new Set(games.map(game=>game.steamAppId).filter(Boolean).map(String))].filter(id=>!steamArt.has(id));
+  if(!ids.length||!window.launcher?.getSteamArt)return Promise.resolve(false);
+  if(steamArtLoading)return steamArtLoading;
+  steamArtLoading=window.launcher.getSteamArt(ids).then(found=>{ids.forEach(id=>steamArt.set(id,found?.[id]||null));return true;}).catch(()=>false).finally(()=>{steamArtLoading=null;});
+  return steamArtLoading;
+}
+// The accent of a cover that is not local Steam art, read from the image when
+// its server allows it (CORS); otherwise the theme's own accent stays.
+var coverAccents=new Map();
+function coverAccent(url){
+  if(!url)return Promise.resolve(null);
+  if(coverAccents.has(url))return coverAccents.get(url);
+  const job=new Promise(resolve=>{const image=new Image();image.crossOrigin='anonymous';image.onload=()=>{try{const canvas=document.createElement('canvas');canvas.width=32;canvas.height=Math.max(1,Math.round(32*image.naturalHeight/image.naturalWidth));const ctx=canvas.getContext('2d');ctx.drawImage(image,0,0,canvas.width,canvas.height);resolve(window.PRGAccent.pickAccent(ctx.getImageData(0,0,canvas.width,canvas.height).data));}catch{resolve(null);}};image.onerror=()=>resolve(null);image.src=url;});
+  coverAccents.set(url,job);return job;
+}
+async function gameAccent(game){return artFor(game)?.color||await coverAccent(game?.cover);}
+
+// GAMEPAD MODE (couch-mode.js): the library full screen for the couch.
+var couchMode=window.createCouchMode({
+  getGames:()=>games,
+  launch:id=>{if(!guestBlock())launchAndTrack(id);},
+  getActiveId:()=>activeGameId,
+  translate:t,
+  fmtHours,
+  setFullscreen:on=>window.launcher?.setCouchFullscreen?.(on),
+  getArt:artFor,
+  loadArt:loadSteamArt,
+  getAccent:gameAccent,
+  formatDate:fmtDate,
+  openSwitch:()=>window.launcher?.openSwitchView?.(),
+  setStatus:(id,status)=>{if(!guestBlock())setGameStatus(id,status);},
+  onClose:()=>document.getElementById('couch-btn')?.focus({preventScroll:true}),
+});
+document.getElementById('couch-btn')?.addEventListener('click',()=>couchMode.open());
+
+// TASKBAR JUMP LIST: the recently played games you can start from the
+// taskbar (main/jump-list.js). Sent only when what it shows changes.
+let lastJumpSignature='';
+function updateJumpList(){
+  if(!window.launcher?.updateJumpList||!currentUser)return;
+  const en=currentLanguage==='en';
+  const recent=games.filter(game=>Number(game.lastPlayed)>0&&(game.steamAppId||game.localExecutable)).sort((a,b)=>b.lastPlayed-a.lastPlayed).slice(0,7)
+    .map(game=>({id:game.id,title:game.title,appId:game.steamAppId?String(game.steamAppId):'',executable:game.localExecutable||'',detail:`${fmtHours(game.playtime||0)} · ${en?'last played':'востаннє'} ${new Date(game.lastPlayed).toLocaleDateString(en?'en-US':'uk-UA',{day:'numeric',month:'short'})}`}));
+  const payload={games:recent,category:t('Нещодавні ігри'),switchTitle:t('Вікно Switch')};
+  const signature=JSON.stringify(payload);
+  if(signature===lastJumpSignature)return;
+  lastJumpSignature=signature;
+  window.launcher.updateJumpList(payload);
+}
+let pendingJumpLaunchId=null;
+function launchFromJumpList(gameId){
+  if(!currentUser||!games.length){pendingJumpLaunchId=gameId;return;}
+  const game=getGame(gameId);
+  if(!game||activeGameId===game.id||guestBlock()||(!game.steamAppId&&!game.localExecutable))return;
+  launchAndTrack(game.id);
+}
+window.launcher?.onJumpLaunch?.(launchFromJumpList);
+async function runPendingJumpLaunch(){const id=pendingJumpLaunchId||await window.launcher?.takeJumpLaunch?.();pendingJumpLaunchId=null;if(id)launchFromJumpList(id);}
 function updateMiniBar(){
   checkDailyWrapped();
+  updateJumpList();
+  couchMode?.refresh();
   const state=miniBarState();
   const signature=JSON.stringify(state);
   if(signature===lastMiniSignature)return;
@@ -1028,11 +1101,20 @@ function launchFromMiniTab(gameId){
 
 // RENDER
 function coverEl(game){
+  // A card without a cover uses Steam's wide hero art when it is cached.
+  const hero=!game.cover&&artFor(game)?.hero;
+  if(hero){const img=document.createElement('img');img.loading='lazy';img.decoding='async';img.src=hero;img.alt=game.title;img.onerror=()=>img.replaceWith(fallbackEl(game));return img;}
   if(game.cover){const img=document.createElement('img');img.loading='lazy';img.decoding='async';img.src=game.cover;img.alt=game.title;img.onerror=()=>img.replaceWith(fallbackEl(game));return img;}
   return fallbackEl(game);
 }
 function fallbackEl(game){const d=document.createElement('div');d.className='cover-fallback';const t=document.createElement('div');t.className='cover-fb-text';t.textContent=game.title.slice(0,2).toUpperCase();d.appendChild(t);return d;}
 
+// How long a game is by HLTB Main Story, for the library length filter.
+function hltbLengthBand(game){
+  const minutes=game.hltb&&!game.hltb.hidden?Number(game.hltb.mainStoryMinutes):0;
+  if(!(minutes>0))return 'unknown';
+  return minutes<=300?'short':minutes<=1200?'medium':minutes<=3000?'long':'epic';
+}
 function getFilteredGames(){
   games.forEach(game=>{if(game.status==='Sessions')game.status='QuickPlay';});
   let list = filter==='all'?[...games]:games.filter(g=>g.status===filter);
@@ -1043,6 +1125,7 @@ function getFilteredGames(){
   if(ratingFilter==='rated') list=list.filter(g=>g.rating);
   else if(ratingFilter==='unrated') list=list.filter(g=>!g.rating);
   else if(ratingFilter!=='all'){const exact=parseInt(ratingFilter);list=list.filter(g=>g.rating===exact);}
+  if(lengthFilter!=='all')list=list.filter(g=>hltbLengthBand(g)===lengthFilter);
   if(librarySort==='time')list.sort((a,b)=>(b.playtime||0)-(a.playtime||0));
   else if(librarySort==='title')list.sort((a,b)=>a.title.localeCompare(b.title,'uk'));
   else if(librarySort==='added')list.sort((a,b)=>(b.added||0)-(a.added||0));
@@ -1095,13 +1178,13 @@ function renderGrid(){
 // Everything a game card displays. A card whose signature is unchanged is
 // reused as is; the running timer badge is refreshed separately by tickTimer.
 function gameCardSignature(game){
-  return [currentLanguage,activeGameId===game.id?1:0,game.title,game.cover||'',game.status,game.platform||'',game.rating||0,game.playtime||0,(game.sessions||[]).length,game.steamAppId||'',progressUtils.suggestStatus(game,{activeGameId})?.kind||''].join('\u0001');
+  return [currentLanguage,activeGameId===game.id?1:0,game.title,game.cover||'',game.status,game.platform||'',game.rating||0,game.playtime||0,(game.sessions||[]).length,game.steamAppId||'',progressUtils.suggestStatus(game,{activeGameId})?.kind||'',game.cover?'':artFor(game)?.hero||''].join('\u0001');
 }
 
 function resetLibraryFilters(){
-  libraryQuery='';yearFilter='all';ratingFilter='all';platformFilter='all';filter='all';
+  libraryQuery='';yearFilter='all';ratingFilter='all';lengthFilter='all';platformFilter='all';filter='all';
   document.getElementById('library-search').value='';
-  for(const id of ['f-bar-year','f-bar-rating','f-bar-platform'])document.getElementById(id).value='all';
+  for(const id of ['f-bar-year','f-bar-rating','f-bar-length','f-bar-platform'])document.getElementById(id).value='all';
   if(games.length&&games.every(game=>game.status==='QuickPlay')){showQuickPlay=true;document.getElementById('quickplay-toggle').checked=true;localStorage.setItem('gv-show-quickplay-v1','1');}
   document.querySelectorAll('.filter-tab').forEach(button=>button.classList.toggle('active',button.dataset.filter==='all'));
   document.querySelectorAll('.stat-filter').forEach(button=>button.setAttribute('aria-pressed','false'));
@@ -1377,7 +1460,8 @@ function openDetail(id){
   detailId=id;const game=getGame(id);if(!game)return;
   setDetailTab('overview');
   renderCompanions(game);
-  detailUi.renderGameDetail(game,{activeGameId,activeStart,createStatusButton,platformIcons:PLATFORM_ICONS,renderGameSources,setRatingUI,renderHltbPanel,renderGameHistory,fmtTime,fmtDate,translate:t});
+  detailUi.renderGameDetail(game,{activeGameId,activeStart,createStatusButton,platformIcons:PLATFORM_ICONS,renderGameSources,setRatingUI,renderHltbPanel,renderGameHistory,fmtTime,fmtDate,translate:t,bannerImage:artFor(game)?.hero||game.cover});
+  applyDetailAccent(game);
   renderReviewEditor(game);
   renderStatusHint(game);
   detailFocus.open(document.getElementById('detail-modal'));
@@ -1402,6 +1486,13 @@ function renderStatusHint(game){
   const dismiss=document.createElement('button');dismiss.type='button';dismiss.className='status-hint-dismiss';dismiss.textContent='✕';dismiss.title=t('Сховати підказку');dismiss.setAttribute('aria-label',t('Сховати підказку'));
   dismiss.onclick=()=>{game.statusHints=progressUtils.dismissHint(game,hint.kind);save();pushToFb().catch(error=>console.warn('[Sync] Status hint failed',error));renderStatusHint(game);renderGrid();};
   box.append(text,accept,dismiss);
+}
+// The game page takes its accent from the game's art (accent-color.js).
+async function applyDetailAccent(game){
+  const modal=document.getElementById('detail-modal');if(!modal)return;
+  modal.style.removeProperty('--game-accent');
+  const color=await gameAccent(game);
+  if(color&&detailId===game.id)modal.style.setProperty('--game-accent',color);
 }
 function closeDetail(restoreFocus=true){detailFocus.close(document.getElementById('detail-modal'),restoreFocus);}
 
@@ -1787,6 +1878,7 @@ document.getElementById('duplicate-close-bottom')?.addEventListener('click',()=>
 
 document.getElementById('f-bar-year').onchange=e=>{yearFilter=e.target.value==='all'?'all':parseInt(e.target.value);buildFilterBar();renderGrid();updateStats();};
 document.getElementById('f-bar-rating').onchange=e=>{ratingFilter=e.target.value;buildFilterBar();renderGrid();updateStats();};
+document.getElementById('f-bar-length').onchange=e=>{lengthFilter=e.target.value;buildFilterBar();renderGrid();updateStats();};
 document.getElementById('f-bar-platform').onchange=e=>{platformFilter=e.target.value;buildFilterBar();renderGrid();updateStats();};
 document.getElementById('library-search').oninput=e=>{libraryQuery=e.target.value.trim().toLocaleLowerCase();renderGrid();};
 document.getElementById('filter-toggle').onclick=()=>{const bar=document.getElementById('library-extra-filters');const button=document.getElementById('filter-toggle');const collapsed=bar.classList.toggle('is-collapsed');bar.inert=collapsed;button.setAttribute('aria-expanded',String(!collapsed));button.textContent=t(collapsed?'Фільтри':'Сховати фільтри');};
@@ -1887,21 +1979,17 @@ async function syncNintendoLibrary({showIgnored=false,announce=true}={}){
     if(owner!==currentUser?.uid||!nintendoProfileReady)return false;
     const incoming=normalizeNintendoHistory(result.data||{});let changed=0,matched=0;const pending=[],updatedTitles=[];
     incoming.forEach(item=>{
-      const cleanTitle=value=>String(value||'').toLocaleLowerCase().replace(/\bnintendo\s+switch\s*2?\s+edition\b|\bswitch\s*2?\s+edition\b/gi,'').replace(/[^\p{L}\p{N}]+/gu,'').trim();
+      const cleanTitle=nintendoUtils.editionKey;
       const normalizedIncoming=cleanTitle(item.title);
-      const game=games.find(g=>g.nintendoTitleId===item.id)||games.find(g=>{const normalizedGame=cleanTitle(g.title);const hasExternalSource=g.backloggdGameId||g.sources?.some(source=>source.type==='backloggd'||source.type==='nintendo');return (hasExternalSource||g.tags?.includes('Nintendo Sync')||g.platform?.startsWith('Nintendo'))&&normalizedGame&&(normalizedGame===normalizedIncoming||normalizedGame.includes(normalizedIncoming)||normalizedIncoming.includes(normalizedGame));});
+      let game=games.find(g=>nintendoUtils.ownsTitle(g,item.id))||games.find(g=>{const normalizedGame=cleanTitle(g.title);const hasExternalSource=g.backloggdGameId||g.sources?.some(source=>source.type==='backloggd'||source.type==='nintendo');return (hasExternalSource||g.tags?.includes('Nintendo Sync')||g.platform?.startsWith('Nintendo'))&&normalizedGame&&(normalizedGame===normalizedIncoming||normalizedGame.includes(normalizedIncoming)||normalizedIncoming.includes(normalizedGame));});
+      // A card already linked to another Nintendo title takes this one only
+      // as another edition of the same game (equal names once the edition is
+      // stripped); a merely similar name is offered as a new game instead.
+      if(game&&game.nintendoTitleId&&!nintendoUtils.ownsTitle(game,item.id)&&cleanTitle(game.title)!==normalizedIncoming)game=null;
       if(!game){if(showIgnored||!nintendoIgnoredIds.has(item.id))pending.push(item);return;}
       matched++;
-      if(!game.nintendoTitleId)game.nintendoTitleId=item.id;
       addGameSource(game,{type:'nintendo',id:String(item.id),platform:item.platform||'Nintendo Switch'});
-      const hasBaseline=game.nintendoLastSeenMinutes!==undefined&&game.nintendoLastSeenMinutes!==null;
-      const previous=Number(game.nintendoLastSeenMinutes||0);const current=Math.max(previous,item.minutes||0);
-      const playedAt=Date.parse(item.lastPlayedAt||'');
-      const importedDaily=new Set(game.nintendoImportedDailyKeys||[]);const daily=extractNintendoDaily(item.raw);let dailyChanged=false;let dailyMinutesAdded=0;let dailyLatest=0;const dailyAnchor=Number(game.nintendoLastSeenPlayedAt||game.lastPlayed||0);daily.forEach(day=>{if(importedDaily.has(day.key))return;const start=new Date(day.ts);start.setHours(12,0,0,0);game.sessions=Array.isArray(game.sessions)?game.sessions:[];game.sessions.push({start:start.getTime(),end:start.getTime()+day.minutes*60000,dur:day.minutes*60000,source:'nintendo-sync'});importedDaily.add(day.key);game.lastPlayed=Math.max(Number(game.lastPlayed||0),start.getTime());dailyLatest=Math.max(dailyLatest,start.getTime());if(hasBaseline&&start.getTime()>dailyAnchor)dailyMinutesAdded+=day.minutes;dailyChanged=true;});if(dailyChanged){game.nintendoImportedDailyKeys=[...importedDaily];if(dailyMinutesAdded){game.playtime=Math.max(0,Number(game.playtime||0)+dailyMinutesAdded*60000);updatedTitles.push(game.title);}if(dailyLatest>Number(game.nintendoLastSeenPlayedAt||0))game.nintendoLastSeenPlayedAt=dailyLatest;changed++;}
-      if(!hasBaseline){game.nintendoLastSeenMinutes=current;game.nintendoLastSeenPlayedAt=Number.isFinite(playedAt)?playedAt:null;game.nintendoLastSync=Date.now();changed++;}
-      else if(current!==previous){const deltaMinutes=current-previous;game.playtime=Math.max(0,Number(game.playtime||0)+deltaMinutes*60000);game.nintendoLastSeenMinutes=current;game.nintendoLastSync=Date.now();const sessionStart=Number.isFinite(playedAt)?playedAt:Date.now()-deltaMinutes*60000;const session={start:sessionStart,end:sessionStart+deltaMinutes*60000,dur:deltaMinutes*60000,source:'nintendo-sync'};game.sessions=Array.isArray(game.sessions)?game.sessions:[];game.sessions.push(session);game.lastPlayed=sessionStart;game.nintendoLastSeenPlayedAt=Number.isFinite(playedAt)?playedAt:sessionStart;changed++;updatedTitles.push(game.title);}
-      else if(Number.isFinite(playedAt)&&playedAt>Number(game.lastPlayed||0)){game.lastPlayed=playedAt;game.nintendoLastSeenPlayedAt=playedAt;changed++;}
-      if(!game.cover&&item.cover){game.cover=item.cover;changed++;}
+      const applied=nintendoUtils.applyNintendoItem(game,item,{now:Date.now()});changed+=applied.changed;if(applied.updated)updatedTitles.push(game.title);
     });
     nintendoHistoryData=incoming;
     localStorage.setItem(profileStorageKey('gv-nintendo-last-sync-v1'),String(Date.now()));setNintendoLastSync(Date.now());
@@ -1956,6 +2044,17 @@ function validateBackupData(data){
   for(const game of backupGames){if(!game||!String(game.id||'').trim()||!String(game.title||'').trim()||ids.has(String(game.id)))return {ok:false,error:'Backup містить пошкоджену або дубльовану гру.'};ids.add(String(game.id));if(game.sessions&&!Array.isArray(game.sessions))return {ok:false,error:'Backup містить пошкоджений журнал сесій.'};}
   return {ok:true};
 }
+// Library export (library-export.js): the browser download asks where to save.
+function exportLibrary(kind){
+  if(guestBlock())return;
+  const tools=window.createLibraryExport();const rows=tools.exportGames(games);
+  const text=kind==='csv'?tools.toCsv(rows):tools.toJson(rows);
+  const blob=new Blob([text],{type:kind==='csv'?'text/csv;charset=utf-8':'application/json'});
+  const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=`PRGLauncher library ${new Date().toISOString().slice(0,10)}.${kind}`;link.click();setTimeout(()=>URL.revokeObjectURL(url),60000);
+  feedbackUi.announce(currentLanguage==='en'?`Exported ${rows.length} games`:`Експортовано ігор: ${rows.length}`);
+}
+document.getElementById('export-library-csv')?.addEventListener('click',()=>exportLibrary('csv'));
+document.getElementById('export-library-json')?.addEventListener('click',()=>exportLibrary('json'));
 document.getElementById('export-backup-btn')?.addEventListener('click',async()=>{const backup=canonical.buildCanonicalSnapshot({games:schema.migrateGames(games),schemaVersion:schema.CURRENT_SCHEMA_VERSION,profile:{language:currentLanguage,theme:localStorage.getItem('gv-theme')||'neon',scale:localStorage.getItem('gv-ui-scale-v1')||localStorage.getItem('gv-ui-scale')||'1'},integrations:{steamProfile:localStorage.getItem(profileStorageKey('gv-steam-profile-url'))||null,backloggdProfile:localStorage.getItem(profileStorageKey('gv-backloggd-profile-url'))||null,nintendoConnected:Boolean(nintendoProfileReady)}});const result=await window.launcher.exportBackup({...backup,createdAt:Date.now(),theme:localStorage.getItem('gv-theme')||'neon',nintendoIgnoredIds:[...nintendoIgnoredIds]});if(result?.ok)setNintendoSyncStatus('Backup збережено',true);else if(!result?.canceled)setNintendoSyncStatus(`Backup error: ${result?.error||'невідома помилка'}`);});
 document.getElementById('import-backup-btn')?.addEventListener('click',async()=>{const result=await window.launcher.importBackup();if(result?.canceled)return;if(!result?.ok){setNintendoSyncStatus(`Import error: ${result?.error||'невідома помилка'}`);return;}const validation=validateBackupData(result.data);if(!validation.ok){setNintendoSyncStatus(`Import error: ${validation.error}`);return;}const backupGames=canonical.extractGames(result.data);if(!confirm(`Імпортувати ${backupGames.length} ігор і замінити поточний локальний каталог?`))return;games=schema.migrateGames(backupGames);if(Array.isArray(result.data.nintendoIgnoredIds)){nintendoIgnoredIds=new Set(result.data.nintendoIgnoredIds);localStorage.setItem(profileStorageKey('gv-nintendo-ignored-v1'),JSON.stringify([...nintendoIgnoredIds]));}if(result.data.theme)applyTheme(result.data.theme);save();pushToFb();buildFilterBar();renderGrid();updateStats();setNintendoSyncStatus('Backup імпортовано',true);});
 document.getElementById('export-diagnostics-btn')?.addEventListener('click',async()=>{
@@ -2049,23 +2148,28 @@ async function loadSwitchSettings(probe=false){
   fill('switch-video',videos.length?videos.map((device,index)=>[device.deviceId,device.label||`${t('Відеопристрій')} ${index+1}`]):[['',t('Відеопристроїв не знайдено')]],videoSelected?.deviceId||'');
   const audioSelected=['auto','none'].includes(config.audioId)?config.audioId:(audios.find(device=>device.deviceId===config.audioId)||audios.find(device=>device.label&&device.label===config.audioLabel))?.deviceId||'auto';
   fill('switch-audio',[['auto',t('Авто — звук самої картки')],['none',t('Без звуку')],...audios.map((device,index)=>[device.deviceId,device.label||`${t('Аудіопристрій')} ${index+1}`])],audioSelected);
+  const outputs=devices.filter(device=>device.kind==='audiooutput'&&!['default','communications'].includes(device.deviceId));
+  const outputSelected=(outputs.find(device=>device.deviceId===config.outputId)||outputs.find(device=>device.label&&device.label===config.outputLabel))?.deviceId||'default';
+  fill('switch-output',[['default',t('Як у Windows')],...outputs.map((device,index)=>[device.deviceId,device.label||`${t('Аудіовихід')} ${index+1}`])],outputSelected);
   const displaySelected=displays.find(display=>display.id===config.displayId)||displays.find(display=>!display.primary)||displays[0];
   fill('switch-display',displays.map(display=>[String(display.id),`${t('Монітор')} ${display.index} · ${display.width}×${display.height}${display.primary?` (${t('основний')})`:''}`]),String(displaySelected?.id??''));
   document.getElementById('switch-quality').value=config.quality||'1080p60';
   document.getElementById('switch-replay').value=String(config.replay||0);
+  document.getElementById('switch-mode').value=config.mode==='window'?'window':'fullscreen';
   status.textContent=!videos.length?t('Картку захоплення не видно. Підключи її та натисни «Оновити список пристроїв».'):!videos.some(device=>SWITCH_CAPTURE.test(device.label))?t('Схожої на картку захоплення назви немає — вибери пристрій вручну.'):'';
   if(!config.videoId&&videoSelected)saveSwitchSettings();
 }
 function saveSwitchSettings(){
   const pick=id=>document.getElementById(id);
-  const video=pick('switch-video'),audio=pick('switch-audio');
+  const video=pick('switch-video'),audio=pick('switch-audio'),output=pick('switch-output');
   return window.launcher?.saveSwitchConfig?.({
     videoId:video.value,videoLabel:video.selectedOptions[0]?.textContent||'',
     audioId:audio.value,audioLabel:['auto','none'].includes(audio.value)?'':audio.selectedOptions[0]?.textContent||'',
     displayId:Number(pick('switch-display').value),quality:pick('switch-quality').value,replay:Number(pick('switch-replay').value),
+    mode:pick('switch-mode').value,outputId:output.value||'default',outputLabel:output.value&&output.value!=='default'?output.selectedOptions[0]?.textContent||'':'',
   });
 }
-['switch-video','switch-audio','switch-display','switch-quality','switch-replay'].forEach(id=>document.getElementById(id).addEventListener('change',saveSwitchSettings));
+['switch-video','switch-audio','switch-output','switch-display','switch-mode','switch-quality','switch-replay'].forEach(id=>document.getElementById(id).addEventListener('change',saveSwitchSettings));
 document.getElementById('switch-refresh').onclick=()=>loadSwitchSettings(true);
 document.getElementById('switch-open').onclick=async()=>{await saveSwitchSettings();const result=await window.launcher?.openSwitchView?.();if(result&&!result.ok)document.getElementById('switch-status').textContent=t('Спершу вибери картку захоплення.');};
 window.launcher?.onOpenSwitchSettings?.(()=>{openSettings();setSettingsTab('general');requestAnimationFrame(()=>{document.getElementById('switch-settings-title')?.scrollIntoView({block:'start'});document.getElementById('switch-video')?.focus({preventScroll:true});});});
@@ -2125,7 +2229,7 @@ document.getElementById('backloggd-import-select-all').onclick=()=>setBackloggdI
 document.getElementById('backloggd-import-clear-all').onclick=()=>setBackloggdImportSelection(false);
 document.getElementById('backloggd-import-skip').onclick=()=>document.getElementById('backloggd-import-modal').classList.add('hidden');
 async function enrichBackloggdPreviewCovers(){const rows=[...document.querySelectorAll('#backloggd-import-list .backloggd-import-row')];for(const row of rows){const source=backloggdImportGames[Number(row.querySelector('.backloggd-import-check')?.dataset.index)];if(!source?.title||source.rawgCover)continue;try{const data=await searchRAWG(source.title);const match=bestRawgMatch(source.title,data?.results);if(match?.background_image){source.rawgCover=match.background_image;const image=row.querySelector('.backloggd-import-cover');if(image)image.src=match.background_image;}await new Promise(resolve=>setTimeout(resolve,180));}catch{}}}
-function mergeGameRecord(primary,duplicate){if(!primary||!duplicate||primary===duplicate)return primary;ensureGameSources(primary);ensureGameSources(duplicate);(duplicate.sources||[]).forEach(source=>addGameSource(primary,source));primary.platforms=[...new Set([...(primary.platforms||[]),...(duplicate.platforms||[]),primary.platform,duplicate.platform].filter(Boolean))];if(!primary.steamAppId&&duplicate.steamAppId)primary.steamAppId=duplicate.steamAppId;if(!primary.nintendoTitleId&&duplicate.nintendoTitleId)primary.nintendoTitleId=duplicate.nintendoTitleId;if(primary.steamLastSeenMinutes==null&&duplicate.steamLastSeenMinutes!=null)primary.steamLastSeenMinutes=duplicate.steamLastSeenMinutes;if(primary.nintendoLastSeenMinutes==null&&duplicate.nintendoLastSeenMinutes!=null)primary.nintendoLastSeenMinutes=duplicate.nintendoLastSeenMinutes;if(!primary.backloggdGameId&&duplicate.backloggdGameId){primary.backloggdGameId=duplicate.backloggdGameId;primary.backloggdUrl=duplicate.backloggdUrl;primary.backloggdCover=duplicate.backloggdCover;}if((duplicate.rawgId&&!primary.rawgId)||(!primary.cover&&duplicate.cover)) {primary.cover=duplicate.cover;primary.rawgId=duplicate.rawgId||primary.rawgId;}if(!primary.rating&&duplicate.rating)primary.rating=duplicate.rating;if(primary.status==='Backlog'&&duplicate.status&&duplicate.status!=='Backlog')primary.status=duplicate.status;primary.playtime=Math.max(Number(primary.playtime||0),Number(duplicate.playtime||0));primary.lastPlayed=Math.max(Number(primary.lastPlayed||0),Number(duplicate.lastPlayed||0))||null;const sessions=[...(primary.sessions||[]),...(duplicate.sessions||[])];const sessionKeys=new Set();primary.sessions=sessions.filter(session=>{const key=`${session.start||0}:${session.end||0}:${session.source||''}`;if(sessionKeys.has(key))return false;sessionKeys.add(key);return true;}).sort((a,b)=>(a.start||0)-(b.start||0));const history=[...(primary.history||[]),...(duplicate.history||[])];const historyKeys=new Set();primary.history=history.filter(event=>{const key=event.id||`${event.kind}:${event.at}:${event.source||''}`;if(historyKeys.has(key))return false;historyKeys.add(key);return true;}).sort((a,b)=>(a.at||0)-(b.at||0));if(!primary.review?.markdown&&duplicate.review?.markdown)primary.review={...duplicate.review};else if(primary.review?.markdown&&duplicate.review?.markdown&&primary.review.markdown!==duplicate.review.markdown)primary.review={markdown:`${primary.review.markdown}\n\n---\n\n${duplicate.review.markdown}`,public:false,updatedAt:Date.now()};return primary;}
+function mergeGameRecord(primary,duplicate){if(!primary||!duplicate||primary===duplicate)return primary;ensureGameSources(primary);ensureGameSources(duplicate);(duplicate.sources||[]).forEach(source=>addGameSource(primary,source));primary.platforms=[...new Set([...(primary.platforms||[]),...(duplicate.platforms||[]),primary.platform,duplicate.platform].filter(Boolean))];if(!primary.steamAppId&&duplicate.steamAppId)primary.steamAppId=duplicate.steamAppId;const separateEditions=nintendoUtils.mergeNintendoEditions(primary,duplicate);if(!primary.nintendoTitleId&&duplicate.nintendoTitleId)primary.nintendoTitleId=duplicate.nintendoTitleId;if(primary.steamLastSeenMinutes==null&&duplicate.steamLastSeenMinutes!=null)primary.steamLastSeenMinutes=duplicate.steamLastSeenMinutes;if(primary.nintendoLastSeenMinutes==null&&duplicate.nintendoLastSeenMinutes!=null)primary.nintendoLastSeenMinutes=duplicate.nintendoLastSeenMinutes;if(!primary.backloggdGameId&&duplicate.backloggdGameId){primary.backloggdGameId=duplicate.backloggdGameId;primary.backloggdUrl=duplicate.backloggdUrl;primary.backloggdCover=duplicate.backloggdCover;}if((duplicate.rawgId&&!primary.rawgId)||(!primary.cover&&duplicate.cover)) {primary.cover=duplicate.cover;primary.rawgId=duplicate.rawgId||primary.rawgId;}if(!primary.rating&&duplicate.rating)primary.rating=duplicate.rating;if(primary.status==='Backlog'&&duplicate.status&&duplicate.status!=='Backlog')primary.status=duplicate.status;primary.playtime=separateEditions?Number(primary.playtime||0)+Number(duplicate.playtime||0):Math.max(Number(primary.playtime||0),Number(duplicate.playtime||0));primary.lastPlayed=Math.max(Number(primary.lastPlayed||0),Number(duplicate.lastPlayed||0))||null;const sessions=[...(primary.sessions||[]),...(duplicate.sessions||[])];const sessionKeys=new Set();primary.sessions=sessions.filter(session=>{const key=`${session.start||0}:${session.end||0}:${session.source||''}`;if(sessionKeys.has(key))return false;sessionKeys.add(key);return true;}).sort((a,b)=>(a.start||0)-(b.start||0));const history=[...(primary.history||[]),...(duplicate.history||[])];const historyKeys=new Set();primary.history=history.filter(event=>{const key=event.id||`${event.kind}:${event.at}:${event.source||''}`;if(historyKeys.has(key))return false;historyKeys.add(key);return true;}).sort((a,b)=>(a.at||0)-(b.at||0));if(!primary.review?.markdown&&duplicate.review?.markdown)primary.review={...duplicate.review};else if(primary.review?.markdown&&duplicate.review?.markdown&&primary.review.markdown!==duplicate.review.markdown)primary.review={markdown:`${primary.review.markdown}\n\n---\n\n${duplicate.review.markdown}`,public:false,updatedAt:Date.now()};return primary;}
 function mergeDuplicateGames(){const before=games.map(game=>JSON.parse(JSON.stringify(game)));const bucket=new Map();const merged=[];games.forEach(game=>{const key=normalizeBackloggdTitle(game.title);if(!key){merged.push(game);return;}const primary=bucket.get(key);if(!primary){bucket.set(key,game);merged.push(game);return;}addGameHistory(primary,'merge',{title:game.title},'library');mergeGameRecord(primary,game);});if(merged.length!==games.length){games=merged;localStorage.setItem(profileStorageKey('gv-last-merge-backup'),JSON.stringify(before));const undo=document.getElementById('undo-merge-btn');if(undo)undo.disabled=false;}}
 function restoreLastMerge(){try{const raw=localStorage.getItem(profileStorageKey('gv-last-merge-backup'));if(!raw)return false;const restored=JSON.parse(raw);if(!Array.isArray(restored))return false;games=restored;localStorage.removeItem(profileStorageKey('gv-last-merge-backup'));skipMergeOnce=true;save();pushToFb();buildFilterBar();renderGrid();updateStats();const undo=document.getElementById('undo-merge-btn');if(undo)undo.disabled=true;return true;}catch(error){console.warn('[Merge] Could not restore backup',error);return false;}}
 function getDuplicateGroups(){const groups=new Map();games.forEach(game=>{const key=normalizeBackloggdTitle(game.title);if(!key)return;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(game);});return [...groups.values()].filter(group=>group.length>1);}

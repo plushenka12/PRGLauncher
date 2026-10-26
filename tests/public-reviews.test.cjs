@@ -62,9 +62,12 @@ test('overlong published text is not silently truncated in public', () => {
 test('merging duplicate games keeps both distinct reviews privately', () => {
   const source = rendererSource();
   const mergeSource = source.split('function mergeGameRecord(')[1].split('\n')[0];
+  const nintendoContext = { window: {} };
+  vm.runInNewContext(fs.readFileSync('src/renderer/nintendo-utils.js', 'utf8'), nintendoContext);
   const mergeContext = {
     ensureGameSources: game => { game.sources ||= []; },
     addGameSource: () => {},
+    nintendoUtils: nintendoContext.window.createNintendoUtils(),
     Date
   };
   vm.runInNewContext(`function mergeGameRecord(${mergeSource}`, mergeContext);

@@ -7,6 +7,7 @@
       main: 'сюжет', extra: 'сюжет + додатково', full: '100%', next: (name, d) => `${name} ~${d}`, beyond: d => `більше за 100% (~${d})`,
       games: n => { const a = n % 10, b = n % 100; return `${n} ${a === 1 && b !== 11 ? 'гра' : a >= 2 && a <= 4 && (b < 12 || b > 14) ? 'гри' : 'ігор'}`; },
       empty: 'Встановлених ігор Steam поки немає.', signedOut: 'Увійди в PRG Account у лаунчері, щоб бачити свої ігри.',
+      sessionDone: 'Сесію завершено', total: d => `разом ${d}`, ofHltb: n => `${n}% від HLTB Main Story`,
     },
     en: {
       playing: 'Now playing', last: 'Last played', play: 'Play', stop: 'End session', open: 'Open launcher', switchView: 'Switch window', launch: 'Launch', installed: 'Installed',
@@ -15,6 +16,7 @@
       main: 'main story', extra: 'main + extras', full: 'completionist', next: (name, d) => `${name} ~${d}`, beyond: d => `past completionist (~${d})`,
       games: n => `${n} ${n === 1 ? 'game' : 'games'}`,
       empty: 'No installed Steam games yet.', signedOut: 'Sign in to PRG Account in the launcher to see your games.',
+      sessionDone: 'Session ended', total: d => `${d} in total`, ofHltb: n => `${n}% of HLTB Main Story`,
     },
   };
   const ICON = {
@@ -415,7 +417,10 @@
   $('w-prev').onclick = () => showSlide(slideIndex - 1);
   $('w-next').onclick = () => nextSlide();
   $('wrapped').addEventListener('mouseenter', () => $('wrapped').classList.add('paused'));
-  $('wrapped').addEventListener('mouseleave', () => $('wrapped').classList.remove('paused'));
+  $('wrapped').addEventListener('mouseleave', () => { if (!quiet) $('wrapped').classList.remove('paused'); });
+  // Hidden over a full-screen game: the Wrapped waits instead of playing unseen.
+  let quiet = false;
+  window.launcher?.onMiniQuiet?.(value => { quiet = value; $('wrapped').classList.toggle('paused', value); });
   document.addEventListener('keydown', event => {
     if ($('wrapped').hidden) return;
     if (event.key === 'Escape') closeWrapped();
@@ -423,10 +428,33 @@
     else if (event.key === 'ArrowLeft') showSlide(slideIndex - 1);
   });
 
+  // A short card after a session ends: how long it was, the total and the
+  // HLTB share. One card per session, only right after it ended.
+  let seenSessionId = '';
+  let doneTimer = null;
+  function showSessionDone(session) {
+    const box = $('session-done');
+    const x = t();
+    const minutes = Math.max(1, Math.round(session.dur / 60000));
+    const length = minutes < 60 ? x.m(minutes) : `${x.h(Math.floor(minutes / 60))}${minutes % 60 ? ` ${x.m(minutes % 60)}` : ''}`;
+    box.replaceChildren(el('div', 'done-label', x.sessionDone), el('div', 'done-title', session.title), el('div', 'done-time num', length),
+      el('div', 'done-meta', [x.total(duration(session.total / 60000)), session.hltbPct != null ? x.ofHltb(session.hltbPct) : ''].filter(Boolean).join(' · ')));
+    box.hidden = false;
+    box.classList.remove('leaving');
+    clearTimeout(doneTimer);
+    const hide = () => { box.classList.add('leaving'); doneTimer = setTimeout(() => { box.hidden = true; }, 260); };
+    box.onclick = hide;
+    doneTimer = setTimeout(hide, 9000);
+  }
+
   window.launcher?.onMiniState?.(next => {
     state = { ...state, ...next };
     applyTheme(next.theme);
     render();
+    if (next.session && next.session.id !== seenSessionId) {
+      seenSessionId = next.session.id;
+      if (Date.now() - next.session.at < 60000 && !wrapped) showSessionDone(next.session);
+    }
     // Each day's Wrapped plays once per mini-tab.
     if (next.wrapped && next.wrapped.id !== seenWrappedId && !wrapped) {
       seenWrappedId = next.wrapped.id;

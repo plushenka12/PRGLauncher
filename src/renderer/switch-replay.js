@@ -81,7 +81,10 @@
       slots.forEach(drop);
     }
 
-    return { save, stop, format };
+    // False while no recorder has produced a byte (a stuck GPU encoder does that).
+    const hasData = () => slots.some(slot => (slot.chunks || []).some(chunk => chunk.size > 0));
+
+    return { save, stop, hasData, format };
   }
 
   global.PRGSwitchReplay = { create, pickType };

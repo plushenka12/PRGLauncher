@@ -5,7 +5,7 @@
     const {
       activeGameId, activeStart, createStatusButton, platformIcons,
       renderGameSources, setRatingUI, renderHltbPanel, renderGameHistory,
-      fmtTime, fmtDate, translate
+      fmtTime, fmtDate, translate, bannerImage = game.cover
     } = options;
     const isActive = activeGameId === game.id;
     const elapsed = isActive ? Date.now() - activeStart : 0;
@@ -21,11 +21,15 @@
       fallback.textContent = game.title.slice(0, 2).toUpperCase();
       banner.insertBefore(fallback, banner.firstChild);
     };
-    if (game.cover) {
+    // Wide Steam hero art when Steam has it, else the library cover.
+    if (bannerImage) {
       const image = document.createElement('img');
-      image.src = game.cover;
+      image.src = bannerImage;
       image.alt = game.title;
-      image.onerror = () => { image.remove(); addFallback(); };
+      image.onerror = () => {
+        if (bannerImage !== game.cover && game.cover) { image.onerror = () => { image.remove(); addFallback(); }; image.src = game.cover; return; }
+        image.remove(); addFallback();
+      };
       banner.insertBefore(image, banner.firstChild);
     } else addFallback();
 

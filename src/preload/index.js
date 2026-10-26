@@ -79,6 +79,12 @@ contextBridge.exposeInMainWorld('launcher', {
   pauseMiniSession: () => ipcRenderer.send('mini:pause'),
   onMiniState:  (callback) => ipcRenderer.on('mini:state', (_, state) => callback(state)),
   onMiniPause:  (callback) => ipcRenderer.on('mini:pause', callback),
+  getSteamArt: (appIds) => ipcRenderer.invoke('art:steam', appIds),
+  setCouchFullscreen: (on) => ipcRenderer.invoke('couch:setFullscreen', on),
+  updateJumpList: (payload) => ipcRenderer.invoke('jumplist:update', payload),
+  takeJumpLaunch: () => ipcRenderer.invoke('jumplist:takePending'),
+  onJumpLaunch: (callback) => ipcRenderer.on('jumplist:launch', (_, gameId) => callback(gameId)),
+  onMiniQuiet:  (callback) => ipcRenderer.on('mini:quiet', (_, quiet) => callback(Boolean(quiet))),
 
   // Platform
   platform: process.platform,

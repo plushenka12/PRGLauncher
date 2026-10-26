@@ -12,6 +12,8 @@
       replayKey: seconds => `S — зберегти останні ${seconds} с`, saving: 'Зберігаю кліп…', saved: 'Кліп збережено',
       savedWhere: 'Відео → PRGLauncher Switch', replayOff: 'Буфер повтору недоступний на цьому ПК', clip: 'Зберегти кліп',
       replayEmpty: 'Буфер ще порожній — спробуй за секунду',
+      replayStuck: 'Буфер повтору не записує', replayStuckHint: 'Відеокарта не віддає кадри для запису. Зазвичай допомагає перезапуск ПК; гра у вікні працює й так.',
+      fullKey: 'F11 — на весь екран', shotKey: 'P — скріншот', shot: 'Скріншот збережено', outputMissing: 'Вибраний звуковий вихід не підключено — граю через стандартний вихід Windows',
     },
     en: {
       opening: 'Connecting to the capture card…', close: 'Esc — close', noAudio: 'no sound',
@@ -21,6 +23,8 @@
       replayKey: seconds => `S — save the last ${seconds} s`, saving: 'Saving the clip…', saved: 'Clip saved',
       savedWhere: 'Videos → PRGLauncher Switch', replayOff: 'The replay buffer is not available on this PC', clip: 'Save clip',
       replayEmpty: 'The buffer is still empty — try again in a second',
+      replayStuck: 'The replay buffer is not recording', replayStuckHint: 'The graphics card is not passing frames to the recorder. A PC restart usually helps; the picture works either way.',
+      fullKey: 'F11 — full screen', shotKey: 'P — screenshot', shot: 'Screenshot saved', outputMissing: 'The chosen sound output is not connected — playing through the Windows default',
     },
   }[lang];
   const QUALITY = { '1080p60': [1920, 1080, 60], '720p60': [1280, 720, 60], '1080p30': [1920, 1080, 30] };
@@ -68,14 +72,25 @@
     });
     video.srcObject = stream;
     video.muted = false;
+    // Sound can go to another output than the Windows default (headphones
+    // for the game, speakers for the rest). A missing output falls back.
+    let outputNote = '';
+    const outputId = params.get('output') || 'default';
+    if (microphone && outputId !== 'default' && typeof video.setSinkId === 'function') {
+      const output = findDevice(await navigator.mediaDevices.enumerateDevices(), 'audiooutput', outputId, params.get('outputLabel'));
+      if (output) { try { await video.setSinkId(output.deviceId); outputNote = ` → ${output.label}`; } catch { outputNote = ''; } }
+      else outputNote = `\n${TEXT.outputMissing}`;
+    }
     const settings = stream.getVideoTracks()[0].getSettings();
     if (replaySeconds) {
       replay = window.PRGSwitchReplay ? window.PRGSwitchReplay.create(stream, { seconds: replaySeconds, bitrate: BITRATE[params.get('quality')] || BITRATE['1080p60'] }) : null;
       clipButton.textContent = TEXT.clip;
       clipButton.hidden = !replay;
+      // The recorder starts but some GPU driver states give it no frames.
+      if (replay) setTimeout(() => { if (replay && !replay.hasData()) show(TEXT.replayStuck, TEXT.replayStuckHint, { sticky: true }); }, 6000);
     }
     const replayLine = !replaySeconds ? '' : replay ? `\n${TEXT.replayKey(replaySeconds)}` : `\n${TEXT.replayOff}`;
-    show(camera.label, `${settings.width}×${settings.height} · ${Math.round(settings.frameRate || frameRate)} fps · ${microphone ? microphone.label : TEXT.noAudio}\n${TEXT.close}${replayLine}`);
+    show(camera.label, `${settings.width}×${settings.height} · ${Math.round(settings.frameRate || frameRate)} fps · ${microphone ? microphone.label : TEXT.noAudio}${outputNote}\n${TEXT.close}${params.get('mode') === 'window' ? ` · ${TEXT.fullKey}` : ''} · ${TEXT.shotKey}${replayLine}`);
     // No frames at all after a few seconds usually means no HDMI signal.
     let frames = 0;
     const count = () => { frames++; video.requestVideoFrameCallback(count); };
@@ -84,8 +99,36 @@
     stream.getVideoTracks()[0].addEventListener('ended', () => show(TEXT.missing, TEXT.missingHint, { error: true, sticky: true }));
   }
 
-  // The clip is handed to the main process as a download; it saves it to
-  // Videos\PRGLauncher Switch without asking, so play is not interrupted.
+  // Clips and screenshots are handed to the main process as downloads; it
+  // saves them to Videos\PRGLauncher Switch without asking, so play is not
+  // interrupted. Names use the local time.
+  function stamp() {
+    const now = new Date();
+    const pad = value => String(value).padStart(2, '0');
+    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
+  }
+  function download(blob, extension) {
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `PRG Switch ${stamp()}.${extension}`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(link.href), 60000);
+  }
+
+  // The frame as the card delivers it, at full resolution.
+  function saveScreenshot() {
+    if (!video.videoWidth) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0);
+    canvas.toBlob(blob => {
+      if (!blob) return;
+      download(blob, 'png');
+      show(TEXT.shot, TEXT.savedWhere);
+    }, 'image/png');
+  }
+
   async function saveClip() {
     if (!replay || saving) return;
     saving = true;
@@ -93,18 +136,17 @@
     try {
       const clip = await replay.save();
       if (!clip || !clip.blob.size) { show(TEXT.replayEmpty); return; }
-      const stamp = new Date().toISOString().slice(0, 19).replace('T', ' ').replace(/:/g, '-');
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(clip.blob);
-      link.download = `PRG Switch ${stamp}.${clip.extension}`;
-      link.click();
-      setTimeout(() => URL.revokeObjectURL(link.href), 60000);
+      download(clip.blob, clip.extension);
       show(TEXT.saved, `${TEXT.savedWhere} · ${Math.round(clip.durationMs / 1000)} s`);
     } finally {
       saving = false;
     }
   }
-  document.addEventListener('keydown', event => { if (event.code === 'KeyS' && !event.repeat) saveClip(); });
+  document.addEventListener('keydown', event => {
+    if (event.repeat) return;
+    if (event.code === 'KeyS') saveClip();
+    else if (event.code === 'KeyP') saveScreenshot();
+  });
   clipButton.addEventListener('click', saveClip);
   window.addEventListener('pagehide', () => replay && replay.stop());
 

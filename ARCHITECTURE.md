@@ -1,6 +1,6 @@
 # PRGLauncher architecture
 
-Code audit updated 24 October 2026. Windows release target: 1.2.9.
+Code audit updated 26 October 2026. Windows release target: 1.2.10.
 
 ## Product boundary
 

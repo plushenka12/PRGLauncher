@@ -147,6 +147,16 @@
   .w-cta{position:relative;z-index:2;margin-top:24px;align-self:flex-start;height:44px;padding:0 22px;border-radius:999px;background:#fff;color:#0a0a12;font-weight:800;font-size:14px;transition:transform .16s var(--ease-out)}
   .w-cta:active{transform:scale(.96)}
   @media (prefers-reduced-motion:reduce){#wrapped .w-progress i.now b{animation:wfill 5s linear forwards!important}}
+  /* "Session ended" card, a few seconds after a game closes */
+  .done{position:fixed;left:12px;right:12px;bottom:12px;z-index:20;padding:14px 16px;border-radius:14px;background:color-mix(in srgb,var(--bg2) 94%,transparent);border:1px solid color-mix(in srgb,var(--green) 40%,var(--border2));box-shadow:0 12px 32px rgba(0,0,0,.45);cursor:pointer;animation:doneIn .26s var(--ease-out)}
+  .done[hidden]{display:none}
+  .done.leaving{opacity:0;transform:translateY(8px);transition:opacity .22s var(--ease-out),transform .22s var(--ease-out)}
+  .done-label{color:var(--green);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+  .done-title{margin-top:4px;font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .done-time{margin-top:2px;font-size:28px;font-weight:800}
+  .done-meta{margin-top:2px;color:var(--text2);font-size:12px}
+  @keyframes doneIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.done{animation:none}.done.leaving{transition:none}}
 </style>
 </head>
 <body>
@@ -183,6 +193,7 @@
   <div class="w-top"><span id="w-heading"></span><button class="w-close" id="w-close"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.2 3.1 8 6.9l3.8-3.8 1.1 1.1L9.1 8l3.8 3.8-1.1 1.1L8 9.1l-3.8 3.8-1.1-1.1L6.9 8 3.1 4.2l1.1-1.1Z"/></svg></button></div>
   <div class="w-stage" id="w-stage"><div class="w-tap"><button id="w-prev" tabindex="-1" aria-hidden="true"></button><button id="w-next" tabindex="-1" aria-hidden="true"></button></div></div>
 </section>
+<div id="session-done" class="done" role="status" hidden></div>
 <script src="./mini-bar.js"></script>
 </body>
 </html>

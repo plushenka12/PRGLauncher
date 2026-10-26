@@ -4,16 +4,16 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { pathToFileURL } = require('node:url');
 const vm = require('node:vm');
-const { sanitizeSwitchConfig, isConfigured, pickSwitchDisplay, allowPermission, clipSavePath, QUALITIES } = require('../src/main/switch-view.js');
+const { sanitizeSwitchConfig, isConfigured, pickSwitchDisplay, allowPermission, clipSavePath, switchWindowBounds, QUALITIES } = require('../src/main/switch-view.js');
 const { rendererSource } = require('./helpers/renderer-source.cjs');
 
 const main = fs.readFileSync('src/main/index.js', 'utf8');
 const executablePath = process.env.PRG_TEST_BROWSER;
 
 test('Switch settings are sanitized and default to 1080p60 with the card sound', () => {
-  assert.deepEqual(sanitizeSwitchConfig(null), { videoId: '', videoLabel: '', audioId: 'auto', audioLabel: '', displayId: null, quality: '1080p60', replay: 0 });
+  assert.deepEqual(sanitizeSwitchConfig(null), { videoId: '', videoLabel: '', audioId: 'auto', audioLabel: '', displayId: null, quality: '1080p60', replay: 0, outputId: 'default', outputLabel: '', mode: 'fullscreen' });
   const clean = sanitizeSwitchConfig({ videoId: 'abc', videoLabel: 'Elgato HD60 X', audioId: 'none', displayId: '42', quality: '4k120', extra: 'x' });
-  assert.deepEqual(clean, { videoId: 'abc', videoLabel: 'Elgato HD60 X', audioId: 'none', audioLabel: '', displayId: 42, quality: '1080p60', replay: 0 });
+  assert.deepEqual(clean, { videoId: 'abc', videoLabel: 'Elgato HD60 X', audioId: 'none', audioLabel: '', displayId: 42, quality: '1080p60', replay: 0, outputId: 'default', outputLabel: '', mode: 'fullscreen' });
   assert.equal(sanitizeSwitchConfig({ replay: 60 }).replay, 60);
   assert.equal(sanitizeSwitchConfig({ replay: '30' }).replay, 30);
   assert.equal(sanitizeSwitchConfig({ replay: 600 }).replay, 0, 'only the offered lengths');
@@ -61,7 +61,9 @@ test('main process wires the Switch window without giving it the launcher bridge
 
 async function openSwitchPage(query) {
   const { chromium } = require('playwright-core');
-  const browser = await chromium.launch({ executablePath, headless: true, args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream'] });
+  // Software encoding keeps the recording tests independent of the PC's GPU
+  // driver state (a stuck GPU process makes MediaRecorder return no data).
+  const browser = await chromium.launch({ executablePath, headless: true, args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream', '--disable-gpu'] });
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
@@ -99,7 +101,7 @@ test('the Switch page explains a missing capture card', { skip: !executablePath 
 test('replay clips get our own name in the clip folder and never overwrite a file', () => {
   const folder = 'C:\\Users\\me\\Videos\\PRGLauncher Switch';
   const existing = new Set([path.win32.join(folder, 'PRG Switch 2026-10-26 21-30-05.mp4')]);
-  const pick = filename => clipSavePath({ folder, filename, exists: file => existing.has(file), join: path.win32.join, now: new Date('2026-10-26T20:00:00Z') });
+  const pick = filename => clipSavePath({ folder, filename, exists: file => existing.has(file), join: path.win32.join, now: new Date(2026, 9, 26, 20, 0, 0) });
   assert.equal(pick('PRG Switch 2026-10-26 21-30-05.mp4'), path.win32.join(folder, 'PRG Switch 2026-10-26 21-30-05 (2).mp4'));
   assert.equal(pick('PRG Switch 2026-10-26 21-31-00.webm'), path.win32.join(folder, 'PRG Switch 2026-10-26 21-31-00.webm'));
   for (const bad of ['..\\..\\evil.exe', 'C:\\Windows\\x.mp4', 'clip.bat', '']) {
@@ -132,12 +134,23 @@ test('the replay buffer prefers H.264 and drops the audio codec without sound', 
   assert.equal(pickType(true, () => false), null);
 });
 
-test('the Switch page offers the replay buffer and a saved clip plays', { skip: !executablePath }, async () => {
+test('the Switch page offers the replay buffer', { skip: !executablePath }, async () => {
   const { browser, page, errors } = await openSwitchPage({ video: 'stale-id', videoLabel: 'fake_device_0', audio: 'none', quality: '720p60', replay: '30', lang: 'uk' });
   try {
     await page.waitForFunction(() => document.getElementById('video').videoWidth > 0, null, { timeout: 15000 });
     assert.match(await page.textContent('#hud'), /S — зберегти останні 30 с/);
     assert.equal(await page.getAttribute('#clip', 'hidden'), null, 'the save button is there for the mouse');
+    assert.deepEqual(errors, []);
+  } finally {
+    await browser.close();
+  }
+});
+
+test('a clip saved from the replay buffer plays', { skip: !executablePath }, async () => {
+  // A page without its own buffer, so only this test's two recorders run.
+  const { browser, page, errors } = await openSwitchPage({ video: 'stale-id', videoLabel: 'fake_device_0', audio: 'none', quality: '720p60', lang: 'uk' });
+  try {
+    await page.waitForFunction(() => document.getElementById('video').videoWidth > 0, null, { timeout: 15000 });
     // A two-second buffer on the same stream, so the test does not wait 30 s.
     // After 4.5 s the first recorder has restarted once and the older one
     // holds 2.5 s.
@@ -162,4 +175,58 @@ test('the Switch page offers the replay buffer and a saved clip plays', { skip: 
   } finally {
     await browser.close();
   }
+});
+
+test('screenshots get the same safe names as clips, and the sound output is saved', () => {
+  const folder = 'C:/Videos/PRGLauncher Switch';
+  const pick = filename => clipSavePath({ folder, filename, exists: () => false, join: path.posix.join, now: new Date(2026, 9, 26, 20, 0, 0) });
+  assert.equal(pick('PRG Switch 2026-10-26 21-30-05.png'), `${folder}/PRG Switch 2026-10-26 21-30-05.png`);
+  assert.equal(pick('evil.png.exe'), `${folder}/PRG Switch 2026-10-26 20-00-00.mp4`);
+  const clean = sanitizeSwitchConfig({ outputId: 'abc', outputLabel: 'Headphones (USB)' });
+  assert.equal(clean.outputId, 'abc');
+  assert.equal(clean.outputLabel, 'Headphones (USB)');
+  assert.match(main, /output: config\.outputId, outputLabel: config\.outputLabel/);
+  const renderer = rendererSource();
+  assert.match(renderer, /id="switch-output"/);
+  assert.match(renderer, /outputId:output\.value\|\|'default'/);
+  const page = fs.readFileSync('src/renderer/switch-view.js', 'utf8');
+  assert.match(page, /event\.code === 'KeyP'\) saveScreenshot\(\)/);
+  assert.match(page, /await video\.setSinkId\(output\.deviceId\)/);
+});
+
+test('P saves a full-size screenshot of the capture card', { skip: !executablePath }, async () => {
+  const { browser, page, errors } = await openSwitchPage({ video: 'x', videoLabel: 'fake_device_0', audio: 'none', quality: '720p60', lang: 'en' });
+  try {
+    await page.waitForFunction(() => document.getElementById('video').videoWidth > 0, null, { timeout: 15000 });
+    assert.match(await page.textContent('#hud'), /P — screenshot/);
+    const [download] = await Promise.all([page.waitForEvent('download'), page.keyboard.press('KeyP')]);
+    assert.match(download.suggestedFilename(), /^PRG Switch \d{4}-\d{2}-\d{2} \d{2}-\d{2}-\d{2}\.png$/);
+    const file = await download.path();
+    const png = fs.readFileSync(file);
+    assert.equal(png.subarray(1, 4).toString(), 'PNG');
+    assert.ok(png.readUInt32BE(16) >= 640, 'full frame width');
+    await page.waitForFunction(() => /Screenshot saved/.test(document.getElementById('hud').textContent));
+    assert.deepEqual(errors, []);
+  } finally {
+    await browser.close();
+  }
+});
+
+test('window mode remembers its place, or opens 16:9 in the middle of the chosen monitor', () => {
+  const { isReachable } = require('../src/main/mini-tab-bounds.js');
+  const display = { workArea: { x: 1920, y: 0, width: 1920, height: 1040 } };
+  const displays = [{ workArea: { x: 0, y: 0, width: 1920, height: 1040 } }, display];
+  assert.deepEqual(switchWindowBounds({ saved: null, display, displays, isReachable }), { x: 2240, y: 160, width: 1280, height: 720 });
+  assert.deepEqual(switchWindowBounds({ saved: { x: 100, y: 50, width: 960, height: 540 }, display, displays, isReachable }), { x: 100, y: 50, width: 960, height: 540 });
+  assert.deepEqual(switchWindowBounds({ saved: { x: 9000, y: 50, width: 960, height: 540 }, display, displays, isReachable }).x, 2240, 'a monitor that is gone');
+  assert.equal(switchWindowBounds({ saved: { x: 0, y: 0, width: 100, height: 50 }, display, displays, isReachable }).width, 1280, 'too small is ignored');
+  const laptop = { workArea: { x: 0, y: 0, width: 1366, height: 728 } };
+  assert.deepEqual(switchWindowBounds({ saved: null, display: laptop, displays: [laptop], isReachable }), { x: 228, y: 108, width: 911, height: 512 });
+  assert.equal(sanitizeSwitchConfig({ mode: 'window' }).mode, 'window');
+  assert.equal(sanitizeSwitchConfig({ mode: 'kiosk' }).mode, 'fullscreen');
+  const open = main.slice(main.indexOf('function openSwitchWindow()'), main.indexOf("handleFromMain('switch:open'"));
+  assert.match(open, /if \(windowed\) switchWindow\.setAspectRatio\(16 \/ 9\)/);
+  assert.match(open, /input\.key === 'F11'/);
+  assert.match(open, /if \(!windowed && miniBar/, 'a window does not hide the mini-tab');
+  assert.match(rendererSource(), /id="switch-mode"/);
 });

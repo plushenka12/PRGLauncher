@@ -17,9 +17,13 @@ const { STEAM_GUARD_SCRIPT, createSteamWindowGuard } = require('./steam-window-g
 const { resolveMiniTabBounds, loadSavedBounds, saveBounds, isReachable } = require('./mini-tab-bounds')
 const { createSteamLibraryArt } = require('./steam-library-art')
 const { createCompanionApps } = require('./companion-apps')
-const { sanitizeSwitchConfig, isConfigured, pickSwitchDisplay, allowPermission, clipSavePath } = require('./switch-view')
+const { sanitizeSwitchConfig, isConfigured, pickSwitchDisplay, allowPermission, clipSavePath, switchWindowBounds, MIN_WINDOW: SWITCH_MIN_WINDOW } = require('./switch-view')
 const { createN3dsReceiver, newCode: newN3dsCode, DEFAULT_PORT: N3DS_PORT } = require('./n3ds-receiver')
 const { parseUpload: parseN3dsUpload } = require('./n3ds-history')
+const { createFullscreenWatch } = require('./fullscreen-watch')
+const { pickAccent } = require('../renderer/accent-color')
+const { fileURLToPath } = require('url')
+const { launchIdFrom, cleanGames: cleanJumpGames, pngToIco, findSteamIcon, buildItems: buildJumpItems } = require('./jump-list')
 const steamLibraryArt = createSteamLibraryArt({ fs, getSteamPath: () => steamPath })
 
 // Keep the Windows app identity and packaged process name discoverable.
@@ -1167,6 +1171,38 @@ handleFromMain('nintendo:fetchHistory', async () => {
   catch (error) { if (profile !== nintendoProfile) return { ok: false, error: 'PRG account changed' }; return { ok: false, error: error.message, authRequired: requiresNintendoReauth(error) } }
 })
 
+// Local Steam art (portrait capsule, hero) and its accent colour, for the
+// game page and the gamepad mode. Colours are worked out once per app id.
+const steamArtColors = new Map()
+function steamArtColor(art) {
+  const file = art.capsule || art.hero
+  if (!file) return null
+  if (steamArtColors.has(file)) return steamArtColors.get(file)
+  let color = null
+  try {
+    const image = nativeImage.createFromPath(fileURLToPath(file))
+    if (!image.isEmpty()) color = pickAccent(image.resize({ width: 32, quality: 'good' }).toBitmap(), { bgra: true })
+  } catch {}
+  steamArtColors.set(file, color)
+  return color
+}
+handleFromMain('art:steam', (_, appIds) => {
+  const result = {}
+  for (const id of (Array.isArray(appIds) ? appIds : []).slice(0, 500)) {
+    const art = /^\d{1,10}$/.test(String(id)) ? steamLibraryArt.find(String(id)) : null
+    if (art) result[String(id)] = { ...art, color: steamArtColor(art) }
+  }
+  return result
+})
+
+// Gamepad mode fills the screen with the main window.
+handleFromMain('couch:setFullscreen', (_, on) => {
+  if (!mainWindow || mainWindow.isDestroyed()) return false
+  if (on === true) showMainWindow()
+  mainWindow.setFullScreen(on === true)
+  return true
+})
+
 handleFromMain('app:minimize', () => {
   if (mainWindow) mainWindow.minimize()
 })
@@ -1402,6 +1438,14 @@ function saveSwitchConfig(config) {
   return clean
 }
 
+const SWITCH_BOUNDS_FILE = () => path.join(app.getPath('userData'), 'switch-window.json')
+function loadSavedSwitchBounds() {
+  try { return JSON.parse(fs.readFileSync(SWITCH_BOUNDS_FILE(), 'utf8')) } catch { return null }
+}
+function saveSwitchBounds(bounds) {
+  try { writeJsonAtomic(SWITCH_BOUNDS_FILE(), { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height }) } catch (error) { console.warn('[Switch] Could not save window position:', error.message) }
+}
+
 function switchDisplays() {
   const primaryId = screen.getPrimaryDisplay().id
   return screen.getAllDisplays().map((display, index) => ({ id: display.id, index: index + 1, primary: display.id === primaryId, width: display.size.width, height: display.size.height }))
@@ -1413,34 +1457,57 @@ function openSwitchWindow() {
   if (switchWindow && !switchWindow.isDestroyed()) { switchWindow.focus(); return { ok: true } }
   const display = pickSwitchDisplay(screen.getAllDisplays(), screen.getPrimaryDisplay().id, config.displayId)
   const file = path.join(__dirname, '..', 'renderer', 'switch-view.html')
+  // Full screen on the chosen monitor, or an ordinary 16:9 window that keeps
+  // its size and place. F11 switches between the two while it is open.
+  const windowed = config.mode === 'window'
+  const bounds = windowed
+    ? switchWindowBounds({ saved: loadSavedSwitchBounds(), display, displays: screen.getAllDisplays(), isReachable })
+    : display.bounds
   switchWindow = new BrowserWindow({
-    ...display.bounds,
-    frame: false,
-    fullscreen: true,
+    ...bounds,
+    frame: windowed,
+    fullscreen: !windowed,
+    minWidth: SWITCH_MIN_WINDOW.width,
+    minHeight: SWITCH_MIN_WINDOW.height,
     autoHideMenuBar: true,
     show: false,
     title: 'Nintendo Switch',
     backgroundColor: '#000000',
     webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true },
   })
+  if (windowed) switchWindow.setAspectRatio(16 / 9)
   attachNavigationGuard(switchWindow.webContents, file)
   switchWindow.webContents.on('before-input-event', (event, input) => {
-    if (input.type === 'keyDown' && input.key === 'Escape') { event.preventDefault(); switchWindow?.close() }
+    if (input.type !== 'keyDown') return
+    if (input.key === 'Escape') {
+      event.preventDefault()
+      // In window mode Esc first leaves full screen, like a video player.
+      if (windowed && switchWindow?.isFullScreen()) switchWindow.setFullScreen(false)
+      else switchWindow?.close()
+    } else if (input.key === 'F11') {
+      event.preventDefault()
+      switchWindow?.setFullScreen(!switchWindow.isFullScreen())
+    }
   })
-  // The mini-tab stays above everything; keep it off the Switch picture.
-  if (miniBar && !miniBar.isDestroyed() && miniBar.isVisible() && screen.getDisplayMatching(miniBar.getBounds()).id === display.id) {
+  // The mini-tab stays above everything; keep it off a full-screen Switch picture.
+  if (!windowed && miniBar && !miniBar.isDestroyed() && miniBar.isVisible() && screen.getDisplayMatching(miniBar.getBounds()).id === display.id) {
     miniBar.hide()
     miniHiddenForSwitch = true
+  }
+  if (windowed) {
+    const remember = () => { if (switchWindow && !switchWindow.isDestroyed() && !switchWindow.isFullScreen() && !switchWindow.isMinimized()) saveSwitchBounds(switchWindow.getBounds()) }
+    switchWindow.on('resized', remember)
+    switchWindow.on('moved', remember)
   }
   switchWindow.once('ready-to-show', () => { switchWindow?.show(); switchWindow?.focus() })
   switchWindow.on('closed', () => {
     switchWindow = null
-    if (miniHiddenForSwitch && miniBar && !miniBar.isDestroyed()) miniBar.showInactive()
+    if (miniHiddenForSwitch && !miniHiddenForFullscreen && miniBar && !miniBar.isDestroyed()) miniBar.showInactive()
     miniHiddenForSwitch = false
   })
   switchWindow.loadFile(file, { query: {
     video: config.videoId, videoLabel: config.videoLabel, audio: config.audioId, audioLabel: config.audioLabel,
-    quality: config.quality, replay: String(config.replay), lang: lastMiniState?.lang === 'en' ? 'en' : 'uk',
+    quality: config.quality, mode: config.mode, replay: String(config.replay), output: config.outputId, outputLabel: config.outputLabel, lang: lastMiniState?.lang === 'en' ? 'en' : 'uk',
   } })
   return { ok: true }
 }
@@ -1456,6 +1523,97 @@ handleFromMain('switch:open', () => {
 })
 handleFromMain('switch:getConfig', () => ({ config: loadSwitchConfig(), displays: switchDisplays() }))
 handleFromMain('switch:saveConfig', (_, config) => saveSwitchConfig(config))
+
+// ── TASKBAR JUMP LIST ─────────────────────────────────────────────────────
+// Right-clicking PRGLauncher on the taskbar lists the recent games; a click
+// starts this exe again with --prg-launch=<id>, which reaches the running
+// launcher as a second instance. A click while the launcher is closed waits
+// until the library has loaded.
+const JUMP_ICON_DIR = () => path.join(app.getPath('userData'), 'jumplist-icons')
+let jumpListKey = ''
+let pendingJumpLaunch = launchIdFrom(process.argv)
+let pendingSwitchOpen = process.argv.includes('--prg-switch')
+
+function jumpIconFor(game) {
+  if (game.executable && fs.existsSync(game.executable)) return game.executable
+  const source = findSteamIcon(fs, steamPath, game.appId)
+  if (!source) return null
+  const target = path.join(JUMP_ICON_DIR(), `${game.appId}.ico`)
+  try {
+    if (!fs.existsSync(target)) {
+      const image = nativeImage.createFromPath(source)
+      if (image.isEmpty()) return null
+      fs.mkdirSync(JUMP_ICON_DIR(), { recursive: true })
+      // Steam's icons are usually 32 px; larger ones are scaled down, never up.
+      const size = Math.min(64, image.getSize().width, image.getSize().height)
+      fs.writeFileSync(target, pngToIco(image.resize({ width: size, height: size, quality: 'best' }).toPNG(), size))
+    }
+    return target
+  } catch { return null }
+}
+
+handleFromMain('jumplist:update', (_, payload) => {
+  if (process.platform !== 'win32') return false
+  const games = cleanJumpGames(payload?.games)
+  const category = String(payload?.category || 'Recent games').slice(0, 60)
+  const switchTitle = String(payload?.switchTitle || 'Switch window').slice(0, 60)
+  const key = JSON.stringify([games, category, switchTitle])
+  if (key === jumpListKey) return true
+  jumpListKey = key
+  const program = process.execPath
+  const baseArgs = process.defaultApp ? [path.resolve(process.argv[1] || '.')] : []
+  const items = buildJumpItems(games, { program, baseArgs, iconFor: jumpIconFor })
+  const switchArgs = [...baseArgs, '--prg-switch'].map(arg => (/\s/.test(arg) ? `"${arg}"` : arg)).join(' ')
+  const result = app.setJumpList([
+    ...(items.length ? [{ type: 'custom', name: category, items }] : []),
+    { type: 'tasks', items: [{ type: 'task', title: switchTitle, description: switchTitle, program, args: switchArgs, iconPath: program, iconIndex: 0 }] },
+  ])
+  if (result !== 'ok') console.warn('[JumpList] Not updated:', result)
+  return result === 'ok'
+})
+handleFromMain('jumplist:takePending', () => {
+  const id = pendingJumpLaunch
+  pendingJumpLaunch = null
+  return id
+})
+
+function handleLaunchArgs(argv) {
+  const id = launchIdFrom(argv)
+  if (id) {
+    if (mainWindow && !mainWindow.isDestroyed() && !mainWindow.webContents.isLoading()) mainWindow.webContents.send('jumplist:launch', id)
+    else pendingJumpLaunch = id
+    return true
+  }
+  if (argv.includes('--prg-switch')) {
+    const result = openSwitchWindow()
+    if (!result.ok && mainWindow && !mainWindow.isDestroyed()) { showMainWindow(); mainWindow.webContents.send('app:openSwitchSettings') }
+    return true
+  }
+  return false
+}
+
+// ── QUIET OVER FULL-SCREEN GAMES ──────────────────────────────────────────
+// The mini-tab stays above everything; when a full-screen game covers its
+// monitor, it steps aside (and its Wrapped pauses) until the game leaves
+// full screen. Our own windows (the Switch window) are handled separately.
+let miniHiddenForFullscreen = false
+
+function onFullscreenChange(front) {
+  if (!miniBar || miniBar.isDestroyed()) return
+  const covers = Boolean(front && front.pid !== process.pid
+    && screen.getDisplayMatching(front.bounds).id === screen.getDisplayMatching(miniBar.getBounds()).id)
+  if (covers && miniBar.isVisible()) {
+    miniBar.hide()
+    miniHiddenForFullscreen = true
+    miniBar.webContents.send('mini:quiet', true)
+  } else if (!covers && miniHiddenForFullscreen) {
+    miniHiddenForFullscreen = false
+    miniBar.webContents.send('mini:quiet', false)
+    if (!miniHiddenForSwitch) miniBar.showInactive()
+  }
+}
+
+const fullscreenWatch = createFullscreenWatch({ spawn, onChange: onFullscreenChange, log: (...args) => console.warn(...args) })
 
 // ── NINTENDO 3DS ──────────────────────────────────────────────────────────
 // The PRG 3DS homebrew sends the console's play history over the home
@@ -1619,6 +1777,7 @@ app.whenReady().then(async () => {
   })
 
   if (loadN3dsConfig().enabled) n3dsReceiver.start(N3DS_PORT)
+  if (process.platform === 'win32') fullscreenWatch.start()
 
   steamPath = await findSteamPath()
   console.log('[Steam] Path:', steamPath || 'not found')
@@ -1656,12 +1815,18 @@ app.whenReady().then(async () => {
   createWindow()
   createTray()
   createMiniBar()
+  // Started from the jump list's "Switch window" while the launcher was closed.
+  if (pendingSwitchOpen) {
+    pendingSwitchOpen = false
+    mainWindow.webContents.once('did-finish-load', () => handleLaunchArgs(['--prg-switch']))
+  }
   for (const event of ['display-removed', 'display-metrics-changed']) screen.on(event, keepMiniTabOnScreen)
   checkForUpdatesAfterLaunch()
 })
 
 app.on('before-quit', () => {
   isQuitting = true
+  fullscreenWatch.stop()
   if (steamMonitorTimer) { clearInterval(steamMonitorTimer); steamMonitorTimer = null }
   stopSteamActivity()
   if (steamCollectionTimer) { clearInterval(steamCollectionTimer); steamCollectionTimer = null }
@@ -1680,7 +1845,8 @@ const gotLock = app.requestSingleInstanceLock()
 if (!gotLock) {
   app.quit()
 } else {
-  app.on('second-instance', () => {
+  app.on('second-instance', (_, argv) => {
+    if (handleLaunchArgs(argv)) return
     if (mainWindow) {
       mainWindow.show()
       mainWindow.focus()

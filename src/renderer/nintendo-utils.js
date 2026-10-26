@@ -53,5 +53,103 @@
     return [...new Map(out.map(entry => [entry.key, entry])).values()];
   }
 
-  global.createNintendoUtils = () => ({ normalizeNintendoHistory, extractNintendoDaily });
+  // The Switch release of a game and its "Nintendo Switch 2 Edition" are
+  // separate titles for Nintendo, each with its own play time, but one game
+  // in the library. Their names share this key ("… – Nintendo Switch 2
+  // Edition + Jamboree TV" included).
+  function editionKey(title) {
+    return String(title || '').toLocaleLowerCase()
+      .replace(/\b(nintendo\s+)?switch\s*2?\s+edition\b.*$/iu, '')
+      .replace(/[^\p{L}\p{N}]+/gu, '')
+      .trim();
+  }
+
+  // Where the sync remembers what it has already counted for one Nintendo
+  // title: the card's own fields for its main title, an entry in
+  // nintendoEditions for any other edition merged into it.
+  const PRIMARY = { minutes: 'nintendoLastSeenMinutes', playedAt: 'nintendoLastSeenPlayedAt', daily: 'nintendoImportedDailyKeys', sync: 'nintendoLastSync' };
+  function nintendoTrack(game, id) {
+    if (!game.nintendoTitleId) game.nintendoTitleId = id;
+    if (game.nintendoTitleId === id) return { edition: false, get: key => game[PRIMARY[key]], set: (key, value) => { game[PRIMARY[key]] = value; } };
+    game.nintendoEditions = Array.isArray(game.nintendoEditions) ? game.nintendoEditions : [];
+    let edition = game.nintendoEditions.find(entry => entry.id === id);
+    if (!edition) { edition = { id, minutes: null, playedAt: null, daily: [], sync: null }; game.nintendoEditions.push(edition); }
+    return { edition: true, get: key => edition[key], set: (key, value) => { edition[key] = value; } };
+  }
+
+  const ownsTitle = (game, id) => game.nintendoTitleId === id || (Array.isArray(game.nintendoEditions) && game.nintendoEditions.some(entry => entry.id === id));
+
+  // Applies one play-activity record to its card: new daily sessions, then
+  // the growth of the title's total since the last sync.
+  function applyNintendoItem(game, item, { now = Date.now() } = {}) {
+    const track = nintendoTrack(game, item.id);
+    let changed = 0, updated = false;
+    const hasBaseline = track.get('minutes') !== undefined && track.get('minutes') !== null;
+    const previous = Number(track.get('minutes') || 0);
+    const current = Math.max(previous, item.minutes || 0);
+    const playedAt = Date.parse(item.lastPlayedAt || '');
+    const importedDaily = new Set(track.get('daily') || []);
+    let dailyChanged = false, dailyMinutesAdded = 0, dailyLatest = 0;
+    const dailyAnchor = Number(track.get('playedAt') || game.lastPlayed || 0);
+    extractNintendoDaily(item.raw).forEach(day => {
+      if (importedDaily.has(day.key)) return;
+      const start = new Date(day.ts); start.setHours(12, 0, 0, 0);
+      game.sessions = Array.isArray(game.sessions) ? game.sessions : [];
+      game.sessions.push({ start: start.getTime(), end: start.getTime() + day.minutes * 60000, dur: day.minutes * 60000, source: 'nintendo-sync' });
+      importedDaily.add(day.key);
+      game.lastPlayed = Math.max(Number(game.lastPlayed || 0), start.getTime());
+      dailyLatest = Math.max(dailyLatest, start.getTime());
+      if (hasBaseline && start.getTime() > dailyAnchor) dailyMinutesAdded += day.minutes;
+      dailyChanged = true;
+    });
+    if (dailyChanged) {
+      track.set('daily', [...importedDaily]);
+      if (dailyMinutesAdded) { game.playtime = Math.max(0, Number(game.playtime || 0) + dailyMinutesAdded * 60000); updated = true; }
+      if (dailyLatest > Number(track.get('playedAt') || 0)) track.set('playedAt', dailyLatest);
+      changed++;
+    }
+    if (!hasBaseline) {
+      track.set('minutes', current); track.set('playedAt', Number.isFinite(playedAt) ? playedAt : null); track.set('sync', now); changed++;
+      // A new edition of a game already in the library brings its own time.
+      if (track.edition && current) {
+        game.playtime = Math.max(0, Number(game.playtime || 0) + current * 60000);
+        if (Number.isFinite(playedAt)) game.lastPlayed = Math.max(Number(game.lastPlayed || 0), playedAt);
+        updated = true;
+      }
+    } else if (current !== previous) {
+      const deltaMinutes = current - previous;
+      game.playtime = Math.max(0, Number(game.playtime || 0) + deltaMinutes * 60000);
+      track.set('minutes', current); track.set('sync', now);
+      const sessionStart = Number.isFinite(playedAt) ? playedAt : now - deltaMinutes * 60000;
+      game.sessions = Array.isArray(game.sessions) ? game.sessions : [];
+      game.sessions.push({ start: sessionStart, end: sessionStart + deltaMinutes * 60000, dur: deltaMinutes * 60000, source: 'nintendo-sync' });
+      game.lastPlayed = sessionStart;
+      track.set('playedAt', Number.isFinite(playedAt) ? playedAt : sessionStart);
+      changed++; updated = true;
+    } else if (Number.isFinite(playedAt) && playedAt > Number(game.lastPlayed || 0)) {
+      game.lastPlayed = playedAt; track.set('playedAt', playedAt); changed++;
+    }
+    if (!game.cover && item.cover) { game.cover = item.cover; changed++; }
+    return { changed, updated };
+  }
+
+  // Merging two cards of different Nintendo titles keeps the second title's
+  // sync state, so its later play is still counted once. Returns true when
+  // the cards were different titles, whose times then add up.
+  function mergeNintendoEditions(primary, duplicate) {
+    if (!primary.nintendoTitleId || !duplicate.nintendoTitleId || primary.nintendoTitleId === duplicate.nintendoTitleId) return false;
+    primary.nintendoEditions = Array.isArray(primary.nintendoEditions) ? primary.nintendoEditions : [];
+    const add = entry => { if (entry.id && entry.id !== primary.nintendoTitleId && !primary.nintendoEditions.some(item => item.id === entry.id)) primary.nintendoEditions.push(entry); };
+    add({
+      id: duplicate.nintendoTitleId,
+      minutes: duplicate.nintendoLastSeenMinutes ?? Math.round(Number(duplicate.playtime || 0) / 60000),
+      playedAt: duplicate.nintendoLastSeenPlayedAt ?? null,
+      daily: [...(duplicate.nintendoImportedDailyKeys || [])],
+      sync: duplicate.nintendoLastSync ?? null,
+    });
+    (Array.isArray(duplicate.nintendoEditions) ? duplicate.nintendoEditions : []).forEach(entry => add({ ...entry }));
+    return true;
+  }
+
+  global.createNintendoUtils = () => ({ normalizeNintendoHistory, extractNintendoDaily, editionKey, ownsTitle, applyNintendoItem, mergeNintendoEditions });
 })(window);
