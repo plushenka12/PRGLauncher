@@ -79,19 +79,25 @@ test('gamepad mode opens, moves with the keys and closes in both languages', { s
       await page.addInitScript(value => localStorage.setItem('gv-language', value), lang);
       await page.goto(pathToFileURL(path.join(__dirname, '..', 'src', 'renderer', 'index.html')).href);
       await page.waitForFunction(() => typeof renderGrid === 'function');
+    // Signed-out start-up clears the library once Firebase answers; demo games
+    // go in after that (the login screen shows then).
+    await page.waitForFunction(() => document.getElementById('login-overlay')?.style.display === 'flex', null, { timeout: 15000 });
       await page.evaluate(() => {
         document.getElementById('login-overlay').style.display = 'none';
         games = [{ id: 'g1', title: 'Hades II', status: 'Playing', platform: 'PC', steamAppId: 1145350, playtime: 7.2e6, lastPlayed: Date.now(), hltb: { mainStoryMinutes: 1200 }, sessions: [] }, { id: 'g2', title: 'Celeste', status: 'Backlog', platform: 'PC', playtime: 0, lastPlayed: Date.now() - 1e6, sessions: [] }];
         renderGrid();
         document.getElementById('couch-btn').click();
       });
-      assert.equal(await page.textContent('.couch-title'), 'Hades II');
+      // Waits for the state instead of reading it at once: under a loaded CI
+      // runner the page can lag a frame behind the key presses.
+      const shows = (selector, pattern) => page.waitForFunction(([css, source]) => new RegExp(source).test(document.querySelector(css)?.textContent || ''), [selector, pattern.source], { timeout: 10000 });
+      await shows('.couch-title', /^Hades II$/);
       await page.keyboard.press('ArrowRight');
-      assert.equal(await page.textContent('.couch-title'), 'Celeste');
-      assert.match(await page.textContent('.couch-hero'), lang === 'en' ? /No launcher for this game/ : /Запуску немає/);
-      assert.match(await page.textContent('.couch-hints'), lang === 'en' ? /Play.*Exit/ : /Грати.*Вийти/);
+      await shows('.couch-title', /^Celeste$/);
+      await shows('.couch-hero', lang === 'en' ? /No launcher for this game/ : /Запуску немає/);
+      await shows('.couch-hints', lang === 'en' ? /Play.*Exit/ : /Грати.*Вийти/);
       await page.keyboard.press('Escape');
-      assert.equal(await page.$('.couch'), null);
+      await page.waitForSelector('.couch', { state: 'detached', timeout: 10000 });
       assert.deepEqual(errors, []);
       await page.close();
     }
@@ -111,6 +117,9 @@ test('X opens the Switch window and Y the details panel, where a status can be s
     await page.addInitScript(() => { localStorage.setItem('gv-language', 'uk'); window.__switchOpened = 0; });
     await page.goto(pathToFileURL(path.join(__dirname, '..', 'src', 'renderer', 'index.html')).href);
     await page.waitForFunction(() => typeof renderGrid === 'function');
+    // Signed-out start-up clears the library once Firebase answers; demo games
+    // go in after that (the login screen shows then).
+    await page.waitForFunction(() => document.getElementById('login-overlay')?.style.display === 'flex', null, { timeout: 15000 });
     await page.evaluate(() => {
       document.getElementById('login-overlay').style.display = 'none';
       window.launcher = { ...(window.launcher || {}), openSwitchView: async () => { window.__switchOpened += 1; return { ok: true }; } };
@@ -121,6 +130,7 @@ test('X opens the Switch window and Y the details panel, where a status can be s
     await page.keyboard.press('x');
     assert.equal(await page.evaluate(() => window.__switchOpened), 1);
     await page.keyboard.press('y');
+    await page.waitForSelector('.couch-panel:not([hidden])');
     const panel = await page.textContent('.couch-panel');
     assert.match(panel, /Hades II.*Статус.*Беклог.*Граю.*Твій час.*2\.0 год.*Основний сюжет.*20\.0 год.*На 100%.*50\.0 год.*Останні сесії.*Path of Building/);
     await page.keyboard.press('ArrowRight');

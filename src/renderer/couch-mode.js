@@ -167,7 +167,7 @@
       });
       box.append(el('p', 'couch-panel-label', t('Статус')), statuses);
       const minutes = key => (game.hltb && !game.hltb.hidden && Number(game.hltb[key]) > 0 ? Number(game.hltb[key]) * 60000 : 0);
-      const rows = [[t('Твій час'), fmtHours(game.playtime || 0)], ['Main Story', minutes('mainStoryMinutes')], ['Main + Extras', minutes('mainExtraMinutes')], ['Completionist', minutes('completionistMinutes')]]
+      const rows = [[t('Твій час'), fmtHours(game.playtime || 0)], [t('Main Story'), minutes('mainStoryMinutes')], [t('Main + Extras'), minutes('mainExtraMinutes')], [t('Completionist'), minutes('completionistMinutes')]]
         .filter(([, value]) => value).map(([label, value]) => [label, typeof value === 'number' ? fmtHours(value) : value]);
       const facts = el('dl', 'couch-facts');
       rows.forEach(([label, value]) => facts.append(el('dt', '', label), el('dd', '', value)));
