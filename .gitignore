@@ -10,3 +10,9 @@ PRGLauncher-backup-*.json
 PRGLauncher-diagnostics-*.json
 .private-history/
 .DS_Store
+
+# 3DS homebrew build output
+homebrew/prg3ds/build/
+homebrew/prg3ds/*.3dsx
+homebrew/prg3ds/*.smdh
+homebrew/prg3ds/*.elf

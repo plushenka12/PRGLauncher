@@ -496,3 +496,7 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 .stats-pace-panel button.stats-session{appearance:none;width:100%;border:0;border-bottom:1px solid rgba(157,148,183,.12);background:none;color:inherit;font:inherit;font-size:12px;text-align:left;grid-template-columns:minmax(0,1fr) auto;border-radius:0}
 .stats-pace-panel button.stats-session b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media(max-width:780px){.stats-pace-metrics{grid-template-columns:1fr}}
+
+/* Nintendo 3DS receiver settings */
+.n3ds-status{display:grid;gap:4px}
+.n3ds-status code{font-family:var(--fm);font-size:13px;color:var(--text);background:color-mix(in srgb,var(--text) 8%,transparent);border-radius:6px;padding:1px 6px}

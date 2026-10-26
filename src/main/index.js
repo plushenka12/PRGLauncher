@@ -18,6 +18,8 @@ const { resolveMiniTabBounds, loadSavedBounds, saveBounds, isReachable } = requi
 const { createSteamLibraryArt } = require('./steam-library-art')
 const { createCompanionApps } = require('./companion-apps')
 const { sanitizeSwitchConfig, isConfigured, pickSwitchDisplay, allowPermission, clipSavePath } = require('./switch-view')
+const { createN3dsReceiver, newCode: newN3dsCode, DEFAULT_PORT: N3DS_PORT } = require('./n3ds-receiver')
+const { parseUpload: parseN3dsUpload } = require('./n3ds-history')
 const steamLibraryArt = createSteamLibraryArt({ fs, getSteamPath: () => steamPath })
 
 // Keep the Windows app identity and packaged process name discoverable.
@@ -1455,6 +1457,72 @@ handleFromMain('switch:open', () => {
 handleFromMain('switch:getConfig', () => ({ config: loadSwitchConfig(), displays: switchDisplays() }))
 handleFromMain('switch:saveConfig', (_, config) => saveSwitchConfig(config))
 
+// ── NINTENDO 3DS ──────────────────────────────────────────────────────────
+// The PRG 3DS homebrew sends the console's play history over the home
+// network. The receiver is off until the owner turns it on; a request needs
+// the pairing code. The parsed games wait in a file until the launcher
+// window takes them, so an upload is not lost while it is closed.
+const N3DS_CONFIG_FILE = () => path.join(app.getPath('userData'), 'n3ds-receiver.json')
+const N3DS_PENDING_FILE = () => path.join(app.getPath('userData'), 'n3ds-pending.json')
+
+function writeJsonAtomic(file, value) {
+  fs.writeFileSync(`${file}.tmp`, JSON.stringify(value))
+  fs.renameSync(`${file}.tmp`, file)
+}
+
+function loadN3dsConfig() {
+  let config = {}
+  try { config = JSON.parse(fs.readFileSync(N3DS_CONFIG_FILE(), 'utf8')) } catch {}
+  const clean = { enabled: config.enabled === true, code: /^\d{6}$/.test(config.code) ? config.code : newN3dsCode() }
+  if (clean.code !== config.code) writeJsonAtomic(N3DS_CONFIG_FILE(), clean)
+  return clean
+}
+
+const n3dsReceiver = createN3dsReceiver({
+  http: require('http'),
+  getCode: () => loadN3dsConfig().code,
+  log: (...args) => console.warn(...args),
+  onUpload: async body => {
+    const parsed = parseN3dsUpload(body)
+    if (!parsed.ok) return parsed
+    writeJsonAtomic(N3DS_PENDING_FILE(), { receivedAt: Date.now(), games: parsed.games })
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('n3ds:uploaded')
+    const sessions = parsed.games.reduce((sum, game) => sum + game.sessions.length, 0)
+    console.log('[3DS] Upload:', { entries: parsed.entries, games: parsed.games.length, sessions, skipped: parsed.skipped, unnamed: parsed.unnamed })
+    return { ok: true, games: parsed.games.length, sessions, skipped: parsed.skipped, unnamed: parsed.unnamed }
+  },
+})
+
+function lanAddresses() {
+  return Object.values(os.networkInterfaces()).flat()
+    .filter(item => item && item.family === 'IPv4' && !item.internal)
+    .map(item => item.address)
+}
+
+async function n3dsStatus() {
+  const config = loadN3dsConfig()
+  return { enabled: config.enabled, running: n3dsReceiver.isRunning(), code: config.code, port: N3DS_PORT, addresses: lanAddresses() }
+}
+
+handleFromMain('n3ds:getStatus', () => n3dsStatus())
+handleFromMain('n3ds:setEnabled', async (_, enabled) => {
+  const config = { ...loadN3dsConfig(), enabled: enabled === true }
+  writeJsonAtomic(N3DS_CONFIG_FILE(), config)
+  const started = config.enabled ? await n3dsReceiver.start(N3DS_PORT) : (await n3dsReceiver.stop(), { ok: true })
+  return { ...(await n3dsStatus()), error: started.ok ? null : started.code }
+})
+handleFromMain('n3ds:newCode', async () => {
+  writeJsonAtomic(N3DS_CONFIG_FILE(), { ...loadN3dsConfig(), code: newN3dsCode() })
+  return n3dsStatus()
+})
+// Hands the waiting upload to the launcher once; it merges it into the library.
+handleFromMain('n3ds:takePending', () => {
+  let pending = null
+  try { pending = JSON.parse(fs.readFileSync(N3DS_PENDING_FILE(), 'utf8')) } catch { return null }
+  try { fs.unlinkSync(N3DS_PENDING_FILE()) } catch {}
+  return pending
+})
+
 ipcMain.on('mini:pause', (event) => {
   if (!isMiniBarSender(event)) return
   mainWindow?.webContents.send('mini:pause')
@@ -1549,6 +1617,8 @@ app.whenReady().then(async () => {
     item.setSavePath(clipSavePath({ folder, filename: item.getFilename(), exists: fs.existsSync, join: path.join }))
     item.once('done', (_, state) => { if (state !== 'completed') console.warn('[Switch] Clip was not saved:', state) })
   })
+
+  if (loadN3dsConfig().enabled) n3dsReceiver.start(N3DS_PORT)
 
   steamPath = await findSteamPath()
   console.log('[Steam] Path:', steamPath || 'not found')

@@ -65,6 +65,7 @@ const nintendoUtils=createNintendoUtils();
 const rawgUtils=createRawgUtils();
 const hltbUtils=createHltbUtils();
 const progressUtils=createProgressUtils();
+const n3dsUtils=createN3dsUtils();
 let syncRetryTimer=null,syncRetryDelay=5000,syncConflictRemote=null,syncConflictResolving=false,libraryEditRevision=0,syncGeneration=0;
 const syncRetryQueue=syncTools.createFirebaseSyncQueue({
   isCurrentUser:user=>Boolean(user?.uid&&currentUser?.uid===user.uid),
@@ -148,6 +149,7 @@ UI_COPY.push(['Повторно увійти в Nintendo','Sign in to Nintendo a
 // Static labels in the game card, time editor and add-game form.
 UI_COPY.push(['Час у грі','Playtime'],['Середня сесія','Avg Session'],['Остання гра','Last Played'],['Журнал сесій','Session Log'],['Змінити час','Edit Time'],['Зберегти нотатки','Save Notes'],['Деталі гри','Game details'],['Год','Hours'],['Сек','Sec'],['+ Додати','+ Add'],['Зберегти зміни','Save Changes'],['Інше','Other'],['наприклад, Elden Ring…','e.g. Elden Ring...'],['Назва гри','Game title'],['Заповнюється з RAWG або встав URL','Auto-filled from RAWG or paste URL'],['Особисті думки…','Personal thoughts...'],['Особисті нотатки...','Personal notes...'],['Вікно Switch','Switch window'],['Показує картку захоплення на весь екран вибраного монітора зі звуком у твоїх навушниках — замість OBS. Відкривається кнопкою 🎮 у міні-табі, Esc закриває. Картку може тримати лише одна програма, тож OBS при цьому має бути закритий.','Shows your capture card full screen on the chosen monitor with its sound in your headphones — instead of OBS. Open it with the 🎮 button in the mini-tab; Esc closes it. Only one app can hold the card, so OBS has to be closed.'],['Картка захоплення','Capture card'],['Звук','Sound'],['Монітор','Monitor'],['Якість','Quality'],['Відкрити вікно Switch','Open the Switch window'],['Оновити список пристроїв','Refresh devices'],['Відеопристрій','Video device'],['Аудіопристрій','Audio device'],['Відеопристроїв не знайдено','No video devices found'],['Авто — звук самої картки','Auto — the card\'s own sound'],['Без звуку','No sound'],['основний','main'],['Картку захоплення не видно. Підключи її та натисни «Оновити список пристроїв».','No capture card is visible. Plug it in and press “Refresh devices”.'],['Схожої на картку захоплення назви немає — вибери пристрій вручну.','No device looks like a capture card — choose one manually.'],['Спершу вибери картку захоплення.','Choose a capture card first.'],['Додатковий софт','Companion apps'],['+ Додати програму','+ Add program'],['Запускаються разом із грою одним кліком: з картки, з бібліотеки чи з міні-таба.','They start together with the game in one click: from the card, the library or the mini-tab.'],['Закривати з грою','Close with game'],['Прибрати програму','Remove program'],['Не знайдено на цьому ПК','Not found on this PC'],['Лише .exe — вибери програму заново','.exe only — choose the program again'],['Не вдалося запустити: ','Could not start: '],['Лаунчер запускає лише .exe. Відкрий картку гри й вибери .exe заново.','The launcher can only start .exe files. Open the game card and choose the .exe again.']);
 UI_COPY.push(['Сховати підказку','Dismiss suggestion'],['Є підказка щодо статусу','Status suggestion available'],['Темп і беклог','Pace and backlog'],['Твій темп','Your pace'],['Залишилось у беклозі','Left in the backlog'],['Прогноз беклогу','Backlog forecast'],['Найближче до фінішу','Closest to the finish'],['Немає ігор «Граю» з даними HLTB','No Playing games with HLTB data'],['Буфер повтору','Replay buffer'],['Вимкнено','Off'],['Останні 30 с','Last 30 s'],['Останні 60 с','Last 60 s'],['Буфер тримає останні секунди гри в пам’яті: S у вікні Switch зберігає кліп у «Відео → PRGLauncher Switch». Вмикай лише за потреби — запис додатково навантажує відеокарту.','The buffer keeps the last seconds of play in memory: S in the Switch window saves a clip to “Videos → PRGLauncher Switch”. Turn it on only when needed — recording adds load on the graphics card.']);
+UI_COPY.push(['Приймає час гри з 3DS із Luma3DS через домашню мережу. Поклади prg3ds.3dsx у папку /3ds на SD-картці, відкрий його в Homebrew Launcher і введи адресу, порт і код звідси.','Receives play time from a 3DS running Luma3DS over your home network. Put prg3ds.3dsx in the /3ds folder on the SD card, open it in the Homebrew Launcher and enter the address, port and code shown here.'],['Приймати дані з 3DS','Receive data from the 3DS'],['Вимкнено. Увімкни, коли надсилатимеш дані з 3DS.','Off. Turn it on when you send data from the 3DS.'],['Новий код','New code'],['Даних з 3DS ще не було.','No data from the 3DS yet.'],['Під час першого ввімкнення Windows може спитати про доступ до мережі — дозволь його для приватних мереж. Повторне надсилання не дублює сесії.','The first time, Windows may ask about network access — allow it for private networks. Sending again does not duplicate sessions.'],['Адреса ПК','PC address'],['Порт','Port'],['Код спарювання','Pairing code'],['Немає підключення до мережі','No network connection'],['Не вдалося ввімкнути приймання даних.','Could not turn on receiving.']);
 const UK_TEXT=new Map(UI_COPY.map(([uk,en])=>[en,uk]));
 const EN_TEXT=new Map(UI_COPY.map(([uk,en])=>[uk,en]));
 let currentLanguage=localStorage.getItem('gv-language')==='en'?'en':'uk';
@@ -293,7 +295,7 @@ function initFb(cfg) {
       if(currentUser?.uid!==user?.uid)return;
       nintendoProfileReady=Boolean(user&&status);
       if(status?.connected){setNintendoSyncStatus('Nintendo Account авторизовано',true);nintendoConnectBtn.textContent='Завантажити play activity';nintendoConnectBtn.dataset.checking='2';startNintendoAutoSync();}
-      updateProfileUI();if(user){await startUserSync(user);}else{setSyncBadge('off');showLogin();if(deniedAccountLogin){showAuthError(t('Цей PRG Account не має доступу до лаунчера.'));deniedAccountLogin=false;}}
+      updateProfileUI();if(user){await startUserSync(user);if(currentUser?.uid===user.uid)importN3dsPending();}else{setSyncBadge('off');showLogin();if(deniedAccountLogin){showAuthError(t('Цей PRG Account не має доступу до лаунчера.'));deniedAccountLogin=false;}}
     });
   } catch(e){setSyncBadge('err');}
 }
@@ -1325,7 +1327,7 @@ function addGameHistory(game,kind,detail=null,source=null,at=Date.now()){
   game.history.push({id:uid(),kind,detail,source,at:Number(at)||Date.now()});
   if(game.history.length>200)game.history.splice(0,game.history.length-200);
 }
-function historySourceLabel(source){if(source==='nintendo-sync'||source==='Nintendo Sync')return 'Nintendo Sync';if(source==='steam'||source==='Steam Import')return 'Steam';if(source==='manual')return currentLanguage==='en'?'Manual':'Вручну';return source||'';}
+function historySourceLabel(source){if(source==='nintendo-sync'||source==='Nintendo Sync')return 'Nintendo Sync';if(source==='3ds')return '3DS Sync';if(source==='steam'||source==='Steam Import')return 'Steam';if(source==='manual')return currentLanguage==='en'?'Manual':'Вручну';return source||'';}
 function gameHistoryEvents(game){
   const events=Array.isArray(game.history)?[...game.history]:[];
   if(!events.some(event=>event.kind==='added')&&game.added)events.push({kind:'added',at:game.added});
@@ -1913,6 +1915,33 @@ async function syncNintendoLibrary({showIgnored=false,announce=true}={}){
 }
 document.getElementById('nintendo-covers-btn')?.addEventListener('click',async()=>{if(guestBlock())return;const targets=games.filter(g=>g.tags?.includes('Nintendo Sync')&&!g.cover);if(!targets.length){setNintendoSyncStatus('Усі Nintendo-ігри вже мають обкладинки',true);return;}const btn=document.getElementById('nintendo-covers-btn');btn.disabled=true;let found=0;for(const game of targets){try{const data=await searchRAWG(game.title);const image=data?.results?.[0]?.background_image;if(image){game.cover=image;found++;}await new Promise(resolve=>setTimeout(resolve,250));}catch{}}save();pushToFb();renderGrid();updateStats();btn.disabled=false;setNintendoSyncStatus(`Обкладинки оновлено: ${found} з ${targets.length}`,true);});
 document.getElementById('nintendo-full-sync-btn')?.addEventListener('click',()=>loadNintendoHistory(true));
+
+// NINTENDO 3DS: the PRG 3DS homebrew sends the console's play history over
+// the home network to the main process, which parses it and keeps it until
+// this window merges it (n3ds-utils.js). The receiver is off by default.
+function renderN3dsStatus(status){
+  const box=document.getElementById('n3ds-status');const toggle=document.getElementById('n3ds-enabled');if(!box||!toggle||!status)return;
+  toggle.checked=Boolean(status.enabled);
+  const en=currentLanguage==='en';
+  box.replaceChildren();
+  if(status.error){box.textContent=status.error==='port-in-use'?(en?`Port ${status.port} is taken by another app.`:`Порт ${status.port} зайнятий іншою програмою.`):t('Не вдалося ввімкнути приймання даних.');return;}
+  if(!status.enabled){box.textContent=t('Вимкнено. Увімкни, коли надсилатимеш дані з 3DS.');return;}
+  const rows=[[t('Адреса ПК'),status.addresses.length?status.addresses.join(', '):t('Немає підключення до мережі')],[t('Порт'),String(status.port)],[t('Код спарювання'),status.code]];
+  rows.forEach(([label,value])=>{const row=document.createElement('div');const name=document.createElement('span');name.textContent=`${label}: `;const code=document.createElement('code');code.textContent=value;row.append(name,code);box.appendChild(row);});
+}
+async function loadN3dsSettings(){if(window.launcher?.getN3dsStatus)renderN3dsStatus(await window.launcher.getN3dsStatus());const last=Number(localStorage.getItem(profileStorageKey('gv-n3ds-last-import-v1'))||0);const label=document.getElementById('n3ds-last');if(label)label.textContent=last?`${currentLanguage==='en'?'Last import':'Останній імпорт'}: ${new Date(last).toLocaleString(currentLanguage==='en'?'en-US':'uk-UA')}`:t('Даних з 3DS ще не було.');}
+async function importN3dsPending(){
+  if(isGuest||!currentUser||!window.launcher?.takeN3dsPending)return;
+  const pending=await window.launcher.takeN3dsPending();if(!pending)return;
+  const result=n3dsUtils.mergeUpload(games,pending,{now:Date.now(),makeId:uid});
+  if(result.added.length||result.updated.length){save();pushToFb();buildFilterBar();renderGrid();updateStats();}
+  localStorage.setItem(profileStorageKey('gv-n3ds-last-import-v1'),String(Date.now()));loadN3dsSettings();
+  const en=currentLanguage==='en';
+  feedbackUi.announce(en?`3DS: ${result.sessions} new sessions · ${result.added.length} new games · ${result.updated.length} updated`:`3DS: нових сесій ${result.sessions} · нових ігор ${result.added.length} · оновлено ${result.updated.length}`);
+}
+window.launcher?.onN3dsUploaded?.(()=>importN3dsPending());
+document.getElementById('n3ds-enabled')?.addEventListener('change',async event=>{if(guestBlock()){event.target.checked=false;return;}renderN3dsStatus(await window.launcher?.setN3dsEnabled?.(event.target.checked));});
+document.getElementById('n3ds-new-code')?.addEventListener('click',async()=>{if(guestBlock())return;renderN3dsStatus(await window.launcher?.newN3dsCode?.());});
 document.getElementById('nintendo-sync-now-btn')?.addEventListener('click',()=>syncNintendoLibrary({announce:true}));
 const nintendoAutoSync=document.getElementById('nintendo-auto-sync'),nintendoSyncInterval=document.getElementById('nintendo-sync-interval');
 if(nintendoAutoSync)nintendoAutoSync.checked=localStorage.getItem(profileStorageKey('gv-nintendo-auto-sync-v1'))!=='0';if(nintendoSyncInterval)nintendoSyncInterval.value=localStorage.getItem(profileStorageKey('gv-nintendo-sync-interval-v1'))||'30';
@@ -1998,7 +2027,7 @@ Promise.resolve(null).then(status=>{
 }).catch(()=>{});
 document.querySelectorAll('.main-tab').forEach(btn=>{btn.onclick=()=>setMainPage(btn.dataset.page);});
 function setSettingsTab(tab){return settingsUi.setTab(tab);}
-function openSettings(){loadSwitchSettings();return settingsUi.open();}
+function openSettings(){loadSwitchSettings();loadN3dsSettings();return settingsUi.open();}
 // ── SWITCH WINDOW SETTINGS ────────────────────────────────────────────────
 // Which capture card, sound, monitor and quality the Switch window uses. The
 // main process stores the choice; device labels need one camera permission,
