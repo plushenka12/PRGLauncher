@@ -1,0 +1,2 @@
+# The 3DS homebrew is built by make in a Linux container: keep LF endings.
+homebrew/** text eol=lf
