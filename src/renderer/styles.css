@@ -482,3 +482,17 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 #switch-status:empty{display:none}
 #switch-status{margin-top:10px}
 @media(max-width:640px){.switch-grid{grid-template-columns:1fr}}
+
+/* Status suggestions (progress-utils.js) and the pace panel on the stats page */
+.status-hint{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:9px 10px 9px 12px;border-radius:10px;border:1px solid color-mix(in srgb,var(--amber) 35%,transparent);background:color-mix(in srgb,var(--amber) 10%,transparent);font-size:13px;line-height:1.4}
+.status-hint[data-kind="done"]{border-color:color-mix(in srgb,var(--green) 35%,transparent);background:color-mix(in srgb,var(--green) 10%,transparent)}
+.status-hint.hidden{display:none}
+.status-hint-text{flex:1;min-width:0}
+.status-hint-dismiss{appearance:none;border:0;background:none;color:var(--text2);font-size:13px;width:28px;height:28px;border-radius:8px;cursor:pointer}
+.status-hint-dismiss:hover{background:color-mix(in srgb,var(--text) 8%,transparent);color:var(--text)}
+.status-hint-dot{width:7px;height:7px;margin-left:6px;border-radius:50%;background:var(--amber);box-shadow:0 0 0 2px rgba(8,9,17,.6)}
+.stats-pace-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.stats-pace-metrics .stats-muted{display:block;margin-top:5px}
+.stats-pace-panel button.stats-session{appearance:none;width:100%;border:0;border-bottom:1px solid rgba(157,148,183,.12);background:none;color:inherit;font:inherit;font-size:12px;text-align:left;grid-template-columns:minmax(0,1fr) auto;border-radius:0}
+.stats-pace-panel button.stats-session b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:780px){.stats-pace-metrics{grid-template-columns:1fr}}

@@ -176,7 +176,9 @@
         <label class="form-label">Звук<select id="switch-audio" class="form-select"></select></label>
         <label class="form-label">Монітор<select id="switch-display" class="form-select"></select></label>
         <label class="form-label">Якість<select id="switch-quality" class="form-select"><option value="1080p60">1080p · 60 fps</option><option value="720p60">720p · 60 fps</option><option value="1080p30">1080p · 30 fps</option></select></label>
+        <label class="form-label">Буфер повтору<select id="switch-replay" class="form-select"><option value="0">Вимкнено</option><option value="30">Останні 30 с</option><option value="60">Останні 60 с</option></select></label>
       </div>
+      <p class="nintendo-manual-help">Буфер тримає останні секунди гри в пам’яті: S у вікні Switch зберігає кліп у «Відео → PRGLauncher Switch». Вмикай лише за потреби — запис додатково навантажує відеокарту.</p>
       <div class="switch-actions"><button class="btn btn-primary btn-sm" id="switch-open" type="button">Відкрити вікно Switch</button><button class="btn btn-ghost btn-sm" id="switch-refresh" type="button">Оновити список пристроїв</button></div>
       <p class="nintendo-manual-help" id="switch-status" role="status"></p>
       </section>
@@ -451,6 +453,7 @@
         <button type="button" class="detail-tab" id="detail-tab-review" data-detail-tab="review" role="tab" aria-selected="false">Review</button>
       </div>
       <div class="detail-pane" id="d-overview-pane">
+      <div class="status-hint hidden" id="d-status-hint" role="status"></div>
       <section class="detail-group">
         <div class="detail-stats-grid">
           <div class="detail-stat"><div class="detail-stat-label">Playtime</div><div class="detail-stat-value" id="d-playtime">—</div></div>
@@ -613,6 +616,7 @@
 <script src="./recap-utils.js"></script>
 <script src="./stats-year.js"></script>
 <script src="./hltb-utils.js"></script>
+<script src="./progress-utils.js"></script>
 <script src="./a11y.js"></script>
 <script src="./ui-feedback.js"></script>
 <script src="./perf-metrics.js"></script>

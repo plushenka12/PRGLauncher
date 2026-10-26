@@ -15,12 +15,18 @@
   .hud span{display:block;color:rgba(255,255,255,.75);font-size:13px}
   .hud.error{left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;padding:20px 24px}
   .hud.error b{font-size:18px}
-  @media (prefers-reduced-motion:reduce){.hud{transition:none}}
+  .clip{position:fixed;right:24px;top:24px;padding:10px 16px;border:0;border-radius:12px;background:rgba(0,0,0,.72);color:#fff;font:inherit;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .2s cubic-bezier(.23,1,.32,1)}
+  .clip[hidden]{display:none}
+  body.pointer .clip{opacity:1;pointer-events:auto}
+  .clip:hover{background:rgba(255,255,255,.18)}
+  @media (prefers-reduced-motion:reduce){.hud,.clip{transition:none}}
 </style>
 </head>
 <body>
 <video id="video" autoplay playsinline></video>
 <div class="hud" id="hud" role="status" aria-live="polite"></div>
+<button class="clip" id="clip" type="button" hidden></button>
+<script src="./switch-replay.js"></script>
 <script src="./switch-view.js"></script>
 </body>
 </html>

@@ -64,6 +64,7 @@ const steamUtils=createSteamUtils();
 const nintendoUtils=createNintendoUtils();
 const rawgUtils=createRawgUtils();
 const hltbUtils=createHltbUtils();
+const progressUtils=createProgressUtils();
 let syncRetryTimer=null,syncRetryDelay=5000,syncConflictRemote=null,syncConflictResolving=false,libraryEditRevision=0,syncGeneration=0;
 const syncRetryQueue=syncTools.createFirebaseSyncQueue({
   isCurrentUser:user=>Boolean(user?.uid&&currentUser?.uid===user.uid),
@@ -146,6 +147,7 @@ UI_COPY.push(
 UI_COPY.push(['Повторно увійти в Nintendo','Sign in to Nintendo again'],['Nintendo-сесія недійсна. Увійди повторно; ігри й час залишаться.','Nintendo session is no longer valid. Sign in again; your games and playtime will stay.']);
 // Static labels in the game card, time editor and add-game form.
 UI_COPY.push(['Час у грі','Playtime'],['Середня сесія','Avg Session'],['Остання гра','Last Played'],['Журнал сесій','Session Log'],['Змінити час','Edit Time'],['Зберегти нотатки','Save Notes'],['Деталі гри','Game details'],['Год','Hours'],['Сек','Sec'],['+ Додати','+ Add'],['Зберегти зміни','Save Changes'],['Інше','Other'],['наприклад, Elden Ring…','e.g. Elden Ring...'],['Назва гри','Game title'],['Заповнюється з RAWG або встав URL','Auto-filled from RAWG or paste URL'],['Особисті думки…','Personal thoughts...'],['Особисті нотатки...','Personal notes...'],['Вікно Switch','Switch window'],['Показує картку захоплення на весь екран вибраного монітора зі звуком у твоїх навушниках — замість OBS. Відкривається кнопкою 🎮 у міні-табі, Esc закриває. Картку може тримати лише одна програма, тож OBS при цьому має бути закритий.','Shows your capture card full screen on the chosen monitor with its sound in your headphones — instead of OBS. Open it with the 🎮 button in the mini-tab; Esc closes it. Only one app can hold the card, so OBS has to be closed.'],['Картка захоплення','Capture card'],['Звук','Sound'],['Монітор','Monitor'],['Якість','Quality'],['Відкрити вікно Switch','Open the Switch window'],['Оновити список пристроїв','Refresh devices'],['Відеопристрій','Video device'],['Аудіопристрій','Audio device'],['Відеопристроїв не знайдено','No video devices found'],['Авто — звук самої картки','Auto — the card\'s own sound'],['Без звуку','No sound'],['основний','main'],['Картку захоплення не видно. Підключи її та натисни «Оновити список пристроїв».','No capture card is visible. Plug it in and press “Refresh devices”.'],['Схожої на картку захоплення назви немає — вибери пристрій вручну.','No device looks like a capture card — choose one manually.'],['Спершу вибери картку захоплення.','Choose a capture card first.'],['Додатковий софт','Companion apps'],['+ Додати програму','+ Add program'],['Запускаються разом із грою одним кліком: з картки, з бібліотеки чи з міні-таба.','They start together with the game in one click: from the card, the library or the mini-tab.'],['Закривати з грою','Close with game'],['Прибрати програму','Remove program'],['Не знайдено на цьому ПК','Not found on this PC'],['Лише .exe — вибери програму заново','.exe only — choose the program again'],['Не вдалося запустити: ','Could not start: '],['Лаунчер запускає лише .exe. Відкрий картку гри й вибери .exe заново.','The launcher can only start .exe files. Open the game card and choose the .exe again.']);
+UI_COPY.push(['Сховати підказку','Dismiss suggestion'],['Є підказка щодо статусу','Status suggestion available'],['Темп і беклог','Pace and backlog'],['Твій темп','Your pace'],['Залишилось у беклозі','Left in the backlog'],['Прогноз беклогу','Backlog forecast'],['Найближче до фінішу','Closest to the finish'],['Немає ігор «Граю» з даними HLTB','No Playing games with HLTB data'],['Буфер повтору','Replay buffer'],['Вимкнено','Off'],['Останні 30 с','Last 30 s'],['Останні 60 с','Last 60 s'],['Буфер тримає останні секунди гри в пам’яті: S у вікні Switch зберігає кліп у «Відео → PRGLauncher Switch». Вмикай лише за потреби — запис додатково навантажує відеокарту.','The buffer keeps the last seconds of play in memory: S in the Switch window saves a clip to “Videos → PRGLauncher Switch”. Turn it on only when needed — recording adds load on the graphics card.']);
 const UK_TEXT=new Map(UI_COPY.map(([uk,en])=>[en,uk]));
 const EN_TEXT=new Map(UI_COPY.map(([uk,en])=>[uk,en]));
 let currentLanguage=localStorage.getItem('gv-language')==='en'?'en':'uk';
@@ -199,6 +201,7 @@ function fmtTime(ms) {
 }
 function fmtHours(ms){const h=ms/3600000;const uk=currentLanguage==='uk';return h<1?Math.round(ms/60000)+(uk?' хв':'m'):h.toFixed(1)+(uk?' год':'h')}
 function fmtDate(ts){if(!ts)return'—';return new Date(ts).toLocaleDateString(currentLanguage==='en'?'en-US':'uk-UA',{day:'2-digit',month:'short',year:'numeric'})}
+function gameCountText(count){if(currentLanguage==='en')return `${count} ${count===1?'game':'games'}`;const mod10=count%10,mod100=count%100;return `${count} ${mod10===1&&mod100!==11?'гра':mod10>=2&&mod10<=4&&(mod100<12||mod100>14)?'гри':'ігор'}`;}
 function sessionCountText(count){if(currentLanguage==='en')return `${count} ${count===1?'session':'sessions'}`;const mod10=count%10,mod100=count%100;return `${count} ${mod10===1&&mod100!==11?'сесія':mod10>=2&&mod10<=4&&(mod100<12||mod100>14)?'сесії':'сесій'}`;}
 function getGameYear(g){return new Date(g.added||Date.now()).getFullYear()}
 
@@ -1065,6 +1068,7 @@ function createStatusButton(game,detail=false){
   if(game.status!==status)game.status=status;
   const badge=document.createElement('button');badge.type='button';badge.className=`card-status-badge status-control badge-${status.toLowerCase()}`;badge.textContent=t(status);badge.title=t('Змінити статус');badge.dataset.tooltip=t('Змінити статус гри: ')+t(status);badge.setAttribute('aria-label',t('Змінити статус гри: ')+t(status));badge.dataset.status=status;
   if(detail)badge.classList.add('status-control-detail');
+  else if(progressUtils.suggestStatus(game,{activeGameId})){const dot=document.createElement('span');dot.className='status-hint-dot';dot.setAttribute('aria-hidden','true');badge.appendChild(dot);badge.dataset.tooltip+=' · '+t('Є підказка щодо статусу');badge.setAttribute('aria-label',badge.getAttribute('aria-label')+'. '+t('Є підказка щодо статусу'));}
   badge.onclick=event=>{event.stopPropagation();if(!guestBlock())openQuickStatusMenu(game.id,badge);};return badge;
 }
 
@@ -1089,7 +1093,7 @@ function renderGrid(){
 // Everything a game card displays. A card whose signature is unchanged is
 // reused as is; the running timer badge is refreshed separately by tickTimer.
 function gameCardSignature(game){
-  return [currentLanguage,activeGameId===game.id?1:0,game.title,game.cover||'',game.status,game.platform||'',game.rating||0,game.playtime||0,(game.sessions||[]).length,game.steamAppId||''].join('\u0001');
+  return [currentLanguage,activeGameId===game.id?1:0,game.title,game.cover||'',game.status,game.platform||'',game.rating||0,game.playtime||0,(game.sessions||[]).length,game.steamAppId||'',progressUtils.suggestStatus(game,{activeGameId})?.kind||''].join('\u0001');
 }
 
 function resetLibraryFilters(){
@@ -1373,9 +1377,29 @@ function openDetail(id){
   renderCompanions(game);
   detailUi.renderGameDetail(game,{activeGameId,activeStart,createStatusButton,platformIcons:PLATFORM_ICONS,renderGameSources,setRatingUI,renderHltbPanel,renderGameHistory,fmtTime,fmtDate,translate:t});
   renderReviewEditor(game);
+  renderStatusHint(game);
   detailFocus.open(document.getElementById('detail-modal'));
   document.querySelector('#detail-modal .detail-body').scrollTop=0;
   maybeLookupHltb(game);
+}
+// Status suggestions never change a game on their own: the owner accepts one
+// or dismisses it, and a dismissed one stays hidden (see progress-utils.js).
+function statusHintText(hint){
+  const en=currentLanguage==='en';
+  if(hint.kind==='done')return en?`Played ${hint.percent}% of the HLTB Main Story. Completed?`:`Награно ${hint.percent}% від HLTB Main Story. Пройдено?`;
+  return en?`Not played for ${hint.days} days. Move back to the backlog?`:`Не запускав ${hint.days} дн. Повернути в беклог?`;
+}
+function renderStatusHint(game){
+  const box=document.getElementById('d-status-hint');if(!box)return;
+  const hint=isGuest?null:progressUtils.suggestStatus(game,{activeGameId});
+  box.replaceChildren();box.classList.toggle('hidden',!hint);if(!hint)return;
+  box.dataset.kind=hint.kind;
+  const text=document.createElement('span');text.className='status-hint-text';text.textContent=statusHintText(hint);
+  const accept=document.createElement('button');accept.type='button';accept.className='btn btn-ghost btn-sm';accept.textContent=t(hint.to);
+  accept.onclick=()=>{setGameStatus(game.id,hint.to);};
+  const dismiss=document.createElement('button');dismiss.type='button';dismiss.className='status-hint-dismiss';dismiss.textContent='✕';dismiss.title=t('Сховати підказку');dismiss.setAttribute('aria-label',t('Сховати підказку'));
+  dismiss.onclick=()=>{game.statusHints=progressUtils.dismissHint(game,hint.kind);save();pushToFb().catch(error=>console.warn('[Sync] Status hint failed',error));renderStatusHint(game);renderGrid();};
+  box.append(text,accept,dismiss);
 }
 function closeDetail(restoreFocus=true){detailFocus.close(document.getElementById('detail-modal'),restoreFocus);}
 
@@ -1532,10 +1556,44 @@ function addMostReturnedStatsCard(stats){
   panel.insertAdjacentHTML('beforeend',card(t('Найчастіше повертався'),recurring?.game,`${recurring?.count||0} ${t('сесій')} · ${fmtHours(recurring?.ms||0)}`)+card(t('Найдовша сесія'),longest?.game,`${longest?fmtHours(longest.dur):'—'} ${t('без перерви')}`));
   panel.querySelectorAll('.stats-returned-inner').forEach(node=>{const open=()=>openDetail(node.dataset.statsGame);node.addEventListener('click',event=>{event.stopPropagation();open();});node.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation();open();}});});
 }
+// Pace against HLTB and when the backlog would be done at the recent rate.
+// It describes the library now, so it does not follow the year picker.
+function backlogForecastText(weeks){
+  const en=currentLanguage==='en';
+  if(weeks<8){const n=Math.max(1,Math.round(weeks));return en?`~${n} wk`:`~${n} тиж.`;}
+  const months=weeks/4.345;
+  if(months<24){const n=Math.round(months);return en?`~${n} mo`:`~${n} міс.`;}
+  const years=Math.round(months/12*10)/10;return en?`~${years} yr`:`~${years} р.`;
+}
+function addPaceStatsPanel(){
+  const root=document.querySelector('.stats-new');if(!root||root.querySelector('.stats-pace-panel'))return;
+  const pace=progressUtils.buildPace(games,{now:Date.now()});
+  if(!pace.withHltb&&!pace.samples)return;
+  const en=currentLanguage==='en';
+  const panel=document.createElement('section');panel.className='stats-panel stats-pace-panel';
+  const heading=document.createElement('h3');heading.textContent=t('Темп і беклог');panel.appendChild(heading);
+  const metrics=document.createElement('div');metrics.className='stats-pace-metrics';
+  const metric=(label,value,detail)=>{const box=document.createElement('div');box.className='stats-metric';const small=document.createElement('small');small.textContent=label;const strong=document.createElement('strong');strong.textContent=value;const note=document.createElement('span');note.className='stats-muted';note.textContent=detail;box.append(small,strong,note);metrics.appendChild(box);};
+  const percent=Math.round(Math.abs(1-pace.pace)*100);
+  const paceDetail=!pace.measured
+    ?(en?`Needs 3 completed games with HLTB data (now ${pace.samples}), HLTB is used as is`:`Потрібно 3 пройдені гри з даними HLTB (зараз ${pace.samples}), поки рахую за HLTB`)
+    :percent<5?(en?`Right on HLTB Main Story · ${gameCountText(pace.samples)}`:`Точно як HLTB Main Story · ${gameCountText(pace.samples)}`)
+    :pace.pace<1?(en?`${percent}% faster than HLTB Main Story · ${gameCountText(pace.samples)}`:`На ${percent}% швидше за HLTB Main Story · ${gameCountText(pace.samples)}`)
+    :(en?`${percent}% slower than HLTB Main Story · ${gameCountText(pace.samples)}`:`На ${percent}% повільніше за HLTB Main Story · ${gameCountText(pace.samples)}`);
+  metric(t('Твій темп'),pace.measured?`${pace.pace.toFixed(2)}× HLTB`:'1.00× HLTB',paceDetail);
+  metric(t('Залишилось у беклозі'),`~${fmtHours(pace.remainingMs)}`,en?`${gameCountText(pace.withHltb)} with HLTB data${pace.missing?` · ${pace.missing} without`:''}`:`${gameCountText(pace.withHltb)} з даними HLTB${pace.missing?` · ${pace.missing} без даних`:''}`);
+  metric(t('Прогноз беклогу'),pace.weeks==null?'—':backlogForecastText(pace.weeks),pace.weeks==null?(pace.remainingMs?(en?'No play in the last 90 days yet':'За останні 90 днів ще не грав'):(en?'Nothing left to play':'Беклог розібрано')):(en?`at your ${fmtHours(pace.weeklyMs)} a week over the last 90 days`:`при твоїх ${fmtHours(pace.weeklyMs)} на тиждень за останні 90 днів`));
+  panel.appendChild(metrics);
+  const listTitle=document.createElement('h3');listTitle.textContent=t('Найближче до фінішу');panel.appendChild(listTitle);
+  if(!pace.closest.length){const empty=document.createElement('div');empty.className='stats-muted';empty.textContent=t('Немає ігор «Граю» з даними HLTB');panel.appendChild(empty);}
+  pace.closest.forEach(({game,leftMs})=>{const row=document.createElement('button');row.type='button';row.className='stats-session stats-clickable';const name=document.createElement('b');name.textContent=game.title;const left=document.createElement('span');left.textContent=en?`~${fmtHours(leftMs)} left`:`~${fmtHours(leftMs)} до кінця`;row.append(name,left);row.addEventListener('click',()=>openDetail(game.id));panel.appendChild(row);});
+  const anchor=root.querySelector('.stats-month-panel');root.insertBefore(panel,anchor||null);
+}
 function renderStatsPage(){
   const finishPerf=perfMetrics.start('statsRender');
   const stats=renderStatsOverview();
   if(stats)addMostReturnedStatsCard(stats);
+  if(stats)addPaceStatsPanel();
   finishPerf(stats?1:0);
 }
 
@@ -1965,6 +2023,7 @@ async function loadSwitchSettings(probe=false){
   const displaySelected=displays.find(display=>display.id===config.displayId)||displays.find(display=>!display.primary)||displays[0];
   fill('switch-display',displays.map(display=>[String(display.id),`${t('Монітор')} ${display.index} · ${display.width}×${display.height}${display.primary?` (${t('основний')})`:''}`]),String(displaySelected?.id??''));
   document.getElementById('switch-quality').value=config.quality||'1080p60';
+  document.getElementById('switch-replay').value=String(config.replay||0);
   status.textContent=!videos.length?t('Картку захоплення не видно. Підключи її та натисни «Оновити список пристроїв».'):!videos.some(device=>SWITCH_CAPTURE.test(device.label))?t('Схожої на картку захоплення назви немає — вибери пристрій вручну.'):'';
   if(!config.videoId&&videoSelected)saveSwitchSettings();
 }
@@ -1974,10 +2033,10 @@ function saveSwitchSettings(){
   return window.launcher?.saveSwitchConfig?.({
     videoId:video.value,videoLabel:video.selectedOptions[0]?.textContent||'',
     audioId:audio.value,audioLabel:['auto','none'].includes(audio.value)?'':audio.selectedOptions[0]?.textContent||'',
-    displayId:Number(pick('switch-display').value),quality:pick('switch-quality').value,
+    displayId:Number(pick('switch-display').value),quality:pick('switch-quality').value,replay:Number(pick('switch-replay').value),
   });
 }
-['switch-video','switch-audio','switch-display','switch-quality'].forEach(id=>document.getElementById(id).addEventListener('change',saveSwitchSettings));
+['switch-video','switch-audio','switch-display','switch-quality','switch-replay'].forEach(id=>document.getElementById(id).addEventListener('change',saveSwitchSettings));
 document.getElementById('switch-refresh').onclick=()=>loadSwitchSettings(true);
 document.getElementById('switch-open').onclick=async()=>{await saveSwitchSettings();const result=await window.launcher?.openSwitchView?.();if(result&&!result.ok)document.getElementById('switch-status').textContent=t('Спершу вибери картку захоплення.');};
 window.launcher?.onOpenSwitchSettings?.(()=>{openSettings();setSettingsTab('general');requestAnimationFrame(()=>{document.getElementById('switch-settings-title')?.scrollIntoView({block:'start'});document.getElementById('switch-video')?.focus({preventScroll:true});});});

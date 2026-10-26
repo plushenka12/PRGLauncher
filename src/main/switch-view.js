@@ -7,6 +7,8 @@ const QUALITIES = {
   '1080p30': { width: 1920, height: 1080, frameRate: 30 },
 }
 const AUDIO_MODES = new Set(['auto', 'none'])
+// Replay buffer length in seconds; 0 is off (the default: recording costs GPU).
+const REPLAY_SECONDS = [0, 30, 60]
 
 const text = (value, max = 256) => (typeof value === 'string' && value.length <= max ? value : '')
 
@@ -20,7 +22,23 @@ function sanitizeSwitchConfig(input) {
     audioLabel: text(config.audioLabel),
     displayId: Number.isFinite(Number(config.displayId)) ? Number(config.displayId) : null,
     quality: Object.prototype.hasOwnProperty.call(QUALITIES, config.quality) ? config.quality : '1080p60',
+    replay: REPLAY_SECONDS.includes(Number(config.replay)) ? Number(config.replay) : 0,
   }
+}
+
+// Where a clip from the Switch window is saved. The page only suggests a name;
+// anything but our own "PRG Switch <date>.mp4|webm" is replaced, and an
+// existing file is never overwritten.
+const CLIP_NAME = /^PRG Switch \d{4}-\d{2}-\d{2} \d{2}-\d{2}-\d{2}\.(mp4|webm)$/
+function clipSavePath({ folder, filename, exists, join, now = new Date() }) {
+  const extension = /\.webm$/i.test(String(filename || '')) ? 'webm' : 'mp4'
+  const stamp = now.toISOString().slice(0, 19).replace('T', ' ').replace(/:/g, '-')
+  const base = CLIP_NAME.test(String(filename || '')) ? String(filename).replace(/\.(mp4|webm)$/, '') : `PRG Switch ${stamp}`
+  for (let index = 1; index < 1000; index += 1) {
+    const candidate = join(folder, `${base}${index > 1 ? ` (${index})` : ''}.${extension}`)
+    if (!exists(candidate)) return candidate
+  }
+  return join(folder, `${base} ${Date.now()}.${extension}`)
 }
 
 const isConfigured = config => Boolean(config.videoId || config.videoLabel)
@@ -43,4 +61,4 @@ function allowPermission({ permission, url, role }) {
   return false
 }
 
-module.exports = { QUALITIES, sanitizeSwitchConfig, isConfigured, pickSwitchDisplay, allowPermission }
+module.exports = { QUALITIES, REPLAY_SECONDS, sanitizeSwitchConfig, isConfigured, pickSwitchDisplay, allowPermission, clipSavePath }

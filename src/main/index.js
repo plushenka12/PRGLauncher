@@ -17,7 +17,7 @@ const { STEAM_GUARD_SCRIPT, createSteamWindowGuard } = require('./steam-window-g
 const { resolveMiniTabBounds, loadSavedBounds, saveBounds, isReachable } = require('./mini-tab-bounds')
 const { createSteamLibraryArt } = require('./steam-library-art')
 const { createCompanionApps } = require('./companion-apps')
-const { sanitizeSwitchConfig, isConfigured, pickSwitchDisplay, allowPermission } = require('./switch-view')
+const { sanitizeSwitchConfig, isConfigured, pickSwitchDisplay, allowPermission, clipSavePath } = require('./switch-view')
 const steamLibraryArt = createSteamLibraryArt({ fs, getSteamPath: () => steamPath })
 
 // Keep the Windows app identity and packaged process name discoverable.
@@ -1438,7 +1438,7 @@ function openSwitchWindow() {
   })
   switchWindow.loadFile(file, { query: {
     video: config.videoId, videoLabel: config.videoLabel, audio: config.audioId, audioLabel: config.audioLabel,
-    quality: config.quality, lang: lastMiniState?.lang === 'en' ? 'en' : 'uk',
+    quality: config.quality, replay: String(config.replay), lang: lastMiniState?.lang === 'en' ? 'en' : 'uk',
   } })
   return { ok: true }
 }
@@ -1538,6 +1538,17 @@ app.whenReady().then(async () => {
   const roleOf = contents => contents && contents === mainWindow?.webContents ? 'main' : contents && contents === switchWindow?.webContents ? 'switch' : contents && contents === miniBar?.webContents ? 'mini' : null
   session.defaultSession.setPermissionRequestHandler((contents, permission, callback, details) => callback(allowPermission({ permission, url: details?.requestingUrl || contents?.getURL(), role: roleOf(contents) })))
   session.defaultSession.setPermissionCheckHandler((contents, permission, requestingOrigin, details) => allowPermission({ permission, url: details?.requestingUrl || contents?.getURL() || requestingOrigin, role: roleOf(contents) }))
+  // Replay clips from the Switch window go straight to Videos\PRGLauncher
+  // Switch, without a dialog over the game. Nothing else that window could
+  // download is accepted; other windows keep the default behaviour.
+  session.defaultSession.on('will-download', (event, item, contents) => {
+    if (!contents || contents !== switchWindow?.webContents) return
+    if (!item.getURL().startsWith('blob:file://')) { event.preventDefault(); return }
+    const folder = path.join(app.getPath('videos'), 'PRGLauncher Switch')
+    try { fs.mkdirSync(folder, { recursive: true }) } catch (error) { console.warn('[Switch] Clip folder failed:', error.message); event.preventDefault(); return }
+    item.setSavePath(clipSavePath({ folder, filename: item.getFilename(), exists: fs.existsSync, join: path.join }))
+    item.once('done', (_, state) => { if (state !== 'completed') console.warn('[Switch] Clip was not saved:', state) })
+  })
 
   steamPath = await findSteamPath()
   console.log('[Steam] Path:', steamPath || 'not found')
