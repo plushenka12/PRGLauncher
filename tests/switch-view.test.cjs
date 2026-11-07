@@ -59,11 +59,12 @@ test('main process wires the Switch window without giving it the launcher bridge
   assert.match(fs.readFileSync('src/renderer/mini-bar.js', 'utf8'), /\$\('switch'\)\.onclick = \(\) => window\.launcher\?\.openSwitchView\?\.\(\)/);
 });
 
-async function openSwitchPage(query) {
+async function openSwitchPage(query, { fakeDevice = '' } = {}) {
   const { chromium } = require('playwright-core');
   // Software encoding keeps the recording tests independent of the PC's GPU
   // driver state (a stuck GPU process makes MediaRecorder return no data).
-  const browser = await chromium.launch({ executablePath, headless: true, args: ['--use-fake-device-for-media-stream', '--use-fake-ui-for-media-stream', '--disable-gpu'] });
+  const fake = fakeDevice ? `--use-fake-device-for-media-stream=${fakeDevice}` : '--use-fake-device-for-media-stream';
+  const browser = await chromium.launch({ executablePath, headless: true, args: [fake, '--use-fake-ui-for-media-stream', '--disable-gpu'] });
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   const errors = [];
   page.on('pageerror', error => errors.push(error.message));
@@ -229,4 +230,24 @@ test('window mode remembers its place, or opens 16:9 in the middle of the chosen
   assert.match(open, /input\.key === 'F11'/);
   assert.match(open, /if \(!windowed && miniBar/, 'a window does not hide the mini-tab');
   assert.match(rendererSource(), /id="switch-mode"/);
+});
+
+test('the chosen resolution is required, the frame rate only preferred', () => {
+  const page = fs.readFileSync('src/renderer/switch-view.js', 'utf8');
+  assert.match(page, /width: \{ \[size\]: width \}, height: \{ \[size\]: height \}, frameRate: \{ ideal: frameRate \}/);
+  assert.match(page, /getUserMedia\(\{ video: videoConstraints\('exact'\), audio \}\)/, 'first the exact resolution');
+  assert.match(page, /if \(!error \|\| error\.name !== 'OverconstrainedError'\) throw error;\r?\n\s+stream = await navigator\.mediaDevices\.getUserMedia\(\{ video: videoConstraints\('ideal'\), audio \}\)/, 'then the best the card has');
+});
+
+test('a card that does 1080p only at 30 fps opens at 1080p and says so', { skip: !executablePath }, async () => {
+  const { browser, page, errors } = await openSwitchPage({ video: 'x', videoLabel: 'fake_device_0', audio: 'none', quality: '1080p60', lang: 'uk' }, { fakeDevice: 'fps=30' });
+  try {
+    await page.waitForFunction(() => document.getElementById('video').videoWidth > 0, null, { timeout: 15000 });
+    const size = await page.evaluate(() => [document.getElementById('video').videoWidth, document.getElementById('video').videoHeight]);
+    assert.deepEqual(size, [1920, 1080], 'resolution is not traded for frame rate');
+    await page.waitForFunction(() => /Картка дає 1080p лише на 30 fps/.test(document.getElementById('hud').textContent), null, { timeout: 5000 });
+    assert.deepEqual(errors, []);
+  } finally {
+    await browser.close();
+  }
 });

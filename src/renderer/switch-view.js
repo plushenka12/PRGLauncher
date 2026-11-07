@@ -13,6 +13,7 @@
       savedWhere: 'Відео → PRGLauncher Switch', replayOff: 'Буфер повтору недоступний на цьому ПК', clip: 'Зберегти кліп',
       replayEmpty: 'Буфер ще порожній — спробуй за секунду',
       replayStuck: 'Буфер повтору не записує', replayStuckHint: 'Відеокарта не віддає кадри для запису. Зазвичай допомагає перезапуск ПК; гра у вікні працює й так.',
+      lowRes: h => `Картка віддає лише ${h}p — вища якість їй недоступна`, lowFps: (h, fps) => `Картка дає ${h}p лише на ${fps} fps`,
       fullKey: 'F11 — на весь екран', shotKey: 'P — скріншот', shot: 'Скріншот збережено', outputMissing: 'Вибраний звуковий вихід не підключено — граю через стандартний вихід Windows',
     },
     en: {
@@ -24,6 +25,7 @@
       savedWhere: 'Videos → PRGLauncher Switch', replayOff: 'The replay buffer is not available on this PC', clip: 'Save clip',
       replayEmpty: 'The buffer is still empty — try again in a second',
       replayStuck: 'The replay buffer is not recording', replayStuckHint: 'The graphics card is not passing frames to the recorder. A PC restart usually helps; the picture works either way.',
+      lowRes: h => `The card gives only ${h}p — a higher quality is not available`, lowFps: (h, fps) => `The card does ${h}p only at ${fps} fps`,
       fullKey: 'F11 — full screen', shotKey: 'P — screenshot', shot: 'Screenshot saved', outputMissing: 'The chosen sound output is not connected — playing through the Windows default',
     },
   }[lang];
@@ -65,11 +67,20 @@
       : audioChoice === 'auto' ? (audios.find(device => device.groupId && device.groupId === camera.groupId) || audios.find(device => CAPTURE.test(device.label)) || null)
         : findDevice(devices, 'audioinput', audioChoice, params.get('audioLabel'));
     const [width, height, frameRate] = QUALITY[params.get('quality')] || QUALITY['1080p60'];
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: { deviceId: { exact: camera.deviceId }, width: { ideal: width }, height: { ideal: height }, frameRate: { ideal: frameRate } },
-      // Game sound, not a voice: no echo cancelling, noise suppression or gain.
-      audio: microphone ? { deviceId: { exact: microphone.deviceId }, echoCancellation: false, noiseSuppression: false, autoGainControl: false, latency: 0 } : false,
-    });
+    // Game sound, not a voice: no echo cancelling, noise suppression or gain.
+    const audio = microphone ? { deviceId: { exact: microphone.deviceId }, echoCancellation: false, noiseSuppression: false, autoGainControl: false, latency: 0 } : false;
+    // The resolution is required and the frame rate only preferred: with both
+    // merely "ideal", Chromium trades resolution for frame rate, and a card
+    // that does 1080p only at 30 fps (most cheap USB ones) is opened at ~540p
+    // 60 fps. A card that cannot do the resolution at all still opens, at its best.
+    const videoConstraints = size => ({ deviceId: { exact: camera.deviceId }, width: { [size]: width }, height: { [size]: height }, frameRate: { ideal: frameRate } });
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints('exact'), audio });
+    } catch (error) {
+      if (!error || error.name !== 'OverconstrainedError') throw error;
+      stream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints('ideal'), audio });
+    }
     video.srcObject = stream;
     video.muted = false;
     // Sound can go to another output than the Windows default (headphones
@@ -90,7 +101,11 @@
       if (replay) setTimeout(() => { if (replay && !replay.hasData()) show(TEXT.replayStuck, TEXT.replayStuckHint, { sticky: true }); }, 6000);
     }
     const replayLine = !replaySeconds ? '' : replay ? `\n${TEXT.replayKey(replaySeconds)}` : `\n${TEXT.replayOff}`;
-    show(camera.label, `${settings.width}×${settings.height} · ${Math.round(settings.frameRate || frameRate)} fps · ${microphone ? microphone.label : TEXT.noAudio}${outputNote}\n${TEXT.close}${params.get('mode') === 'window' ? ` · ${TEXT.fullKey}` : ''} · ${TEXT.shotKey}${replayLine}`);
+    // Say so when the card gave less than the chosen quality.
+    const gotFps = Math.round(settings.frameRate || frameRate);
+    const qualityLine = settings.height && settings.height < height ? `\n${TEXT.lowRes(settings.height)}`
+      : gotFps < frameRate - 1 ? `\n${TEXT.lowFps(height, gotFps)}` : '';
+    show(camera.label, `${settings.width}×${settings.height} · ${gotFps} fps · ${microphone ? microphone.label : TEXT.noAudio}${outputNote}${qualityLine}\n${TEXT.close}${params.get('mode') === 'window' ? ` · ${TEXT.fullKey}` : ''} · ${TEXT.shotKey}${replayLine}`);
     // No frames at all after a few seconds usually means no HDMI signal.
     let frames = 0;
     const count = () => { frames++; video.requestVideoFrameCallback(count); };
