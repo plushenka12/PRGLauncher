@@ -80,6 +80,8 @@ contextBridge.exposeInMainWorld('launcher', {
   onMiniState:  (callback) => ipcRenderer.on('mini:state', (_, state) => callback(state)),
   onMiniPause:  (callback) => ipcRenderer.on('mini:pause', callback),
   getSteamArt: (appIds) => ipcRenderer.invoke('art:steam', appIds),
+  getCoverThumbs: () => ipcRenderer.invoke('covers:index'),
+  requestCoverThumbs: (urls) => ipcRenderer.invoke('covers:request', urls),
   setCouchFullscreen: (on) => ipcRenderer.invoke('couch:setFullscreen', on),
   updateJumpList: (payload) => ipcRenderer.invoke('jumplist:update', payload),
   takeJumpLaunch: () => ipcRenderer.invoke('jumplist:takePending'),

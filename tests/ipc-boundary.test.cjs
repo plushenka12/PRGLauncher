@@ -39,7 +39,7 @@ test('guarded channels answer only the main window top frame', async () => {
     ipcMain: { handle: (name, callback) => { handlers[name] = callback; } },
     mainWindow: { webContents: main },
     miniBar: { webContents: mini },
-    Set, Boolean, Error,
+    Set, Boolean, Error, steamPathReady: null,
   });
   assert.equal(await handlers['app:exportBackup']({ sender: main, senderFrame: main.mainFrame }), 'saved');
   assert.equal(await handlers['mini:restore']({ sender: mini, senderFrame: mini.mainFrame }), 'restored');
@@ -48,6 +48,29 @@ test('guarded channels answer only the main window top frame', async () => {
   assert.throws(() => handlers['app:exportBackup']({ sender: main, senderFrame: {} }), /not available/, 'subframe');
   assert.throws(() => handlers['app:exportBackup']({ sender: {}, senderFrame: {} }), /not available/);
   assert.throws(() => handlers['mini:restore']({ sender: mini, senderFrame: {} }), /not available/);
+});
+
+test('a call made while start-up is still looking for Steam waits for the answer', async () => {
+  const main = { mainFrame: {} };
+  const handlers = {};
+  let found;
+  const context = {
+    ipcMain: { handle: (name, callback) => { handlers[name] = callback; } },
+    mainWindow: { webContents: main }, miniBar: null, Set, Boolean, Error,
+    steamPathReady: new Promise(resolve => { found = resolve; }), steamPath: null,
+  };
+  const start = source.indexOf('const MINI_BAR_CHANNELS');
+  const end = source.indexOf('\n}', source.indexOf('function handleFromMain')) + 2;
+  vm.runInNewContext(`${source.slice(start, end)}\nhandleFromMain('steam:getStatus', () => steamPath)`, context);
+  const answer = handlers['steam:getStatus']({ sender: main, senderFrame: main.mainFrame });
+  context.steamPath = 'demo-steam';
+  found();
+  assert.equal(await answer, 'demo-steam');
+  assert.throws(() => handlers['steam:getStatus']({ sender: {}, senderFrame: {} }), /not available/);
+  // The windows are created before the lookup is awaited.
+  const ready = source.slice(source.indexOf('app.whenReady()'));
+  assert.ok(ready.indexOf('createWindow()') > ready.indexOf('steamPathReady = findSteamPath()'));
+  assert.ok(ready.indexOf('createWindow()') < ready.indexOf('await steamPathReady'));
 });
 
 test('launcher windows may only reload their own file', () => {

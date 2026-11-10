@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, shell, Tray, Menu, nativeImage, screen, safeStorage, dialog, session } = require('electron')
+const { app, BrowserWindow, ipcMain, shell, Tray, Menu, nativeImage, screen, safeStorage, dialog, session, net } = require('electron')
 const { autoUpdater } = require('electron-updater')
 const path = require('path')
 const os = require('os')
@@ -22,7 +22,8 @@ const { createN3dsReceiver, newCode: newN3dsCode, DEFAULT_PORT: N3DS_PORT } = re
 const { parseUpload: parseN3dsUpload } = require('./n3ds-history')
 const { createFullscreenWatch } = require('./fullscreen-watch')
 const { pickAccent } = require('../renderer/accent-color')
-const { fileURLToPath } = require('url')
+const { fileURLToPath, pathToFileURL } = require('url')
+const { createCoverCache, MAX_BYTES: COVER_MAX_BYTES } = require('./cover-cache')
 const { launchIdFrom, cleanGames: cleanJumpGames, pngToIco, findSteamIcon, buildItems: buildJumpItems } = require('./jump-list')
 const steamLibraryArt = createSteamLibraryArt({ fs, getSteamPath: () => steamPath })
 
@@ -54,6 +55,8 @@ let updateInstallInProgress = false
 let updateInstallTimer = null
 let tray       = null
 let steamPath  = null
+// Pending only while start-up looks for Steam; null before and after.
+let steamPathReady = null
 let steamMonitorTimer = null
 let steamActivityPolling = false
 let steamStatusPolling = false
@@ -89,7 +92,9 @@ function handleFromMain(channel, handler) {
     if (!isMainSender(event) && !(MINI_BAR_CHANNELS.has(channel) && isMiniBarSender(event))) {
       throw new Error(`${channel} is not available to this window`)
     }
-    return handler(event, ...args)
+    // Start-up opens the window while Steam is still being looked up; a call
+    // that arrives in that moment waits for the answer instead of seeing none.
+    return steamPathReady ? steamPathReady.then(() => handler(event, ...args)) : handler(event, ...args)
   })
 }
 
@@ -1186,6 +1191,26 @@ function steamArtColor(art) {
   steamArtColors.set(file, color)
   return color
 }
+// COVER CACHE: card-sized local copies of the library's remote covers.
+const coverCache = createCoverCache({
+  dir: path.join(app.getPath('userData'), 'cover-cache'), fs, path,
+  toFileUrl: file => pathToFileURL(file).href,
+  log: (what, message) => console.warn('[Covers]', what, message),
+  fetchImage: async url => {
+    const response = await net.fetch(url, { credentials: 'omit', signal: AbortSignal.timeout(15000) })
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    if (Number(response.headers.get('content-length')) > COVER_MAX_BYTES) throw new Error('too large')
+    return { buffer: Buffer.from(await response.arrayBuffer()), contentType: response.headers.get('content-type'), finalUrl: response.url }
+  },
+  shrink: (buffer, width) => {
+    const image = nativeImage.createFromBuffer(buffer)
+    if (image.isEmpty()) return null
+    return (image.getSize().width > width ? image.resize({ width, quality: 'best' }) : image).toJPEG(84)
+  },
+})
+handleFromMain('covers:index', () => coverCache.index())
+handleFromMain('covers:request', (_, urls) => coverCache.request(urls))
+
 handleFromMain('art:steam', (_, appIds) => {
   const result = {}
   for (const id of (Array.isArray(appIds) ? appIds : []).slice(0, 500)) {
@@ -1779,7 +1804,18 @@ app.whenReady().then(async () => {
   if (loadN3dsConfig().enabled) n3dsReceiver.start(N3DS_PORT)
   if (process.platform === 'win32') fullscreenWatch.start()
 
-  steamPath = await findSteamPath()
+  // The registry lookup runs while the windows are created and start loading.
+  steamPathReady = findSteamPath().catch(() => null).then(found => { steamPath = found; steamPathReady = null })
+  createWindow()
+  createTray()
+  createMiniBar()
+  // Started from the jump list's "Switch window" while the launcher was closed.
+  if (pendingSwitchOpen) {
+    pendingSwitchOpen = false
+    mainWindow.webContents.once('did-finish-load', () => handleLaunchArgs(['--prg-switch']))
+  }
+  for (const event of ['display-removed', 'display-metrics-changed']) screen.on(event, keepMiniTabOnScreen)
+  await steamPathReady
   console.log('[Steam] Path:', steamPath || 'not found')
 
   // Start Steam silently in background
@@ -1812,15 +1848,6 @@ app.whenReady().then(async () => {
     else mainWindow?.webContents.send('app:updateStatus', updateState)
   })
 
-  createWindow()
-  createTray()
-  createMiniBar()
-  // Started from the jump list's "Switch window" while the launcher was closed.
-  if (pendingSwitchOpen) {
-    pendingSwitchOpen = false
-    mainWindow.webContents.once('did-finish-load', () => handleLaunchArgs(['--prg-switch']))
-  }
-  for (const event of ['display-removed', 'display-metrics-changed']) screen.on(event, keepMiniTabOnScreen)
   checkForUpdatesAfterLaunch()
 })
 

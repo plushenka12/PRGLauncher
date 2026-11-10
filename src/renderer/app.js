@@ -296,7 +296,7 @@ function initFb(cfg) {
       if(currentUser?.uid!==user?.uid)return;
       nintendoProfileReady=Boolean(user&&status);
       if(status?.connected){setNintendoSyncStatus('Nintendo Account авторизовано',true);nintendoConnectBtn.textContent='Завантажити play activity';nintendoConnectBtn.dataset.checking='2';startNintendoAutoSync();}
-      updateProfileUI();if(user){await startUserSync(user);if(currentUser?.uid===user.uid){importN3dsPending();runPendingJumpLaunch();loadSteamArt().then(found=>{if(!found)return;renderGrid();if(detailId&&!document.getElementById('detail-modal').classList.contains('hidden'))openDetail(detailId);});}}else{setSyncBadge('off');showLogin();if(deniedAccountLogin){showAuthError(t('Цей PRG Account не має доступу до лаунчера.'));deniedAccountLogin=false;}}
+      updateProfileUI();if(user){await startUserSync(user);if(currentUser?.uid===user.uid){importN3dsPending();runPendingJumpLaunch();requestCoverThumbs();loadSteamArt().then(found=>{if(!found)return;renderGrid();if(detailId&&!document.getElementById('detail-modal').classList.contains('hidden'))openDetail(detailId);});}}else{setSyncBadge('off');showLogin();if(deniedAccountLogin){showAuthError(t('Цей PRG Account не має доступу до лаунчера.'));deniedAccountLogin=false;}}
     });
   } catch(e){setSyncBadge('err');}
 }
@@ -1008,6 +1008,19 @@ function checkDailyWrapped(){
 var steamArt=new Map();
 function artFor(game){return game?.steamAppId?steamArt.get(String(game.steamAppId))||null:null;}
 var steamArtLoading=null;
+// COVER THUMBS: card-sized local copies of remote covers, kept by the main
+// process. The list of what is already on disk is read once at start-up; a
+// cover fetched during this run is used from the next launch, so cards are not
+// rebuilt while the user looks at them. `var` for the same reason as steamArt.
+var coverThumbs=new Map();
+window.launcher?.getCoverThumbs?.().then(found=>{
+  Object.entries(found||{}).forEach(([url,file])=>{if(typeof file==='string'&&file.startsWith('file:'))coverThumbs.set(url,file);});
+  if(coverThumbs.size&&games.length)renderGrid();
+}).catch(()=>{});
+function requestCoverThumbs(){
+  const covers=[...new Set(games.map(game=>game.cover).filter(cover=>typeof cover==='string'&&cover.startsWith('https://')))];
+  if(covers.length)window.launcher?.requestCoverThumbs?.(covers)?.catch(()=>{});
+}
 function loadSteamArt(){
   const ids=[...new Set(games.map(game=>game.steamAppId).filter(Boolean).map(String))].filter(id=>!steamArt.has(id));
   if(!ids.length||!window.launcher?.getSteamArt)return Promise.resolve(false);
@@ -1104,7 +1117,8 @@ function coverEl(game){
   // A card without a cover uses Steam's wide hero art when it is cached.
   const hero=!game.cover&&artFor(game)?.hero;
   if(hero){const img=document.createElement('img');img.loading='lazy';img.decoding='async';img.src=hero;img.alt=game.title;img.onerror=()=>img.replaceWith(fallbackEl(game));return img;}
-  if(game.cover){const img=document.createElement('img');img.loading='lazy';img.decoding='async';img.src=game.cover;img.alt=game.title;img.onerror=()=>img.replaceWith(fallbackEl(game));return img;}
+  // The local thumbnail when there is one; a broken one falls back to the cover itself.
+  if(game.cover){const thumb=coverThumbs.get(game.cover);const img=document.createElement('img');img.loading='lazy';img.decoding='async';img.src=thumb||game.cover;img.alt=game.title;let retried=false;img.onerror=()=>{if(thumb&&!retried){retried=true;coverThumbs.delete(game.cover);img.src=game.cover;}else img.replaceWith(fallbackEl(game));};return img;}
   return fallbackEl(game);
 }
 function fallbackEl(game){const d=document.createElement('div');d.className='cover-fallback';const t=document.createElement('div');t.className='cover-fb-text';t.textContent=game.title.slice(0,2).toUpperCase();d.appendChild(t);return d;}
@@ -1178,7 +1192,7 @@ function renderGrid(){
 // Everything a game card displays. A card whose signature is unchanged is
 // reused as is; the running timer badge is refreshed separately by tickTimer.
 function gameCardSignature(game){
-  return [currentLanguage,activeGameId===game.id?1:0,game.title,game.cover||'',game.status,game.platform||'',game.rating||0,game.playtime||0,(game.sessions||[]).length,game.steamAppId||'',progressUtils.suggestStatus(game,{activeGameId})?.kind||'',game.cover?'':artFor(game)?.hero||''].join('\u0001');
+  return [currentLanguage,activeGameId===game.id?1:0,game.title,game.cover||'',game.status,game.platform||'',game.rating||0,game.playtime||0,(game.sessions||[]).length,game.steamAppId||'',progressUtils.suggestStatus(game,{activeGameId})?.kind||'',game.cover?'':artFor(game)?.hero||'',coverThumbs.get(game.cover)||''].join('\u0001');
 }
 
 function resetLibraryFilters(){
