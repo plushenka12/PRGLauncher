@@ -124,17 +124,25 @@ test('a card shows the local thumbnail and falls back to the cover when it is br
       games = schema.migrateGames([{ id: 'a', title: 'Alpha', cover: first }, { id: 'b', title: 'Beta', cover: second }, { id: 'c', title: 'Gamma' }]);
       renderGrid();
       requestCoverThumbs();
-      window.coverSrc = id => document.querySelector(`[data-id="${id}"] .card-cover img`)?.src;
-      return { before: { a: window.coverSrc('a'), b: window.coverSrc('b') } };
+      // Whether and when the browser loads an image differs between machines,
+      // so the load failures are raised here; everything runs in one task.
+      const image = id => document.querySelector(`[data-id="${id}"] .card-cover img`);
+      const href = value => Object.assign(document.createElement('a'), { href: value }).href;
+      const out = { thumbsAtStart: coverThumbs.size, a: image('a')?.src === href(coverThumbs.get(first)), b: image('b')?.src === href(coverThumbs.get(second)), noCover: Boolean(image('c')) };
+      const broken = image('b');
+      broken.dispatchEvent(new Event('error'));
+      out.afterFirstError = { src: broken.src === href(second), connected: broken.isConnected, thumbs: coverThumbs.size, forgotten: !coverThumbs.has(second) };
+      broken.dispatchEvent(new Event('error'));
+      out.afterSecondError = { image: Boolean(image('b')), fallback: Boolean(document.querySelector('[data-id="b"] .cover-fallback')) };
+      out.requested = window.requestedCovers;
+      return out;
     }, [COVER, OTHER]);
-    // The broken thumbnail fails to load at the browser's own pace.
-    await page.waitForFunction(file => coverThumbs.size === 1 && window.coverSrc('b') !== file, missing, { timeout: 30000 });
-    Object.assign(result, await page.evaluate(() => ({ after: { a: window.coverSrc('a'), b: window.coverSrc('b') }, thumbs: coverThumbs.size, requested: window.requestedCovers })));
-    assert.equal(result.before.a, good);
-    assert.equal(result.before.b, missing);
-    assert.equal(result.after.a, good);
-    assert.notEqual(result.after.b, missing, 'the broken thumbnail is dropped');
-    assert.equal(result.thumbs, 1, 'non-file entries are refused, the broken one forgotten');
+    assert.equal(result.thumbsAtStart, 2, 'entries that are not local files are refused');
+    assert.equal(result.a, true, 'the card shows the thumbnail');
+    assert.equal(result.b, true);
+    assert.equal(result.noCover, false);
+    assert.deepEqual(result.afterFirstError, { src: true, connected: true, thumbs: 1, forgotten: true }, 'a broken thumbnail falls back to the cover');
+    assert.deepEqual(result.afterSecondError, { image: false, fallback: true }, 'a broken cover falls back to the placeholder');
     assert.deepEqual(result.requested, [COVER, OTHER]);
     await page.close();
   } finally {
