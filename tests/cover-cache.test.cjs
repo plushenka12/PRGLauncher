@@ -124,11 +124,12 @@ test('a card shows the local thumbnail and falls back to the cover when it is br
       games = schema.migrateGames([{ id: 'a', title: 'Alpha', cover: first }, { id: 'b', title: 'Beta', cover: second }, { id: 'c', title: 'Gamma' }]);
       renderGrid();
       requestCoverThumbs();
-      const src = id => document.querySelector(`[data-id="${id}"] .card-cover img`)?.src;
-      const before = { a: src('a'), b: src('b') };
-      await new Promise(resolve => setTimeout(resolve, 600));
-      return { before, after: { a: src('a'), b: src('b') }, thumbs: coverThumbs.size, requested: window.requestedCovers };
+      window.coverSrc = id => document.querySelector(`[data-id="${id}"] .card-cover img`)?.src;
+      return { before: { a: window.coverSrc('a'), b: window.coverSrc('b') } };
     }, [COVER, OTHER]);
+    // The broken thumbnail fails to load at the browser's own pace.
+    await page.waitForFunction(file => coverThumbs.size === 1 && window.coverSrc('b') !== file, missing, { timeout: 30000 });
+    Object.assign(result, await page.evaluate(() => ({ after: { a: window.coverSrc('a'), b: window.coverSrc('b') }, thumbs: coverThumbs.size, requested: window.requestedCovers })));
     assert.equal(result.before.a, good);
     assert.equal(result.before.b, missing);
     assert.equal(result.after.a, good);
