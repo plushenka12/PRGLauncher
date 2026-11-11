@@ -7,9 +7,11 @@ const { runCommand } = require('../src/main/run-command.js');
 const source = fs.readFileSync('src/main/index.js', 'utf8');
 
 test('runCommand resolves output, failures and timeouts without throwing', async () => {
-  const ok = await runCommand(process.execPath, ['-e', 'process.stdout.write("SteamPath    REG_SZ    C:/Steam")']);
+  // A busy machine can take longer than the 5 s default just to start Node,
+  // so the commands that should finish get a generous limit.
+  const ok = await runCommand(process.execPath, ['-e', 'process.stdout.write("SteamPath    REG_SZ    C:/Steam")'], { timeout: 60000 });
   assert.deepEqual(ok, { ok: true, stdout: 'SteamPath    REG_SZ    C:/Steam' });
-  assert.equal((await runCommand(process.execPath, ['-e', 'process.exit(1)'])).ok, false);
+  assert.equal((await runCommand(process.execPath, ['-e', 'process.exit(1)'], { timeout: 60000 })).ok, false);
   const started = Date.now();
   assert.equal((await runCommand(process.execPath, ['-e', 'setTimeout(() => {}, 5000)'], { timeout: 200 })).ok, false);
   assert.ok(Date.now() - started < 3000, 'timeout stops the command');
