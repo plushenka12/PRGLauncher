@@ -112,12 +112,12 @@ Steam працює як бекенд, а не як головний інтерф
 Нотатки, Steam App ID, кнопки запуску, завантаження та повний редагований
 каталог у веб-версію не передаються.
 
-### Публікація на Netlify
+### Публікація
 
-`netlify.toml` уже вказує Netlify публікувати тільки каталог `web-dashboard`.
-Поточний сайт `prgtracker.netlify.app` використовує Netlify Drop, тому для
-фінальної публікації треба завантажити в Netlify вміст каталогу
-`web-dashboard`. Після цього dashboard стане production-версією сайту.
+Сайт і серверні функції працюють на власному сервері Oracle за адресою
+`https://prg.145-241-163-181.sslip.io/`; оновлення — `bash scripts/deploy-oracle.sh`,
+подробиці в [`server/README.md`](server/README.md). Старий сайт
+`prgtracker.netlify.app` лишається, доки всі ПК не оновляться до версії з новою адресою.
 
 ## Архітектура файлів
 
@@ -126,7 +126,8 @@ Steam працює як бекенд, а не як головний інтерф
 - `src/renderer/index.html` — основний інтерфейс лаунчера та бізнес-логіка.
 - `src/renderer/mini-bar.html` — міні-таб: таймер і встановлені Steam-ігри.
 - `web-dashboard/index.html` — read-only сайт статистики.
-- `netlify.toml` — налаштування публікації dashboard.
+- `server/` — сервер функцій, nginx і скрипти розгортання на Oracle.
+- `netlify.toml` — налаштування старого сайту на Netlify.
 
 ## Запуск у режимі розробки
 
@@ -173,7 +174,7 @@ OpenID, Firestore Rules та синхронізації без конфлікт�
 
 Після входу через PRG Account лаунчер зберігає каталог у персональному
 Firebase-профілі та створює dashboard-посилання формату
-`https://prgtracker.netlify.app/?u={profileId}`. Ідентифікатор у URL —
+`https://prg.145-241-163-181.sslip.io/?u={profileId}`. Ідентифікатор у URL —
 публічний і використовується лише для читання статистичного snapshot.
 
 ## Мова та вигляд

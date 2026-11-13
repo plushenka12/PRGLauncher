@@ -16,6 +16,8 @@ are fabricated from that total.
 
 ## One-time server setup
 
+> November 2026: the function now runs on the owner's Oracle server; set the key with `server/set-keys.sh` (see [`server/README.md`](server/README.md)). The Netlify steps below apply only to the old site.
+
 1. Obtain a Steam Web API key at [Steam Web API Key](https://steamcommunity.com/dev/apikey) using the
    project owner's Steam account. Never paste it into chat or commit it.
 2. In the Netlify project's environment variables, set `STEAM_WEB_API_KEY` for

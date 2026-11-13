@@ -1,0 +1,31 @@
+[Unit]
+Description=PRGLauncher server functions (RAWG search, Steam library)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=prglauncher
+Group=prglauncher
+WorkingDirectory=/opt/prglauncher
+ExecStart=/usr/bin/node /opt/prglauncher/server/functions-server.cjs
+# RAWG_API_KEY, STEAM_WEB_API_KEY and FIREBASE_WEB_API_KEY. Readable by root only.
+EnvironmentFile=/etc/prglauncher/env
+Environment=PORT=8787 NODE_ENV=production
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6
+RestrictNamespaces=true
+LockPersonality=true
+MemoryMax=256M
+
+[Install]
+WantedBy=multi-user.target

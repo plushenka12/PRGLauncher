@@ -25,6 +25,10 @@ const { pickAccent } = require('../renderer/accent-color')
 const { fileURLToPath, pathToFileURL } = require('url')
 const { createCoverCache, MAX_BYTES: COVER_MAX_BYTES } = require('./cover-cache')
 const { launchIdFrom, cleanGames: cleanJumpGames, pngToIco, findSteamIcon, buildItems: buildJumpItems } = require('./jump-list')
+// The owner's server: guest site and the RAWG/Steam functions. The old Netlify
+// host stays accepted for links while it is still up.
+const PRG_SITE_ORIGIN = 'https://prg.145-241-163-181.sslip.io'
+const PRG_SITE_HOSTS = new Set([new URL(PRG_SITE_ORIGIN).hostname, 'prgtracker.netlify.app'])
 const steamLibraryArt = createSteamLibraryArt({ fs, getSteamPath: () => steamPath })
 
 // Keep the Windows app identity and packaged process name discoverable.
@@ -747,7 +751,7 @@ handleFromMain('steam:profileLibrary', async (_, payload) => {
   if (!payload || typeof payload.profile !== 'string' || payload.profile.length > 300 || typeof payload.token !== 'string' || payload.token.length > 10000) return { error: 'INVALID_PROFILE' }
   try {
     return await new Promise((resolve, reject) => {
-      const request = https.request('https://prgtracker.netlify.app/.netlify/functions/steam-library', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${payload.token}` } }, response => {
+      const request = https.request(`${PRG_SITE_ORIGIN}/.netlify/functions/steam-library`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${payload.token}` } }, response => {
         let body = ''; response.setEncoding('utf8');
         response.on('data', chunk => { body += chunk; if (body.length > 10000000) request.destroy(new Error('Response too large')) });
         response.on('end', () => { try { resolve(JSON.parse(body)) } catch { resolve({ error: 'SERVER_NOT_DEPLOYED' }) } });
@@ -766,7 +770,7 @@ handleFromMain('rawg:search', async (event, payload) => {
     return { error: 'INVALID_QUERY' }
   }
   try {
-    const response = await fetch('https://prgtracker.netlify.app/.netlify/functions/rawg-search', {
+    const response = await fetch(`${PRG_SITE_ORIGIN}/.netlify/functions/rawg-search`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${payload.token}` },
       body: JSON.stringify({ query: payload.query, pageSize: payload.pageSize }),
@@ -921,7 +925,7 @@ handleFromMain('hltb:openGame', async (_, url) => {
 handleFromMain('app:openExternal', async (_, url) => {
   try {
     const parsed = new URL(String(url || ''))
-    if (parsed.protocol !== 'https:' || parsed.hostname !== 'prgtracker.netlify.app') return { ok: false }
+    if (parsed.protocol !== 'https:' || !PRG_SITE_HOSTS.has(parsed.hostname)) return { ok: false }
     await shell.openExternal(parsed.toString())
     return { ok: true }
   } catch { return { ok: false } }

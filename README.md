@@ -12,7 +12,7 @@
 <p align="center">
   <a href="https://github.com/plushenka12/PRGLauncher/releases/latest">Завантажити останню версію</a>
   ·
-  <a href="https://prgtracker.netlify.app/">Гостьова бібліотека</a>
+  <a href="https://prg.145-241-163-181.sslip.io/">Гостьова бібліотека</a>
   ·
   <a href="DOCUMENTATION.md">Детальна документація</a>
 </p>
@@ -101,7 +101,7 @@ PRGLauncher — це не заміна магазину Steam. Steam залиш�
 
 - Вхід через Email/Password або Google.
 - Бібліотека, налаштування й синхронізація власного PRG Account; починаючи з 1.2.6 хмарний доступ обмежено акаунтом власника.
-- Власне dashboard-посилання формату `https://prgtracker.netlify.app/?u={profileId}`.
+- Власне dashboard-посилання формату `https://prg.145-241-163-181.sslip.io/?u={profileId}`; без `?u=` сайт показує бібліотеку власника.
 - На сайт відправляється read-only статистичний знімок. У версії 1.2.6 гостьова бібліотека має окремий дозвіл, вимкнений за замовчуванням: публікуються лише назви, обкладинки, статуси, платформи, оцінки, загальний час, кількість сесій та HLTB Main Story.
 - Приватні нотатки, токени Nintendo, Steam App ID, кнопки запуску й редагований каталог на сайт не передаються.
 
@@ -211,6 +211,7 @@ src/renderer/styles.css        стилі основного інтерфейс�
 src/renderer/mini-bar.html     always-on-top mini-tab
 web-dashboard/index.html       read-only веб-статистика
 netlify/functions/             захищені серверні інтеграції Steam і RAWG
+server/                        запуск сайту й функцій на сервері Oracle
 assets/                        іконки PRGLauncher
 .github/workflows/             macOS tester build та Windows release pipeline
 ```
