@@ -251,3 +251,36 @@ test('a card that does 1080p only at 30 fps opens at 1080p and says so', { skip:
     await browser.close();
   }
 });
+
+test('the background page keeps the buffer muted and saves a clip when the launcher asks', { skip: !executablePath }, async () => {
+  const { browser, page, errors } = await openSwitchPage({ video: 'stale-id', videoLabel: 'fake_device_0', audio: 'auto', quality: '720p60', mode: 'background', replay: '30', lang: 'uk' });
+  try {
+    await page.waitForFunction(() => document.getElementById('video').videoWidth > 0, null, { timeout: 15000 });
+    assert.equal(await page.evaluate(() => document.getElementById('video').muted), true, 'the monitor plays the sound, not the PC');
+    assert.equal(await page.evaluate(() => typeof window.PRGSaveClip), 'function');
+    const first = await page.evaluate(() => window.PRGSaveClip());
+    assert.ok(first.ok || first.code === 'empty', JSON.stringify(first));
+    assert.deepEqual(errors, []);
+  } finally {
+    await browser.close();
+  }
+  const off = await openSwitchPage({ video: 'stale-id', videoLabel: 'fake_device_0', audio: 'none', quality: '720p60', mode: 'background', lang: 'uk' });
+  try {
+    await off.page.waitForFunction(() => document.getElementById('video').videoWidth > 0, null, { timeout: 15000 });
+    assert.deepEqual(await off.page.evaluate(() => window.PRGSaveClip()), { ok: false, code: 'off' });
+  } finally {
+    await off.browser.close();
+  }
+});
+
+test('the background replay runs in the hidden Switch window and stops with the PC input', () => {
+  const main = fs.readFileSync('src/main/index.js', 'utf8');
+  const start = main.slice(main.indexOf('function startBackgroundCapture()'), main.indexOf('function stopBackgroundCapture()'));
+  assert.match(start, /show: false, skipTaskbar: true/);
+  assert.match(start, /backgroundThrottling: false/);
+  assert.match(start, /mode: 'background'/);
+  assert.match(start, /switchWindow = new BrowserWindow/, 'the same window rules (camera, downloads) apply');
+  assert.match(main, /if \(toConsole && config\.replay\) startBackgroundCapture\(\)\r?\n\s+if \(!toConsole\) stopBackgroundCapture\(\)/);
+  assert.match(main, /if \(switchBackground\) return \{ ok: false, code: 'background' \}/);
+  assert.match(main, /executeJavaScript\('window\.PRGSaveClip \? window\.PRGSaveClip\(\) : \(\{ ok: false, code: "starting" \}\)'\)/);
+});

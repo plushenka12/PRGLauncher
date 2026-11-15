@@ -102,13 +102,13 @@ test('Steam guard runs one watcher and restarts it only to cover a longer period
 });
 
 test('main process wires the mini-tab, launch requests and the Steam guard', () => {
-  assert.match(main, /const MINI_BAR_CHANNELS = new Set\(\['mini:restore', 'mini:launch', 'switch:open'\]\)/);
+  assert.match(main, /const MINI_BAR_CHANNELS = new Set\(\['mini:restore', 'mini:launch', 'switch:open', 'switch:saveClip'\]\)/);
   assert.doesNotMatch(main, /mini:togglePin|miniBarStandby|transitionToMainWindow|steam-startup-window/);
   assert.match(main, /createTray\(\)\r?\n {2}createMiniBar\(\)/, 'the mini-tab opens at start-up');
   assert.match(main, /miniBar\.on\('close', event => \{ if \(!isQuitting\) event\.preventDefault\(\) \}\)/);
   assert.match(main, /resizable: false,/, 'the mini-tab has a fixed size');
   assert.doesNotMatch(main, /miniBar\.on\('resized'/);
-  assert.match(main, /lastMiniState = steamLibraryArt\.decorate\(state\)/);
+  assert.match(main, /lastMiniState = \{ \.\.\.steamLibraryArt\.decorate\(state\), \.\.\.monitorMiniState\(\) \}/);
   assert.match(html, /detailId!==game\.id\)return;/, 'background HLTB lookups do not draw into another card');
   assert.match(html, /queueMiniTabHltb\(\[state\.gameId,\.\.\.state\.games\.map\(game=>game\.id\)\]\)/);
   for (const hook of ['hideSteamWindow(STEAM_GUARD_MS.launch)', 'hideSteamWindow(STEAM_GUARD_MS.exit)', 'hideSteamWindow(STEAM_GUARD_MS.startup)']) {

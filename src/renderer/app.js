@@ -151,6 +151,7 @@ UI_COPY.push(['Повторно увійти в Nintendo','Sign in to Nintendo a
 UI_COPY.push(['Час у грі','Playtime'],['Середня сесія','Avg Session'],['Остання гра','Last Played'],['Журнал сесій','Session Log'],['Змінити час','Edit Time'],['Зберегти нотатки','Save Notes'],['Деталі гри','Game details'],['Год','Hours'],['Сек','Sec'],['+ Додати','+ Add'],['Зберегти зміни','Save Changes'],['Інше','Other'],['наприклад, Elden Ring…','e.g. Elden Ring...'],['Назва гри','Game title'],['Заповнюється з RAWG або встав URL','Auto-filled from RAWG or paste URL'],['Особисті думки…','Personal thoughts...'],['Особисті нотатки...','Personal notes...'],['Вікно Switch','Switch window'],['Показує картку захоплення на весь екран вибраного монітора зі звуком у твоїх навушниках — замість OBS. Відкривається кнопкою 🎮 у міні-табі, Esc закриває. Картку може тримати лише одна програма, тож OBS при цьому має бути закритий.','Shows your capture card full screen on the chosen monitor with its sound in your headphones — instead of OBS. Open it with the 🎮 button in the mini-tab; Esc closes it. Only one app can hold the card, so OBS has to be closed.'],['Картка захоплення','Capture card'],['Звук','Sound'],['Монітор','Monitor'],['Якість','Quality'],['Відкрити вікно Switch','Open the Switch window'],['Оновити список пристроїв','Refresh devices'],['Відеопристрій','Video device'],['Аудіопристрій','Audio device'],['Відеопристроїв не знайдено','No video devices found'],['Авто — звук самої картки','Auto — the card\'s own sound'],['Без звуку','No sound'],['основний','main'],['Картку захоплення не видно. Підключи її та натисни «Оновити список пристроїв».','No capture card is visible. Plug it in and press “Refresh devices”.'],['Схожої на картку захоплення назви немає — вибери пристрій вручну.','No device looks like a capture card — choose one manually.'],['Спершу вибери картку захоплення.','Choose a capture card first.'],['Додатковий софт','Companion apps'],['+ Додати програму','+ Add program'],['Запускаються разом із грою одним кліком: з картки, з бібліотеки чи з міні-таба.','They start together with the game in one click: from the card, the library or the mini-tab.'],['Закривати з грою','Close with game'],['Прибрати програму','Remove program'],['Не знайдено на цьому ПК','Not found on this PC'],['Лише .exe — вибери програму заново','.exe only — choose the program again'],['Не вдалося запустити: ','Could not start: '],['Лаунчер запускає лише .exe. Відкрий картку гри й вибери .exe заново.','The launcher can only start .exe files. Open the game card and choose the .exe again.']);
 UI_COPY.push(['Деталі','Details'],['← → статус · A змінити · B або Y закрити','← → status · A to change · B or Y to close'],['Режим геймпада','Gamepad mode'],['Режим геймпада: бібліотека на весь екран для гри з дивана','Gamepad mode: the library full screen for playing from the couch'],['Нещодавні','Recent'],['Усі ігри','All games'],['Грати','Play'],['Вийти','Exit'],['Розділи','Sections'],['Вибір','Select'],['Зараз граєш','Playing now'],['Тут поки порожньо','Nothing here yet'],['Перемкни розділ кнопками LB / RB.','Switch sections with LB / RB.'],['від HLTB Main Story','of HLTB Main Story'],['Запуску немає — A запустить таймер','No launcher for this game — A starts the timer'],['Нещодавні ігри','Recent games'],['Режим','Mode'],['На весь екран','Full screen'],['У вікні','In a window'],['Довжина за HLTB Main Story','Length by HLTB Main Story'],['Будь-яка довжина','Any length'],['До 5 год','Up to 5 h'],['5–20 год','5–20 h'],['20–50 год','20–50 h'],['Понад 50 год','Over 50 h'],['Без даних HLTB','No HLTB data'],['Сховати підказку','Dismiss suggestion'],['Є підказка щодо статусу','Status suggestion available'],['Темп і беклог','Pace and backlog'],['Твій темп','Your pace'],['Залишилось у беклозі','Left in the backlog'],['Прогноз беклогу','Backlog forecast'],['Найближче до фінішу','Closest to the finish'],['Немає ігор «Граю» з даними HLTB','No Playing games with HLTB data'],['Буфер повтору','Replay buffer'],['Вимкнено','Off'],['Останні 30 с','Last 30 s'],['Останні 60 с','Last 60 s'],['Буфер тримає останні секунди гри в пам’яті: S у вікні Switch зберігає кліп у «Відео → PRGLauncher Switch», P — скріншот туди ж. Вмикай лише за потреби — запис додатково навантажує відеокарту.','The buffer keeps the last seconds of play in memory: S in the Switch window saves a clip to “Videos → PRGLauncher Switch”, P saves a screenshot there. Turn it on only when needed — recording adds load on the graphics card.'],['Куди виводити звук','Sound output'],['Експорт бібліотеки','Library export'],['Таблиця для Excel чи Google Sheets: назви, платформи, статуси, оцінки, час і сесії. Нотатки, шляхи запуску й акаунти не потрапляють.','A table for Excel or Google Sheets: titles, platforms, statuses, ratings, time and sessions. Notes, launch paths and accounts are left out.'],['Як у Windows','Windows default'],['Аудіовихід','Audio output']);
 UI_COPY.push(['Приймає час гри з 3DS із Luma3DS через домашню мережу. Поклади prg3ds.3dsx у папку /3ds на SD-картці, відкрий його в Homebrew Launcher і введи адресу, порт і код звідси.','Receives play time from a 3DS running Luma3DS over your home network. Put prg3ds.3dsx in the /3ds folder on the SD card, open it in the Homebrew Launcher and enter the address, port and code shown here.'],['Приймати дані з 3DS','Receive data from the 3DS'],['Вимкнено. Увімкни, коли надсилатимеш дані з 3DS.','Off. Turn it on when you send data from the 3DS.'],['Новий код','New code'],['Даних з 3DS ще не було.','No data from the 3DS yet.'],['Під час першого ввімкнення Windows може спитати про доступ до мережі — дозволь його для приватних мереж. Повторне надсилання не дублює сесії.','The first time, Windows may ask about network access — allow it for private networks. Sending again does not duplicate sessions.'],['Адреса ПК','PC address'],['Порт','Port'],['Код спарювання','Pairing code'],['Немає підключення до мережі','No network connection'],['Не вдалося ввімкнути приймання даних.','Could not turn on receiving.']);
+UI_COPY.push(['Гра напряму через HDMI','Play directly over HDMI'],['Замість картки захоплення монітор сам перемикається на вхід, до якого підключено Switch: повна якість і без затримки. Тоді кнопка 🎮 у міні-табі, пункт «Вікно Switch» у списку переходів і меню в треї перемикають монітор на Switch і назад на ПК. У меню монітора має бути увімкнено DDC/CI. Звук іде через монітор. Якщо Switch підключено через картку з виходом HDMI OUT (Switch → картка → монітор), лаунчер може тримати буфер повтору з картки у фоні: кліп зберігає червона кнопка в міні-табі або меню в треї.','Instead of the capture card, the monitor itself switches to the input the Switch is plugged into: full quality and no delay. The 🎮 button in the mini-tab, the “Switch window” jump list item and the tray menu then switch the monitor to the Switch and back to the PC. DDC/CI must be on in the monitor’s menu. Sound comes from the monitor. If the Switch goes through a capture card with an HDMI OUT (Switch → card → monitor), the launcher can keep a replay buffer from the card in the background: the red button in the mini-tab or the tray menu saves a clip.'],['З картки у фоні','From the card, in the background'],['Картка зараз тримає буфер повтору у фоні — спершу поверни монітор на ПК.','The card is keeping the replay buffer in the background — switch the monitor back to the PC first.'],['Кнопка 🎮','🎮 button'],['Відкриває вікно картки','Opens the capture card window'],['Перемикає монітор на Switch','Switches the monitor to the Switch'],['Вхід Switch','Switch input'],['Перемкнути на Switch','Switch to the console'],['Повернути на ПК','Back to the PC'],['Перевірити монітори','Check monitors'],['Перевіряю монітори…','Checking monitors…'],['Жоден монітор не відповідає по DDC/CI. Увімкни DDC/CI у меню монітора й натисни «Перевірити монітори».','No monitor answers over DDC/CI. Turn DDC/CI on in the monitor’s menu and press “Check monitors”.'],['Не вдалося прочитати монітори.','Could not read the monitors.'],['без DDC/CI','no DDC/CI'],['зараз','now'],['Перемикаю монітор…','Switching the monitor…'],['Монітор перемкнено:','Monitor switched:'],['Монітор не прийняв команду. Перевір DDC/CI і вибраний вхід.','The monitor refused the command. Check DDC/CI and the chosen input.'],['Вибраний монітор не знайдено — натисни «Перевірити монітори».','The chosen monitor is not found — press “Check monitors”.'],['Невідомо, на якому вході ПК: спершу перемкни на Switch із лаунчера.','The PC’s input is not known yet: switch to the console from the launcher first.'],['Спершу вибери монітор.','Choose a monitor first.'],['Не вдалося перемкнути монітор.','Could not switch the monitor.']);
 const UK_TEXT=new Map(UI_COPY.map(([uk,en])=>[en,uk]));
 const EN_TEXT=new Map(UI_COPY.map(([uk,en])=>[uk,en]));
 let currentLanguage=localStorage.getItem('gv-language')==='en'?'en':'uk';
@@ -2142,7 +2143,7 @@ Promise.resolve(null).then(status=>{
 }).catch(()=>{});
 document.querySelectorAll('.main-tab').forEach(btn=>{btn.onclick=()=>setMainPage(btn.dataset.page);});
 function setSettingsTab(tab){return settingsUi.setTab(tab);}
-function openSettings(){loadSwitchSettings();loadN3dsSettings();return settingsUi.open();}
+function openSettings(){loadSwitchSettings();loadMonitorSettings();loadN3dsSettings();return settingsUi.open();}
 // ── SWITCH WINDOW SETTINGS ────────────────────────────────────────────────
 // Which capture card, sound, monitor and quality the Switch window uses. The
 // main process stores the choice; device labels need one camera permission,
@@ -2185,9 +2186,62 @@ function saveSwitchSettings(){
     mode:pick('switch-mode').value,outputId:output.value||'default',outputLabel:output.value&&output.value!=='default'?output.selectedOptions[0]?.textContent||'':'',
   });
 }
+// MONITOR INPUT: settings for playing the Switch on the monitor's HDMI input.
+let monitorList=[];
+async function loadMonitorSettings(){
+  const status=document.getElementById('monitor-status');
+  if(!window.launcher?.listMonitors){document.getElementById('monitor-settings')?.setAttribute('hidden','');return;}
+  status.textContent=t('Перевіряю монітори…');
+  const result=await window.launcher.listMonitors();
+  monitorList=Array.isArray(result?.monitors)?result.monitors:[];
+  const config=result?.config||{};
+  const pick=document.getElementById('monitor-pick');
+  pick.replaceChildren(...monitorList.map(monitor=>{const option=document.createElement('option');option.value=monitor.id;option.disabled=!monitor.ddc;option.textContent=`${monitor.name}${monitor.primary?` (${t('основний')})`:''} · ${monitor.ddc?`${t('зараз')} ${monitor.inputName||'?'}`:t('без DDC/CI')}`;return option;}));
+  const chosen=monitorList.find(monitor=>monitor.id===config.monitorId&&monitor.ddc)||monitorList.find(monitor=>monitor.ddc&&monitor.name===config.monitorName)||monitorList.find(monitor=>monitor.ddc&&monitor.primary)||monitorList.find(monitor=>monitor.ddc);
+  if(chosen)pick.value=chosen.id;
+  document.getElementById('monitor-method').value=config.method==='hdmi'?'hdmi':'card';
+  document.getElementById('monitor-replay').value=config.replay?'1':'0';
+  fillMonitorInputs(config.consoleInput);
+  status.textContent=!result?.ok?t('Не вдалося прочитати монітори.'):!chosen?t('Жоден монітор не відповідає по DDC/CI. Увімкни DDC/CI у меню монітора й натисни «Перевірити монітори».'):'';
+  updateMonitorButtons(config);
+  if(chosen&&chosen.id!==config.monitorId)saveMonitorSettings();
+}
+function fillMonitorInputs(selected){
+  const monitor=monitorList.find(item=>item.id===document.getElementById('monitor-pick').value);
+  // The monitor's own list when it reports one, otherwise the usual inputs.
+  const options=monitor?.options?.length?monitor.options:[[0x11,'HDMI 1'],[0x12,'HDMI 2'],[0x0F,'DisplayPort 1'],[0x10,'DisplayPort 2'],[0x1B,'USB-C']].map(([value,name])=>({value,name}));
+  const select=document.getElementById('monitor-console-input');
+  select.replaceChildren(...options.filter(option=>option.value!==monitor?.input||option.value===selected).map(option=>{const item=document.createElement('option');item.value=String(option.value);item.textContent=option.name;return item;}));
+  const preferred=[selected,0x11,0x12].find(value=>[...select.options].some(option=>Number(option.value)===value));
+  if(preferred)select.value=String(preferred);
+}
+function updateMonitorButtons(config){
+  const hasMonitor=Boolean(document.getElementById('monitor-pick').value);
+  document.getElementById('monitor-to-console').disabled=!hasMonitor;
+  document.getElementById('monitor-to-pc').disabled=!hasMonitor||!config?.pcInput;
+}
+function saveMonitorSettings(){
+  const pick=document.getElementById('monitor-pick');
+  return window.launcher?.saveMonitorConfig?.({monitorId:pick.value||null,monitorName:monitorList.find(monitor=>monitor.id===pick.value)?.name||'',consoleInput:Number(document.getElementById('monitor-console-input').value)||0x11,method:document.getElementById('monitor-method').value,replay:document.getElementById('monitor-replay').value==='1'}).then(config=>{updateMonitorButtons(config);return config;});
+}
+async function switchMonitorFromSettings(toConsole){
+  const status=document.getElementById('monitor-status');
+  if(!document.getElementById('monitor-pick').value){status.textContent=t('Спершу вибери монітор.');return;}
+  await saveMonitorSettings();
+  status.textContent=t('Перемикаю монітор…');
+  const result=await window.launcher.switchMonitor(toConsole);
+  const messages={refused:'Монітор не прийняв команду. Перевір DDC/CI і вибраний вхід.','monitor-missing':'Вибраний монітор не знайдено — натисни «Перевірити монітори».','no-ddc':'Жоден монітор не відповідає по DDC/CI. Увімкни DDC/CI у меню монітора й натисни «Перевірити монітори».','no-pc-input':'Невідомо, на якому вході ПК: спершу перемкни на Switch із лаунчера.','not-configured':'Спершу вибери монітор.'};
+  status.textContent=result?.ok?`${t('Монітор перемкнено:')} ${result.input}`:t(messages[result?.code]||'Не вдалося перемкнути монітор.');
+  if(result?.ok&&!toConsole)loadMonitorSettings();
+}
+document.getElementById('monitor-pick').addEventListener('change',()=>{fillMonitorInputs();saveMonitorSettings();});
+['monitor-method','monitor-console-input','monitor-replay'].forEach(id=>document.getElementById(id).addEventListener('change',saveMonitorSettings));
+document.getElementById('monitor-refresh').onclick=()=>loadMonitorSettings();
+document.getElementById('monitor-to-console').onclick=()=>switchMonitorFromSettings(true);
+document.getElementById('monitor-to-pc').onclick=()=>switchMonitorFromSettings(false);
 ['switch-video','switch-audio','switch-output','switch-display','switch-mode','switch-quality','switch-replay'].forEach(id=>document.getElementById(id).addEventListener('change',saveSwitchSettings));
 document.getElementById('switch-refresh').onclick=()=>loadSwitchSettings(true);
-document.getElementById('switch-open').onclick=async()=>{await saveSwitchSettings();const result=await window.launcher?.openSwitchView?.();if(result&&!result.ok)document.getElementById('switch-status').textContent=t('Спершу вибери картку захоплення.');};
+document.getElementById('switch-open').onclick=async()=>{await saveSwitchSettings();const result=await window.launcher?.openSwitchView?.();if(result&&!result.ok)document.getElementById('switch-status').textContent=t(result.code==='background'?'Картка зараз тримає буфер повтору у фоні — спершу поверни монітор на ПК.':'Спершу вибери картку захоплення.');};
 window.launcher?.onOpenSwitchSettings?.(()=>{openSettings();setSettingsTab('general');requestAnimationFrame(()=>{document.getElementById('switch-settings-title')?.scrollIntoView({block:'start'});document.getElementById('switch-video')?.focus({preventScroll:true});});});
 document.getElementById('settings-btn').onclick=openSettings;
 document.getElementById('settings-close').onclick=()=>settingsUi.close();

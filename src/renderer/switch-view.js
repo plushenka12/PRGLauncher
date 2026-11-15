@@ -32,6 +32,10 @@
   const QUALITY = { '1080p60': [1920, 1080, 60], '720p60': [1280, 720, 60], '1080p30': [1920, 1080, 30] };
   const BITRATE = { '1080p60': 12_000_000, '720p60': 8_000_000, '1080p30': 8_000_000 };
   const replaySeconds = [30, 60].includes(Number(params.get('replay'))) ? Number(params.get('replay')) : 0;
+  // Background: a hidden window that only keeps the replay buffer while the
+  // monitor shows the console through the card's HDMI OUT. Its sound stays
+  // muted, since the monitor already plays it.
+  const background = params.get('mode') === 'background';
   const clipButton = document.getElementById('clip');
   let replay = null;
   let saving = false;
@@ -82,12 +86,12 @@
       stream = await navigator.mediaDevices.getUserMedia({ video: videoConstraints('ideal'), audio });
     }
     video.srcObject = stream;
-    video.muted = false;
+    video.muted = background;
     // Sound can go to another output than the Windows default (headphones
     // for the game, speakers for the rest). A missing output falls back.
     let outputNote = '';
     const outputId = params.get('output') || 'default';
-    if (microphone && outputId !== 'default' && typeof video.setSinkId === 'function') {
+    if (!background && microphone && outputId !== 'default' && typeof video.setSinkId === 'function') {
       const output = findDevice(await navigator.mediaDevices.enumerateDevices(), 'audiooutput', outputId, params.get('outputLabel'));
       if (output) { try { await video.setSinkId(output.deviceId); outputNote = ` → ${output.label}`; } catch { outputNote = ''; } }
       else outputNote = `\n${TEXT.outputMissing}`;
@@ -144,19 +148,27 @@
     }, 'image/png');
   }
 
+  // Resolves what happened, for the launcher when it asks from the mini-tab.
   async function saveClip() {
-    if (!replay || saving) return;
+    if (!replay) return { ok: false, code: 'off' };
+    if (saving) return { ok: false, code: 'busy' };
     saving = true;
     show(TEXT.saving);
     try {
       const clip = await replay.save();
-      if (!clip || !clip.blob.size) { show(TEXT.replayEmpty); return; }
+      if (!clip || !clip.blob.size) { show(TEXT.replayEmpty); return { ok: false, code: 'empty' }; }
       download(clip.blob, clip.extension);
-      show(TEXT.saved, `${TEXT.savedWhere} · ${Math.round(clip.durationMs / 1000)} s`);
+      const seconds = Math.round(clip.durationMs / 1000);
+      show(TEXT.saved, `${TEXT.savedWhere} · ${seconds} s`);
+      return { ok: true, seconds };
+    } catch {
+      return { ok: false, code: 'failed' };
     } finally {
       saving = false;
     }
   }
+  // The main process calls this for the hidden background window.
+  window.PRGSaveClip = saveClip;
   document.addEventListener('keydown', event => {
     if (event.repeat) return;
     if (event.code === 'KeyS') saveClip();

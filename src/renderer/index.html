@@ -192,6 +192,18 @@
       <p class="nintendo-manual-help">Буфер тримає останні секунди гри в пам’яті: S у вікні Switch зберігає кліп у «Відео → PRGLauncher Switch», P — скріншот туди ж. Вмикай лише за потреби — запис додатково навантажує відеокарту.</p>
       <div class="switch-actions"><button class="btn btn-primary btn-sm" id="switch-open" type="button">Відкрити вікно Switch</button><button class="btn btn-ghost btn-sm" id="switch-refresh" type="button">Оновити список пристроїв</button></div>
       <p class="nintendo-manual-help" id="switch-status" role="status"></p>
+      <div id="monitor-settings">
+      <div class="settings-section-title">Гра напряму через HDMI</div>
+      <p class="settings-description">Замість картки захоплення монітор сам перемикається на вхід, до якого підключено Switch: повна якість і без затримки. Тоді кнопка 🎮 у міні-табі, пункт «Вікно Switch» у списку переходів і меню в треї перемикають монітор на Switch і назад на ПК. У меню монітора має бути увімкнено DDC/CI. Звук іде через монітор. Якщо Switch підключено через картку з виходом HDMI OUT (Switch → картка → монітор), лаунчер може тримати буфер повтору з картки у фоні: кліп зберігає червона кнопка в міні-табі або меню в треї.</p>
+      <div class="switch-grid">
+        <label class="form-label">Кнопка 🎮<select id="monitor-method" class="form-select"><option value="card">Відкриває вікно картки</option><option value="hdmi">Перемикає монітор на Switch</option></select></label>
+        <label class="form-label">Монітор<select id="monitor-pick" class="form-select"></select></label>
+        <label class="form-label">Вхід Switch<select id="monitor-console-input" class="form-select"></select></label>
+        <label class="form-label">Буфер повтору<select id="monitor-replay" class="form-select"><option value="0">Вимкнено</option><option value="1">З картки у фоні</option></select></label>
+      </div>
+      <div class="switch-actions"><button class="btn btn-primary btn-sm" id="monitor-to-console" type="button">Перемкнути на Switch</button><button class="btn btn-ghost btn-sm" id="monitor-to-pc" type="button">Повернути на ПК</button><button class="btn btn-ghost btn-sm" id="monitor-refresh" type="button">Перевірити монітори</button></div>
+      <p class="nintendo-manual-help" id="monitor-status" role="status"></p>
+      </div>
       </section>
       <section class="settings-pane" role="tabpanel" id="settings-pane-appearance" aria-labelledby="settings-tab-appearance" data-settings-pane="appearance" hidden>
         <div class="settings-section-title">Тема оформлення</div>

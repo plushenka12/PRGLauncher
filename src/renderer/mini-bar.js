@@ -1,7 +1,7 @@
 // Mini-tab page script: player view, installed games and the daily Wrapped.
   const TEXT = {
     uk: {
-      playing: 'Зараз граю', last: 'Остання гра', play: 'Грати', stop: 'Завершити сесію', open: 'Відкрити лаунчер', switchView: 'Вікно Switch', launch: 'Запустити', installed: 'Встановлені',
+      playing: 'Зараз граю', last: 'Остання гра', play: 'Грати', stop: 'Завершити сесію', open: 'Відкрити лаунчер', monitorToConsole: 'Монітор → Switch (HDMI)', monitorToPc: 'Монітор → ПК', saveClip: seconds => `Зберегти кліп (останні ${seconds} с)`, clipSaved: 'Кліп збережено у «Відео → PRGLauncher Switch»', clipEmpty: 'Буфер ще порожній — спробуй за кілька секунд', clipFailed: 'Не вдалося зберегти кліп', switchView: 'Вікно Switch', launch: 'Запустити', installed: 'Встановлені',
       never: 'Ще не запускали', today: 'Сьогодні', yesterday: 'Вчора', days: n => `${n} дн. тому`, weeks: n => `${n} тиж. тому`, months: n => `${n} міс. тому`,
       h: n => `${n} год`, m: n => `${n} хв`, playedSuffix: ' зіграно',
       main: 'сюжет', extra: 'сюжет + додатково', full: '100%', next: (name, d) => `${name} ~${d}`, beyond: d => `більше за 100% (~${d})`,
@@ -10,7 +10,7 @@
       sessionDone: 'Сесію завершено', total: d => `разом ${d}`, ofHltb: n => `${n}% від HLTB Main Story`,
     },
     en: {
-      playing: 'Now playing', last: 'Last played', play: 'Play', stop: 'End session', open: 'Open launcher', switchView: 'Switch window', launch: 'Launch', installed: 'Installed',
+      playing: 'Now playing', last: 'Last played', play: 'Play', stop: 'End session', open: 'Open launcher', monitorToConsole: 'Monitor → Switch (HDMI)', monitorToPc: 'Monitor → PC', saveClip: seconds => `Save a clip (last ${seconds} s)`, clipSaved: 'Clip saved to “Videos → PRGLauncher Switch”', clipEmpty: 'The buffer is still empty — try again in a few seconds', clipFailed: 'Could not save the clip', switchView: 'Switch window', launch: 'Launch', installed: 'Installed',
       never: 'Not played yet', today: 'Today', yesterday: 'Yesterday', days: n => `${n} days ago`, weeks: n => `${n} weeks ago`, months: n => `${n} months ago`,
       h: n => `${n} h`, m: n => `${n} min`, playedSuffix: ' played',
       main: 'main story', extra: 'main + extras', full: 'completionist', next: (name, d) => `${name} ~${d}`, beyond: d => `past completionist (~${d})`,
@@ -257,7 +257,12 @@
     const x = t();
     document.documentElement.lang = state.lang === 'en' ? 'en' : 'uk';
     $('open').title = x.open; $('open').setAttribute('aria-label', x.open);
-    $('switch').title = x.switchView; $('switch').setAttribute('aria-label', x.switchView);
+    const switchLabel = state.monitorMode === 'console' ? x.monitorToPc : state.monitorMode === 'pc' ? x.monitorToConsole : x.switchView;
+    $('switch').title = switchLabel; $('switch').setAttribute('aria-label', switchLabel);
+    $('switch').classList.toggle('on-console', state.monitorMode === 'console');
+    // Shown while the card keeps a replay buffer behind the console picture.
+    $('clip').hidden = !(state.monitorMode === 'console' && state.backgroundReplay > 0);
+    if (!$('clip').dataset.flash) { const clipLabel = x.saveClip(state.backgroundReplay || 30); $('clip').title = clipLabel; $('clip').setAttribute('aria-label', clipLabel); }
     renderNow();
     renderList();
   }
@@ -463,5 +468,20 @@
   });
   $('open').onclick = () => window.launcher?.restoreMain?.();
   $('switch').onclick = () => window.launcher?.openSwitchView?.();
+  let clipTimer = null;
+  $('clip').onclick = async () => {
+    const button = $('clip');
+    if (button.dataset.flash === 'saving') return;
+    button.dataset.flash = 'saving';
+    const result = await window.launcher?.saveSwitchClip?.().catch(() => null);
+    const x = t();
+    const message = result?.ok ? x.clipSaved : result?.code === 'empty' || result?.code === 'starting' ? x.clipEmpty : x.clipFailed;
+    button.dataset.flash = result?.ok ? 'saved' : 'failed';
+    button.classList.toggle('saved', Boolean(result?.ok));
+    button.classList.toggle('failed', !result?.ok);
+    button.title = message; button.setAttribute('aria-label', message);
+    clearTimeout(clipTimer);
+    clipTimer = setTimeout(() => { delete button.dataset.flash; button.classList.remove('saved', 'failed'); render(); }, 2500);
+  };
   $('empty-open').onclick = () => window.launcher?.restoreMain?.();
   render();
