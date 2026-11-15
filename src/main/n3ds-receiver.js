@@ -76,7 +76,8 @@ function createN3dsReceiver({ http, getCode, onUpload, now = () => Date.now(), l
       const candidate = http.createServer(handle)
       candidate.requestTimeout = 30000
       candidate.once('error', error => { log('[3DS] Receiver failed:', error.message); resolve({ ok: false, code: error.code === 'EADDRINUSE' ? 'port-in-use' : 'failed' }) })
-      candidate.listen(port, '0.0.0.0', () => { server = candidate; resolve({ ok: true, port }) })
+      // Port 0 asks the system for a free one; the reply names the real port.
+      candidate.listen(port, '0.0.0.0', () => { server = candidate; resolve({ ok: true, port: candidate.address().port }) })
     })
   }
 

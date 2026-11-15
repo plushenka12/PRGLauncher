@@ -105,8 +105,12 @@ test('the receiver accepts the home network only and needs the pairing code', as
   const uploads = [];
   let clock = 0;
   const receiver = createN3dsReceiver({ http, getCode: () => '123456', onUpload: async body => { uploads.push(body); return { ok: true, games: 1 }; }, now: () => clock });
-  const port = 47833 + 1000 + Math.floor(Math.random() * 1000);
-  assert.deepEqual(await receiver.start(port), { ok: true, port });
+  // A fixed or random port can fall into a range Windows reserves (Hyper-V,
+  // the CI runner), where binding fails; the system picks a free one instead.
+  const started = await receiver.start(0);
+  assert.equal(started.ok, true);
+  const port = started.port;
+  assert.ok(Number.isInteger(port) && port > 0, 'the real port is reported');
   const send = (code, body = '{"version":1}', path = '/n3ds/v1/upload') => new Promise((resolve, reject) => {
     const req = http.request({ host: '127.0.0.1', port, path, method: 'POST', headers: { 'X-PRG-Code': code, 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) } }, res => {
       let data = ''; res.on('data', chunk => { data += chunk; }); res.on('end', () => resolve({ status: res.statusCode, body: JSON.parse(data) }));
