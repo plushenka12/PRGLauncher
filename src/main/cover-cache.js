@@ -6,7 +6,7 @@
 const crypto = require('node:crypto')
 
 // The same image hosts the renderer's CSP allows.
-const ALLOWED_HOSTS = [/^media\.rawg\.io$/, /^(shared|cdn)\.akamai\.steamstatic\.com$/, /^([a-z0-9-]+\.)*backloggd\.com$/, /^images\.igdb\.com$/]
+const ALLOWED_HOSTS = [/^media\.rawg\.io$/, /^(shared|cdn)\.akamai\.steamstatic\.com$/, /^([a-z0-9-]+\.)*backloggd\.com$/, /^images\.igdb\.com$/, /^[a-z0-9-]+\.cdn\.nintendo\.net$/]
 const MAX_URL_LENGTH = 2000
 const MAX_URLS = 5000
 const MAX_BYTES = 12 * 1024 * 1024

@@ -106,7 +106,7 @@ test('gamepad mode opens, moves with the keys and closes in both languages', { s
   }
 });
 
-test('X opens the Switch window and Y the details panel, where a status can be set', { skip: !executablePath }, async () => {
+test('X switches the monitor to the Switch and Y the details panel, where a status can be set', { skip: !executablePath }, async () => {
   const { chromium } = require('playwright-core');
   const browser = await chromium.launch({ executablePath, headless: true });
   try {

@@ -24,7 +24,7 @@ function makeCache(overrides = {}) {
 }
 
 test('only https covers from the hosts the renderer may show are fetched', () => {
-  for (const good of [COVER, OTHER, 'https://images.igdb.com/igdb/image/upload/t_cover_big/demo.jpg', 'https://www.backloggd.com/demo.png']) assert.equal(isAllowedCoverUrl(good), true, good);
+  for (const good of [COVER, OTHER, 'https://images.igdb.com/igdb/image/upload/t_cover_big/demo.jpg', 'https://www.backloggd.com/demo.png', 'https://atum-img-lp1.cdn.nintendo.net/i/c/28e8fae272fc4a11ab07848881779c60_512']) assert.equal(isAllowedCoverUrl(good), true, good);
   for (const bad of ['http://media.rawg.io/a.jpg', 'https://evil.example/a.jpg', 'https://media.rawg.io.evil.example/a.jpg', 'https://user:pass@media.rawg.io/a.jpg', 'https://media.rawg.io:8443/a.jpg',
     'https://127.0.0.1/a.jpg', 'https://localhost/a.jpg', 'file:///C:/Windows/win.ini', 'not a url', '', null, `https://media.rawg.io/${'a'.repeat(2100)}`]) assert.equal(isAllowedCoverUrl(bad), false, String(bad).slice(0, 60));
 });

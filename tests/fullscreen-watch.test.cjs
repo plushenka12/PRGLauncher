@@ -48,9 +48,9 @@ test('the watcher reads split output, restarts a few times and stops for good', 
 test('the mini-tab steps aside only for another program covering its monitor', () => {
   const main = fs.readFileSync('src/main/index.js', 'utf8');
   const handler = main.slice(main.indexOf('function onFullscreenChange(front)'), main.indexOf('const fullscreenWatch ='));
-  assert.match(handler, /front\.pid !== process\.pid/, 'our own Switch window does not count');
+  assert.match(handler, /front\.pid !== process\.pid/, 'our own windows do not count');
   assert.match(handler, /screen\.getDisplayMatching\(front\.bounds\)\.id === screen\.getDisplayMatching\(miniBar\.getBounds\(\)\)\.id/);
-  assert.match(handler, /if \(!miniHiddenForSwitch\) miniBar\.showInactive\(\)/);
+  assert.match(handler, /miniBar\.webContents\.send\('mini:quiet', false\)\r?\n\s+if \(!miniUserHidden\) miniBar\.showInactive\(\)/);
   assert.match(main, /if \(process\.platform === 'win32'\) fullscreenWatch\.start\(\)/);
   assert.match(main, /isQuitting = true\r?\n  fullscreenWatch\.stop\(\)/);
   assert.match(fs.readFileSync('src/renderer/mini-bar.js', 'utf8'), /onMiniQuiet\?\.\(value => \{ quiet = value; \$\('wrapped'\)\.classList\.toggle\('paused', value\); \}\)/);

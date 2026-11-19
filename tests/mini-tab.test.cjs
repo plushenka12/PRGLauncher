@@ -102,7 +102,7 @@ test('Steam guard runs one watcher and restarts it only to cover a longer period
 });
 
 test('main process wires the mini-tab, launch requests and the Steam guard', () => {
-  assert.match(main, /const MINI_BAR_CHANNELS = new Set\(\['mini:restore', 'mini:launch', 'switch:open', 'switch:saveClip'\]\)/);
+  assert.match(main, /const MINI_BAR_CHANNELS = new Set\(\['mini:restore', 'mini:launch', 'switch:open', 'mini:hide'\]\)/);
   assert.doesNotMatch(main, /mini:togglePin|miniBarStandby|transitionToMainWindow|steam-startup-window/);
   assert.match(main, /createTray\(\)\r?\n {2}createMiniBar\(\)/, 'the mini-tab opens at start-up');
   assert.match(main, /miniBar\.on\('close', event => \{ if \(!isQuitting\) event\.preventDefault\(\) \}\)/);
@@ -196,4 +196,19 @@ test('Wrapped is prepared once, on the first launch of the day only', () => {
   signedOut.context.check();
   assert.equal(signedOut.built.length, 0);
   assert.equal(signedOut.context.wrappedChecked, false, 'checked again once the library is ready');
+});
+
+test('the mini-tab can be hidden and stays hidden until shown again', () => {
+  const main = fs.readFileSync('src/main/index.js', 'utf8');
+  assert.match(main, /const MINI_BAR_CHANNELS = new Set\(\[[^\]]*'mini:hide'\]\)/, 'the mini-tab may hide itself');
+  for (const channel of ['mini:hide', 'mini:setHidden', 'mini:isHidden']) assert.ok(main.includes(`handleFromMain('${channel}'`), channel);
+  assert.match(main, /writeJsonAtomic\(MINI_TAB_PREFS_FILE\(\), \{ hidden: miniUserHidden \}\)/, 'kept across restarts');
+  assert.match(main, /once\('ready-to-show', \(\) => \{ if \(!miniUserHidden\) miniBar\?\.showInactive\(\) \}\)/, 'a hidden mini-tab stays hidden at start-up');
+  assert.match(main, /if \(!miniUserHidden\) miniBar\.showInactive\(\)/, 'a full-screen game ending does not bring it back');
+  assert.match(main, /label: 'Mini-tab', type: 'checkbox', checked: !miniUserHidden/, 'the tray brings it back');
+  assert.match(main, /if \(miniUserHidden\) setMiniTabHidden\(false\)/, 'the compact button shows it again');
+  const mini = fs.readFileSync('src/renderer/mini-bar.js', 'utf8');
+  assert.match(mini, /\$\('hide'\)\.onclick = \(\) => window\.launcher\?\.hideMiniBar\?\.\(\)/);
+  assert.match(fs.readFileSync('src/renderer/mini-bar.html', 'utf8'), /<button id="hide" class="ghost">/);
+  assert.match(fs.readFileSync('src/renderer/index.html', 'utf8'), /id="mini-tab-toggle"/);
 });

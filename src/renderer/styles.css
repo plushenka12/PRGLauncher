@@ -565,3 +565,15 @@ main{flex:1;padding:2rem;max-width:1300px;margin:0 auto;width:100%}
 .couch-panel-empty,.couch-panel-text{margin:0;color:rgba(246,244,255,.75);font:600 14px/1.5 var(--fb)}
 .couch-panel-hint{margin:28px 0 0;color:rgba(246,244,255,.5);font:600 13px var(--fb)}
 @media (prefers-reduced-motion:reduce){.couch-panel{animation:none}}
+/* The Switch / PC button in the header: flips the monitor input both ways. */
+.monitor-trigger{width:auto;min-width:36px;padding:0 10px;display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;white-space:nowrap}
+.monitor-trigger[hidden]{display:none}
+.monitor-trigger svg{width:15px;height:15px;fill:currentColor;flex:none}
+.monitor-trigger.on-console{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 55%,var(--border2));background:color-mix(in srgb,var(--accent) 16%,var(--bg3))}
+.monitor-trigger.busy{animation:monitorBusy .9s ease-in-out infinite;cursor:progress}
+@keyframes monitorBusy{50%{opacity:.45}}
+@media(prefers-reduced-motion:reduce){.monitor-trigger.busy{animation:none;opacity:.6}}
+/* Steam apps the launcher no longer offers to add. */
+.steam-ignored-list{display:flex;flex-direction:column;gap:6px;margin:6px 0 4px}
+.steam-ignored-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--bg3)}
+.steam-ignored-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;color:var(--text)}

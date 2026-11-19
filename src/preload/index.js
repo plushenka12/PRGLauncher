@@ -64,15 +64,19 @@ contextBridge.exposeInMainWorld('launcher', {
   updateMiniBar:(state) => ipcRenderer.invoke('mini:update', state),
   restoreMain:  () => ipcRenderer.invoke('mini:restore'),
   launchFromMini: (gameId) => ipcRenderer.invoke('mini:launch', gameId),
+  hideMiniBar:  () => ipcRenderer.invoke('mini:hide'),
+  setMiniBarHidden: (hidden) => ipcRenderer.invoke('mini:setHidden', hidden),
+  isMiniBarHidden: () => ipcRenderer.invoke('mini:isHidden'),
+  onMiniBarHidden: (callback) => ipcRenderer.on('mini:hidden', (_, hidden) => callback(Boolean(hidden))),
 
-  // Switch window (capture card full screen, instead of OBS)
+  // Switch on the monitor's HDMI input: one button flips the monitor between
+  // the PC and the console, both ways.
   openSwitchView: () => ipcRenderer.invoke('switch:open'),
-  getSwitchConfig: () => ipcRenderer.invoke('switch:getConfig'),
-  saveSwitchConfig: (config) => ipcRenderer.invoke('switch:saveConfig', config),
   listMonitors: () => ipcRenderer.invoke('monitor:list'),
   saveMonitorConfig: (config) => ipcRenderer.invoke('monitor:saveConfig', config),
   switchMonitor: (toConsole) => ipcRenderer.invoke('monitor:switch', toConsole),
-  saveSwitchClip: () => ipcRenderer.invoke('switch:saveClip'),
+  getMonitorState: () => ipcRenderer.invoke('monitor:getState'),
+  onMonitorState: (callback) => ipcRenderer.on('monitor:state', (_, state) => callback(state)),
   onOpenSwitchSettings: (callback) => ipcRenderer.on('app:openSwitchSettings', () => callback()),
   getN3dsStatus: () => ipcRenderer.invoke('n3ds:getStatus'),
   setN3dsEnabled: (enabled) => ipcRenderer.invoke('n3ds:setEnabled', enabled),

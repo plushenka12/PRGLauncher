@@ -17,11 +17,11 @@ const { STEAM_GUARD_SCRIPT, createSteamWindowGuard } = require('./steam-window-g
 const { resolveMiniTabBounds, loadSavedBounds, saveBounds, isReachable } = require('./mini-tab-bounds')
 const { createSteamLibraryArt } = require('./steam-library-art')
 const { createCompanionApps } = require('./companion-apps')
-const { sanitizeSwitchConfig, isConfigured, pickSwitchDisplay, allowPermission, clipSavePath, switchWindowBounds, MIN_WINDOW: SWITCH_MIN_WINDOW } = require('./switch-view')
+const { allowPermission } = require('./permissions')
 const { createN3dsReceiver, newCode: newN3dsCode, DEFAULT_PORT: N3DS_PORT } = require('./n3ds-receiver')
 const { parseUpload: parseN3dsUpload } = require('./n3ds-history')
 const { createFullscreenWatch } = require('./fullscreen-watch')
-const { createMonitorInput, powershellRunner, sanitizeConfig: sanitizeMonitorConfig, inputName } = require('./monitor-input')
+const { createMonitorInput, powershellRunner, sanitizeConfig: sanitizeMonitorConfig, inputName, pcInputFor } = require('./monitor-input')
 const { pickAccent } = require('../renderer/accent-color')
 const { fileURLToPath, pathToFileURL } = require('url')
 const { createCoverCache, MAX_BYTES: COVER_MAX_BYTES } = require('./cover-cache')
@@ -81,8 +81,9 @@ const launchedAtLogin = process.argv.includes('--hidden')
 
 // ── IPC SENDERS ───────────────────────────────────────────────────────────
 // The main window and the mini-bar share the preload bridge. Every channel
-// belongs to the main window's top frame except the two the mini-bar uses.
-const MINI_BAR_CHANNELS = new Set(['mini:restore', 'mini:launch', 'switch:open', 'switch:saveClip'])
+// belongs to the main window's top frame except the few the mini-bar uses:
+// open the launcher, start a game, switch the monitor and hide itself.
+const MINI_BAR_CHANNELS = new Set(['mini:restore', 'mini:launch', 'switch:open', 'mini:hide'])
 
 function isMainSender(event) {
   return Boolean(mainWindow) && event?.sender === mainWindow.webContents && event.senderFrame === mainWindow.webContents.mainFrame
@@ -1408,7 +1409,7 @@ function createMiniBar() {
   const miniBarFile = path.join(__dirname, '..', 'renderer', 'mini-bar.html')
   attachNavigationGuard(miniBar.webContents, miniBarFile)
   miniBar.webContents.on('did-finish-load', () => sendMiniState())
-  miniBar.once('ready-to-show', () => miniBar?.showInactive())
+  miniBar.once('ready-to-show', () => { if (!miniUserHidden) miniBar?.showInactive() })
   miniBar.on('moved', rememberMiniTabBounds)
   // The mini-tab is not closed by the user; only quitting the app removes it.
   miniBar.on('close', event => { if (!isQuitting) event.preventDefault() })
@@ -1424,9 +1425,36 @@ function showMainWindow() {
   mainWindow.focus()
 }
 
-// The big window's "compact" button: hide it and leave the mini-tab.
+// The user may hide the mini-tab (its own button, the tray, the settings);
+// it then stays hidden, across restarts too, until they show it again.
+const MINI_TAB_PREFS_FILE = () => path.join(app.getPath('userData'), 'mini-tab-prefs.json')
+let miniUserHidden = (() => {
+  try { return JSON.parse(fs.readFileSync(MINI_TAB_PREFS_FILE(), 'utf8'))?.hidden === true } catch { return false }
+})()
+function setMiniTabHidden(hidden) {
+  miniUserHidden = hidden === true
+  try { writeJsonAtomic(MINI_TAB_PREFS_FILE(), { hidden: miniUserHidden }) } catch (error) { console.warn('[MiniTab] Could not save:', error.message) }
+  if (miniUserHidden) {
+    // A full-screen game no longer brings it back when it closes.
+    miniHiddenForFullscreen = false
+    if (miniBar && !miniBar.isDestroyed()) miniBar.hide()
+  } else {
+    const bar = createMiniBar()
+    if (!bar.isVisible() && !bar.webContents.isLoading()) bar.showInactive()
+  }
+  updateTrayMenu()
+  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('mini:hidden', miniUserHidden)
+  return miniUserHidden
+}
+handleFromMain('mini:hide', () => setMiniTabHidden(true))
+handleFromMain('mini:setHidden', (_, hidden) => setMiniTabHidden(hidden === true))
+handleFromMain('mini:isHidden', () => miniUserHidden)
+
+// The big window's "compact" button: hide it and leave the mini-tab, which
+// is shown again even if the user had hidden it, so something stays on screen.
 handleFromMain('mini:show', (_, state) => {
   sendMiniState(state)
+  if (miniUserHidden) setMiniTabHidden(false)
   const bar = createMiniBar()
   if (!bar.isVisible() && !bar.webContents.isLoading()) bar.showInactive()
   mainWindow?.hide()
@@ -1449,224 +1477,117 @@ handleFromMain('mini:launch', (_, gameId) => {
   return true
 })
 
-// ── SWITCH WINDOW ─────────────────────────────────────────────────────────
-// A capture card shown full screen on a chosen monitor with its sound on the
-// PC's output, instead of OBS. The page gets no preload bridge: it only plays
-// the device named in its URL, and Esc closes it.
-let switchWindow = null
-let miniHiddenForSwitch = false
-const SWITCH_CONFIG_FILE = () => path.join(app.getPath('userData'), 'switch-view.json')
-
-function loadSwitchConfig() {
-  try { return sanitizeSwitchConfig(JSON.parse(fs.readFileSync(SWITCH_CONFIG_FILE(), 'utf8'))) } catch { return sanitizeSwitchConfig({}) }
-}
-
-function saveSwitchConfig(config) {
-  const clean = sanitizeSwitchConfig(config)
-  fs.writeFileSync(`${SWITCH_CONFIG_FILE()}.tmp`, JSON.stringify(clean))
-  fs.renameSync(`${SWITCH_CONFIG_FILE()}.tmp`, SWITCH_CONFIG_FILE())
-  return clean
-}
-
-const SWITCH_BOUNDS_FILE = () => path.join(app.getPath('userData'), 'switch-window.json')
-function loadSavedSwitchBounds() {
-  try { return JSON.parse(fs.readFileSync(SWITCH_BOUNDS_FILE(), 'utf8')) } catch { return null }
-}
-function saveSwitchBounds(bounds) {
-  try { writeJsonAtomic(SWITCH_BOUNDS_FILE(), { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height }) } catch (error) { console.warn('[Switch] Could not save window position:', error.message) }
-}
-
-function switchDisplays() {
-  const primaryId = screen.getPrimaryDisplay().id
-  return screen.getAllDisplays().map((display, index) => ({ id: display.id, index: index + 1, primary: display.id === primaryId, width: display.size.width, height: display.size.height }))
-}
-
-function openSwitchWindow() {
-  const config = loadSwitchConfig()
-  if (!isConfigured(config)) return { ok: false, code: 'not-configured' }
-  // The card is busy with the background replay while the console is shown.
-  if (switchBackground) return { ok: false, code: 'background' }
-  if (switchWindow && !switchWindow.isDestroyed()) { switchWindow.focus(); return { ok: true } }
-  const display = pickSwitchDisplay(screen.getAllDisplays(), screen.getPrimaryDisplay().id, config.displayId)
-  const file = path.join(__dirname, '..', 'renderer', 'switch-view.html')
-  // Full screen on the chosen monitor, or an ordinary 16:9 window that keeps
-  // its size and place. F11 switches between the two while it is open.
-  const windowed = config.mode === 'window'
-  const bounds = windowed
-    ? switchWindowBounds({ saved: loadSavedSwitchBounds(), display, displays: screen.getAllDisplays(), isReachable })
-    : display.bounds
-  switchWindow = new BrowserWindow({
-    ...bounds,
-    frame: windowed,
-    fullscreen: !windowed,
-    minWidth: SWITCH_MIN_WINDOW.width,
-    minHeight: SWITCH_MIN_WINDOW.height,
-    autoHideMenuBar: true,
-    show: false,
-    title: 'Nintendo Switch',
-    backgroundColor: '#000000',
-    webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true },
-  })
-  if (windowed) switchWindow.setAspectRatio(16 / 9)
-  attachNavigationGuard(switchWindow.webContents, file)
-  switchWindow.webContents.on('before-input-event', (event, input) => {
-    if (input.type !== 'keyDown') return
-    if (input.key === 'Escape') {
-      event.preventDefault()
-      // In window mode Esc first leaves full screen, like a video player.
-      if (windowed && switchWindow?.isFullScreen()) switchWindow.setFullScreen(false)
-      else switchWindow?.close()
-    } else if (input.key === 'F11') {
-      event.preventDefault()
-      switchWindow?.setFullScreen(!switchWindow.isFullScreen())
-    }
-  })
-  // The mini-tab stays above everything; keep it off a full-screen Switch picture.
-  if (!windowed && miniBar && !miniBar.isDestroyed() && miniBar.isVisible() && screen.getDisplayMatching(miniBar.getBounds()).id === display.id) {
-    miniBar.hide()
-    miniHiddenForSwitch = true
-  }
-  if (windowed) {
-    const remember = () => { if (switchWindow && !switchWindow.isDestroyed() && !switchWindow.isFullScreen() && !switchWindow.isMinimized()) saveSwitchBounds(switchWindow.getBounds()) }
-    switchWindow.on('resized', remember)
-    switchWindow.on('moved', remember)
-  }
-  switchWindow.once('ready-to-show', () => { switchWindow?.show(); switchWindow?.focus() })
-  switchWindow.on('closed', () => {
-    switchWindow = null
-    if (miniHiddenForSwitch && !miniHiddenForFullscreen && miniBar && !miniBar.isDestroyed()) miniBar.showInactive()
-    miniHiddenForSwitch = false
-  })
-  switchWindow.loadFile(file, { query: {
-    video: config.videoId, videoLabel: config.videoLabel, audio: config.audioId, audioLabel: config.audioLabel,
-    quality: config.quality, mode: config.mode, replay: String(config.replay), output: config.outputId, outputLabel: config.outputLabel, lang: lastMiniState?.lang === 'en' ? 'en' : 'uk',
-  } })
-  return { ok: true }
-}
-
-// MONITOR INPUT: instead of the capture card, the Switch can be played on
-// the monitor's own HDMI input. Opening the Switch window then switches the
-// monitor to the console, and the same button (mini-tab, jump list, tray)
-// switches it back to the PC.
+// ── MONITOR SWITCH ────────────────────────────────────────────────────────
+// The Switch is played on the monitor's own HDMI input. One button flips the
+// monitor between the PC and the console over DDC/CI: 🎮 in the mini-tab, the
+// Switch button in the launcher's header, the jump list's task, couch mode's X
+// and the tray. Before each flip the monitor's input is read, so the button
+// goes the right way even after the monitor's own buttons were used.
 const monitorInput = createMonitorInput({ run: powershellRunner({ execFile }) })
 const MONITOR_CONFIG_FILE = () => path.join(app.getPath('userData'), 'monitor-switch.json')
-// What the mini-tab's 🎮 button does: open the card window, or switch the monitor.
+// What the buttons show: not set up, on the PC, or on the console.
+function monitorMode(monitor = loadMonitorConfig()) {
+  return monitor.monitorId ? (monitor.onConsole ? 'console' : 'pc') : null
+}
 function monitorMiniState() {
-  const monitor = loadMonitorConfig()
-  return { monitorMode: monitor.method === 'hdmi' && monitor.monitorId ? (monitor.onConsole ? 'console' : 'pc') : null, backgroundReplay: switchBackground ? backgroundReplaySeconds : 0 }
+  return { monitorMode: monitorMode() }
 }
 function loadMonitorConfig() {
   try { return sanitizeMonitorConfig(JSON.parse(fs.readFileSync(MONITOR_CONFIG_FILE(), 'utf8'))) } catch { return sanitizeMonitorConfig({}) }
+}
+function sendMonitorState(config) {
+  const state = { mode: monitorMode(config), busy: monitorBusy }
+  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send('monitor:state', state)
 }
 function saveMonitorConfig(config) {
   const clean = sanitizeMonitorConfig(config)
   writeJsonAtomic(MONITOR_CONFIG_FILE(), clean)
   sendMiniState()
+  sendMonitorState(clean)
   updateTrayMenu()
   return clean
 }
+// One DDC/CI request at a time: a monitor answers slowly and two
+// PowerShells talking to it at once confuse it.
+let monitorQueue = Promise.resolve()
+function onMonitor(task) {
+  const run = monitorQueue.then(task, task)
+  monitorQueue = run.catch(() => {})
+  return run
+}
+// The monitors seen by the last check in the settings: their input lists
+// help pick the PC's input when it was never recorded.
+let lastMonitors = []
 let monitorBusy = false
+// toConsole: true / false, or null to flip to whichever side the monitor is not on.
 async function switchMonitor(toConsole) {
   if (process.platform !== 'win32') return { ok: false, code: 'unsupported' }
   const config = loadMonitorConfig()
   if (!config.monitorId) return { ok: false, code: 'not-configured' }
   if (monitorBusy) return { ok: false, code: 'busy' }
   monitorBusy = true
+  sendMonitorState(config)
   try {
-    let pcInput = config.pcInput
-    if (toConsole) {
-      // The PC's own input is read just before leaving it, so "back" returns there.
-      const now = (await monitorInput.list()).find(item => item.id === config.monitorId)
-      if (!now) return { ok: false, code: 'monitor-missing' }
-      if (!now.ddc) return { ok: false, code: 'no-ddc' }
-      if (now.input && now.input !== config.consoleInput) pcInput = now.input
-    }
-    const target = toConsole ? config.consoleInput : pcInput
-    if (!target) return { ok: false, code: 'no-pc-input' }
-    const result = await monitorInput.setInput(config.monitorId, target)
-    if (result.ok) {
-      if (toConsole && config.replay) startBackgroundCapture()
-      if (!toConsole) stopBackgroundCapture()
-      saveMonitorConfig({ ...config, pcInput, onConsole: toConsole })
-    }
-    return result.ok ? { ok: true, input: inputName(target) } : result
+    return await onMonitor(async () => {
+      // Where the monitor is now. A monitor showing the console may not answer
+      // over DisplayPort; then the last known side counts.
+      const now = await monitorInput.getInput(config.monitorId).catch(() => ({ ok: false }))
+      if (!now.ok && now.code === 'not-found') return { ok: false, code: 'monitor-missing' }
+      const onConsoleNow = now.ok ? now.input === config.consoleInput : config.onConsole
+      const goConsole = toConsole == null ? !onConsoleNow : toConsole
+      let pcInput = config.pcInput
+      // Leaving the PC: remember its input, so "back" returns exactly there.
+      if (now.ok && now.input !== config.consoleInput) pcInput = now.input
+      const options = lastMonitors.find(item => item.id === config.monitorId)?.options || []
+      const target = goConsole ? config.consoleInput : pcInputFor({ pcInput, consoleInput: config.consoleInput, options })
+      if (!target) return { ok: false, code: 'no-pc-input' }
+      if (now.ok && now.input === target) {
+        saveMonitorConfig({ ...config, pcInput, onConsole: goConsole })
+        return { ok: true, input: inputName(target), already: true }
+      }
+      const result = await monitorInput.setInput(config.monitorId, target)
+      if (result.ok) saveMonitorConfig({ ...config, pcInput: goConsole ? pcInput : target, onConsole: goConsole })
+      else if (now.ok) saveMonitorConfig({ ...config, pcInput, onConsole: onConsoleNow })
+      return result.ok ? { ok: true, input: inputName(target), toConsole: goConsole } : result
+    })
   } catch (error) {
     console.warn('[Monitor] Switch failed:', error.message)
     return { ok: false, code: 'failed' }
   } finally {
     monitorBusy = false
+    sendMonitorState()
   }
 }
-// BACKGROUND REPLAY: while the monitor shows the console through the card's
-// HDMI OUT, a hidden Switch page keeps the replay buffer from the card. It is
-// the switchWindow, so the camera permission and the clip download rules for
-// that window apply unchanged. Clips are saved from the mini-tab or the tray.
-let switchBackground = false
-let backgroundReplaySeconds = 0
-function startBackgroundCapture() {
-  const config = loadSwitchConfig()
-  if (!isConfigured(config)) return { ok: false, code: 'not-configured' }
-  if (switchWindow && !switchWindow.isDestroyed()) {
-    if (switchBackground) return { ok: true }
-    switchWindow.close() // the card serves one window at a time
+// The 🎮 / Switch button: flip the monitor, or, before a monitor is chosen,
+// open the launcher at the monitor settings.
+function toggleMonitor() {
+  if (loadMonitorConfig().monitorId) return switchMonitor(null)
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    showMainWindow()
+    if (mainWindow.webContents.isLoading()) mainWindow.webContents.once('did-finish-load', () => mainWindow?.webContents.send('app:openSwitchSettings'))
+    else mainWindow.webContents.send('app:openSwitchSettings')
   }
-  backgroundReplaySeconds = config.replay || 30
-  switchBackground = true
-  const file = path.join(__dirname, '..', 'renderer', 'switch-view.html')
-  switchWindow = new BrowserWindow({
-    width: 640, height: 360, show: false, skipTaskbar: true, title: 'Nintendo Switch replay',
-    webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true, backgroundThrottling: false },
-  })
-  attachNavigationGuard(switchWindow.webContents, file)
-  switchWindow.on('closed', () => { switchWindow = null; switchBackground = false; backgroundReplaySeconds = 0; sendMiniState(); updateTrayMenu() })
-  switchWindow.loadFile(file, { query: {
-    video: config.videoId, videoLabel: config.videoLabel, audio: config.audioId, audioLabel: config.audioLabel,
-    quality: config.quality, mode: 'background', replay: String(backgroundReplaySeconds), output: 'default', lang: lastMiniState?.lang === 'en' ? 'en' : 'uk',
-  } })
-  return { ok: true }
+  return Promise.resolve({ ok: false, code: 'not-configured' })
 }
-function stopBackgroundCapture() {
-  if (switchBackground && switchWindow && !switchWindow.isDestroyed()) switchWindow.close()
-}
-async function saveBackgroundClip() {
-  if (!switchBackground || !switchWindow || switchWindow.isDestroyed()) return { ok: false, code: 'off' }
-  try {
-    const result = await switchWindow.webContents.executeJavaScript('window.PRGSaveClip ? window.PRGSaveClip() : ({ ok: false, code: "starting" })')
-    return result && typeof result === 'object' ? { ok: result.ok === true, code: String(result.code || ''), seconds: Number(result.seconds) || 0 } : { ok: false, code: 'failed' }
-  } catch (error) {
-    console.warn('[Switch] Background clip failed:', error.message)
-    return { ok: false, code: 'failed' }
-  }
-}
-handleFromMain('switch:saveClip', () => saveBackgroundClip())
 
 handleFromMain('monitor:list', async () => {
   if (process.platform !== 'win32') return { ok: false, code: 'unsupported', monitors: [] }
-  try { return { ok: true, monitors: await monitorInput.list(), config: loadMonitorConfig() } } catch (error) { console.warn('[Monitor] List failed:', error.message); return { ok: false, code: 'failed', monitors: [], config: loadMonitorConfig() } }
+  try {
+    lastMonitors = await onMonitor(() => monitorInput.list())
+    return { ok: true, monitors: lastMonitors, config: loadMonitorConfig() }
+  } catch (error) { console.warn('[Monitor] List failed:', error.message); return { ok: false, code: 'failed', monitors: [], config: loadMonitorConfig() } }
 })
-// The settings choose the monitor, the console's input and the method; which
-// input the PC was on and where the monitor is now stay the main process's.
+// The settings choose the monitor and the console's input; which input the
+// PC was on and where the monitor is now stay the main process's.
 handleFromMain('monitor:saveConfig', (_, config) => {
   const current = loadMonitorConfig()
-  const next = sanitizeMonitorConfig({ ...current, monitorId: config?.monitorId, monitorName: config?.monitorName, consoleInput: config?.consoleInput, method: config?.method, replay: config?.replay })
+  const next = sanitizeMonitorConfig({ ...current, monitorId: config?.monitorId, monitorName: config?.monitorName, consoleInput: config?.consoleInput })
   if (next.monitorId !== current.monitorId) { next.pcInput = null; next.onConsole = false }
   return saveMonitorConfig(next)
 })
 handleFromMain('monitor:switch', (_, toConsole) => switchMonitor(toConsole === true))
-
-handleFromMain('switch:open', async () => {
-  const monitor = loadMonitorConfig()
-  if (monitor.method === 'hdmi' && monitor.monitorId) return switchMonitor(!monitor.onConsole)
-  const result = openSwitchWindow()
-  // Not set up yet: open the launcher at the Switch window settings.
-  if (!result.ok && result.code === 'not-configured' && mainWindow && !mainWindow.isDestroyed()) {
-    showMainWindow()
-    mainWindow.webContents.send('app:openSwitchSettings')
-  }
-  return result
-})
-handleFromMain('switch:getConfig', () => ({ config: loadSwitchConfig(), displays: switchDisplays() }))
-handleFromMain('switch:saveConfig', (_, config) => saveSwitchConfig(config))
+handleFromMain('monitor:getState', () => ({ mode: monitorMode(), busy: monitorBusy }))
+handleFromMain('switch:open', () => toggleMonitor())
 
 // ── TASKBAR JUMP LIST ─────────────────────────────────────────────────────
 // Right-clicking PRGLauncher on the taskbar lists the recent games; a click
@@ -1729,10 +1650,7 @@ function handleLaunchArgs(argv) {
     return true
   }
   if (argv.includes('--prg-switch')) {
-    const monitor = loadMonitorConfig()
-    if (monitor.method === 'hdmi' && monitor.monitorId) { switchMonitor(!monitor.onConsole); return true }
-    const result = openSwitchWindow()
-    if (!result.ok && mainWindow && !mainWindow.isDestroyed()) { showMainWindow(); mainWindow.webContents.send('app:openSwitchSettings') }
+    toggleMonitor()
     return true
   }
   return false
@@ -1741,7 +1659,7 @@ function handleLaunchArgs(argv) {
 // ── QUIET OVER FULL-SCREEN GAMES ──────────────────────────────────────────
 // The mini-tab stays above everything; when a full-screen game covers its
 // monitor, it steps aside (and its Wrapped pauses) until the game leaves
-// full screen. Our own windows (the Switch window) are handled separately.
+// full screen. Our own windows never count.
 let miniHiddenForFullscreen = false
 
 function onFullscreenChange(front) {
@@ -1755,7 +1673,7 @@ function onFullscreenChange(front) {
   } else if (!covers && miniHiddenForFullscreen) {
     miniHiddenForFullscreen = false
     miniBar.webContents.send('mini:quiet', false)
-    if (!miniHiddenForSwitch) miniBar.showInactive()
+    if (!miniUserHidden) miniBar.showInactive()
   }
 }
 
@@ -1901,10 +1819,10 @@ function updateTrayMenu() {
   const monitor = loadMonitorConfig()
   tray.setContextMenu(Menu.buildFromTemplate([
     { label: 'Show', click: () => { mainWindow?.show(); mainWindow?.focus() } },
-    ...(monitor.method === 'hdmi' && monitor.monitorId ? [{ type: 'separator' }, monitor.onConsole
+    { label: 'Mini-tab', type: 'checkbox', checked: !miniUserHidden, click: item => setMiniTabHidden(!item.checked) },
+    ...(monitor.monitorId ? [{ type: 'separator' }, monitor.onConsole
       ? { label: 'Monitor → PC', click: () => switchMonitor(false) }
       : { label: 'Monitor → Switch (HDMI)', click: () => switchMonitor(true) }] : []),
-    ...(switchBackground ? [{ label: `Save clip (last ${backgroundReplaySeconds} s)`, click: () => saveBackgroundClip() }] : []),
     { type: 'separator' },
     { label: 'Quit', click: () => { mainWindow?.destroy(); app.quit() } },
   ]))
@@ -1917,21 +1835,10 @@ app.on('web-contents-created', (_, contents) => {
 })
 
 app.whenReady().then(async () => {
-  // Permissions are denied unless switch-view.allowPermission grants them.
-  const roleOf = contents => contents && contents === mainWindow?.webContents ? 'main' : contents && contents === switchWindow?.webContents ? 'switch' : contents && contents === miniBar?.webContents ? 'mini' : null
+  // Permissions are denied unless permissions.allowPermission grants them.
+  const roleOf = contents => contents && contents === mainWindow?.webContents ? 'main' : contents && contents === miniBar?.webContents ? 'mini' : null
   session.defaultSession.setPermissionRequestHandler((contents, permission, callback, details) => callback(allowPermission({ permission, url: details?.requestingUrl || contents?.getURL(), role: roleOf(contents) })))
   session.defaultSession.setPermissionCheckHandler((contents, permission, requestingOrigin, details) => allowPermission({ permission, url: details?.requestingUrl || contents?.getURL() || requestingOrigin, role: roleOf(contents) }))
-  // Replay clips from the Switch window go straight to Videos\PRGLauncher
-  // Switch, without a dialog over the game. Nothing else that window could
-  // download is accepted; other windows keep the default behaviour.
-  session.defaultSession.on('will-download', (event, item, contents) => {
-    if (!contents || contents !== switchWindow?.webContents) return
-    if (!item.getURL().startsWith('blob:file://')) { event.preventDefault(); return }
-    const folder = path.join(app.getPath('videos'), 'PRGLauncher Switch')
-    try { fs.mkdirSync(folder, { recursive: true }) } catch (error) { console.warn('[Switch] Clip folder failed:', error.message); event.preventDefault(); return }
-    item.setSavePath(clipSavePath({ folder, filename: item.getFilename(), exists: fs.existsSync, join: path.join }))
-    item.once('done', (_, state) => { if (state !== 'completed') console.warn('[Switch] Clip was not saved:', state) })
-  })
 
   if (loadN3dsConfig().enabled) n3dsReceiver.start(N3DS_PORT)
   if (process.platform === 'win32') fullscreenWatch.start()
@@ -1947,9 +1854,6 @@ app.whenReady().then(async () => {
     mainWindow.webContents.once('did-finish-load', () => handleLaunchArgs(['--prg-switch']))
   }
   for (const event of ['display-removed', 'display-metrics-changed']) screen.on(event, keepMiniTabOnScreen)
-  // Started while the monitor still shows the console: keep its replay buffer.
-  const monitorAtStart = loadMonitorConfig()
-  if (monitorAtStart.method === 'hdmi' && monitorAtStart.onConsole && monitorAtStart.replay) startBackgroundCapture()
   await steamPathReady
   console.log('[Steam] Path:', steamPath || 'not found')
 

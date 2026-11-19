@@ -1,8 +1,8 @@
 // Switches a monitor's input over DDC/CI (VCP code 0x60, "input source"), so
-// the Switch can be played on the monitor's own HDMI input at full quality
-// instead of through the capture card. Windows exposes DDC/CI through
-// dxva2.dll; a short hidden PowerShell runs each request, as for the
-// full-screen watcher. Nothing here runs unless the user asks for it.
+// the Switch is played on the monitor's own HDMI input at full quality.
+// Windows exposes DDC/CI through dxva2.dll; a short hidden PowerShell runs
+// each request, as for the full-screen watcher. Nothing here runs unless the
+// user asks for it.
 const DDC_TYPES = `
 Add-Type @'
 using System; using System.Runtime.InteropServices; using System.Text; using System.Collections.Generic;
@@ -51,6 +51,16 @@ public static class PrgDdc {
     Each((d, i, b, primary, description, handle) => {
       if (d != device || i != index || result != "not-found") return;
       result = SetVCPFeature(handle, 0x60, value) ? "ok" : "refused";
+    });
+    return result;
+  }
+  // The monitor's current input, or "none" when it does not answer.
+  public static string Input(string device, int index) {
+    string result = "not-found";
+    Each((d, i, b, primary, description, handle) => {
+      if (d != device || i != index || result != "not-found") return;
+      uint current = 0, max = 0;
+      result = GetVCPFeatureAndVCPFeatureReply(handle, 0x60, IntPtr.Zero, out current, out max) ? (current & 0xFF).ToString() : "none";
     });
     return result;
   }
@@ -112,7 +122,17 @@ function createMonitorInput({ run }) {
     const out = String(await run(`${DDC_TYPES}\n[Console]::Out.Write([PrgDdc]::Set('${target.device}', ${target.index}, ${value}))`)).trim()
     return out === 'ok' ? { ok: true } : { ok: false, code: out === 'refused' ? 'refused' : 'not-found' }
   }
-  return { list, setInput }
+  // Which input the monitor shows now: { ok, input } — one quick read, so a
+  // toggle follows the monitor even after its own buttons were used.
+  async function getInput(id) {
+    const target = parseId(id)
+    if (!target) return { ok: false, code: 'invalid' }
+    const out = String(await run(`${DDC_TYPES}\n[Console]::Out.Write([PrgDdc]::Input('${target.device}', ${target.index}))`)).trim()
+    const value = Number(out)
+    if (/^\d{1,3}$/.test(out) && validInput(value)) return { ok: true, input: value }
+    return { ok: false, code: out === 'not-found' ? 'not-found' : 'no-answer' }
+  }
+  return { list, setInput, getInput }
 }
 
 // Runs one script in a hidden PowerShell and resolves its output.
@@ -135,12 +155,16 @@ function sanitizeConfig(value) {
     consoleInput: validInput(config.consoleInput) ? config.consoleInput : 0x11,
     pcInput: validInput(config.pcInput) ? config.pcInput : null,
     onConsole: config.onConsole === true,
-    // 'card': the Switch window shows the capture card; 'hdmi': it switches the monitor.
-    method: config.method === 'hdmi' ? 'hdmi' : 'card',
-    // Keep a replay buffer from the capture card while the console is shown
-    // (the card sits between them and passes the picture to the monitor).
-    replay: config.replay === true,
   }
 }
 
-module.exports = { createMonitorInput, powershellRunner, parseInputOptions, cleanMonitor, sanitizeConfig, inputName, parseId, DDC_TYPES }
+// Where "back to the PC" goes: the input the PC was on before the last
+// switch, else DisplayPort 1 if the monitor has it, else its first other input.
+function pcInputFor({ pcInput, consoleInput, options = [] }) {
+  if (validInput(pcInput) && pcInput !== consoleInput) return pcInput
+  const values = options.map(option => option.value).filter(value => validInput(value) && value !== consoleInput)
+  if (values.includes(0x0F)) return 0x0F
+  return values[0] || (consoleInput === 0x0F ? null : 0x0F)
+}
+
+module.exports = { createMonitorInput, powershellRunner, parseInputOptions, cleanMonitor, sanitizeConfig, inputName, parseId, pcInputFor, DDC_TYPES }
